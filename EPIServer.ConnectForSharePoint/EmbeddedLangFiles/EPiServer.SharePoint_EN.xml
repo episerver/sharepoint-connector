@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+    <language name="English" id="en">
+        <sharepoint>
+            <admin>
+                <displayname>Connect For SharePoint</displayname>
+                <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
+                <selectviewdescription>Select SharePoint views to get media from.</selectviewdescription>
+                <serverurl>SharePoint Site URL</serverurl>
+                <username>Username</username>
+                <password>Password</password>
+                <save>Save</save>
+                <connect>Connect to SharePoint</connect>
+                <entrypoint>Connection Entry Point</entrypoint>
+                <expirationtime>Expiration Time</expirationtime>
+                <refreshcache>Refresh Cache</refreshcache>
+                <entrypointrequired>Connection Entry Point is required.</entrypointrequired>
+                <message>
+                    <savesuccess>Your configuration has been successfully saved.</savesuccess>
+                    <connectsuccess>Successfully connected to the SharePoint site. Select SharePoint views to get media from.</connectsuccess>
+                    <savesuccesswithnomedia>Your configuration has been saved. Note that since there is no view selected, no Sharepoint media is mapped.</savesuccesswithnomedia>
+                    <saveerror>Error while saving: {0}.</saveerror>
+                    <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
+                    <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
+                    <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
+                    <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>Connection Entry Point cannot have any children.</entrypointmustnothavechildren>
+                    <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
+                </message>
+                <thumbnailoptions>
+                  <description>Select an option for generating thumbnails for SharePoint media.</description>
+                  <usegenericthumbnailforall>Use generic thumbnails for all media</usegenericthumbnailforall>
+                  <usesharepointthumbnail>Show thumbnails for images with SharePoint thumbnails, otherwise use generic thumbnails. Generating the SharePoint thumbnails may take some time.</usesharepointthumbnail>
+                  <createthumbnailforall>Create thumbnails for all media</createthumbnailforall>
+              </thumbnailoptions>
+            </admin>
+            <plugin>
+                <spcontentindexjob>
+                    <displayname>SharePoint Content Index</displayname>
+                    <description>This job will index media content from SharePoint.</description>
+                    <indexcompleted>Content successfully indexed.</indexcompleted>
+                    <indexfailed>Content indexing failed.</indexfailed>
+                </spcontentindexjob>
+            </plugin>
+        </sharepoint>
+    </language>
+</languages>
