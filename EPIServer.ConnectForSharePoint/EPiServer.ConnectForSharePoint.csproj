@@ -461,7 +461,7 @@ IF exist "$(SolutionDir)Deployment\*.nuspec" ( del "$(SolutionDir)Deployment\*.n
 xcopy "$(SolutionDir)"MSBuild\*.nuspec "$(SolutionDir)Deployment\"  /I /F /R /Y
 
 cd "$(SolutionDir)Deployment\"
-"$(SolutionDir)\.nuget\nuget.exe" pack Package.nuspec
+"$(SolutionDir)\.nuget\nuget.exe" pack EPiServer.ConnectForSharePoint.nuspec
 xcopy "$(SolutionDir)Deployment\*.nupkg" "$(TargetDir)" /I /F /R /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
