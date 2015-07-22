@@ -42,7 +42,8 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     {
                         if (_defaultThumbnailData == null)
                         {
-                            var defaultThumbnailFilePath = ModuleHelper.ToClientResource("ClientResources/Images/DefaultThumbnail.png");
+                            var defaultThumbnailFilePath = ModuleHelper.ToResource("ClientResources/Images/DefaultThumbnail.png");
+
                             // reading resources in a zip file
                             if (VirtualPathUnifiedProvider.HasAccessToVirtualPath(defaultThumbnailFilePath))
                             {
