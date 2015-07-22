@@ -101,7 +101,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     else if (httpRes != null && (httpRes.StatusCode == HttpStatusCode.BadRequest || httpRes.StatusCode == HttpStatusCode.NotFound))
                     {
                         _logger.Error("Server returns bad request status code, return empty response.", webException);
-                        return string.Empty;
+                        throw;
                     }
                     else
                     {
