@@ -225,12 +225,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
             }
 
-            var timeout = 0;
-            if (!int.TryParse(ExpirationTime.Text.Trim(), out timeout) || timeout < 3)
-            {
-                strErrors.AppendLine(Translate("/sharepoint/admin/message/expirationtimemustbeminutes"));
-            }
-
             if (strErrors.Length > 0)
             {
                 ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
@@ -293,7 +287,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 CurrentSettings.Password = ConfiguredPassword;
                 // Assign current selected Lits-View Ids to the Setting before storing in DDS
                 CurrentSettings.ListIds = String.Join(";", selectedListViewIds);
-                CurrentSettings.ExpirationTime = timeout;
+                CurrentSettings.ExpirationTime  = 300; // HEM_FIXME - REMOVE EXPERIATION TIME FROM SETTINGS = timeout;
                 CurrentSettings.EntryPoint = new ContentReference(entryPointId);
                 CurrentSettings.ThumbnailOption = (ThumbnailOptions)Enum.Parse(typeof(ThumbnailOptions), rbThumbnailOption.SelectedValue);
 

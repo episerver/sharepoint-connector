@@ -77,11 +77,6 @@
             </div>
 
             <div class="epi-size15">
-                <asp:Label AssociatedControlID="ExpirationTime" runat="server"><%# Translate("/sharepoint/admin/expirationtime") %></asp:Label>
-                <asp:TextBox ID="ExpirationTime" runat="server" MaxLength="10" Text="<%# CurrentSettings.ExpirationTime %>" />
-                <i><%# Translate("/sharepoint/admin/message/expirationtimegreaterorequalthree") %></i>
-            </div>
-            <div class="epi-size15">
                  <p class="EP-systemInfo">
                     <%= Translate("/sharepoint/admin/thumbnailoptions/description")%>
                 </p>
