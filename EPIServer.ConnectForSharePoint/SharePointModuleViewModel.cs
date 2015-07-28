@@ -18,14 +18,6 @@ namespace EPiServer.ConnectForSharePoint
             }
         }
 
-        public int ExpirationTime
-        {
-            get
-            {
-                return SharePointSettings.Current.ExpirationTime;
-            }
-        }
-
         public string ThumbnailMode
         {
             get

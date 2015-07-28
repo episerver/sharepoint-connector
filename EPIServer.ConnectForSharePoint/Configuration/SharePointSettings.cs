@@ -38,11 +38,6 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string ListIds { get; set; }
 
         /// <summary>
-        /// Gets or sets expiration timespan (in minutes).
-        /// </summary>
-        public int ExpirationTime { get; set; }
-
-        /// <summary>
         /// Gets or sets the mapping SharePoint's content root assets folder
         /// </summary>
         public ContentReference EntryPoint { get; set; }
@@ -81,7 +76,6 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             Username = string.Empty;
             Password = string.Empty;
             ListIds = string.Empty;
-            ExpirationTime = 3;
             EntryPoint = ContentReference.EmptyReference;
             ThumbnailOption = ThumbnailOptions.GenericThumbnailForAll;
         }

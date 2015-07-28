@@ -19,9 +19,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
         private static readonly string _dataMappingCacheKey = string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "DataMapping");
         private static readonly string _supportMediaListCacheKey = string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "SupportedMediaLists");
         private MemoryCache _cache = new MemoryCache(Consts.SHAREPOINT_CONTENT_CACHE_NAME);
-        // To multiply absolute cache time, the multiplied result should be long enough (because of multi levels of foder)
-        // so that the related cached item is availble when needed
-        private int _numberMultiplyCacheTime = 7;
 
         private static SharePointSettings _currentSettings
         {
@@ -306,7 +303,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 // Store the time that view has changed for sub levels know
                 if (queryChanged)
                 {
-                    AddToCache(GetViewQueryTimeChangedCacheKey(viewCacheKey), DateTime.Now, GetAbsExpirePolicy(_numberMultiplyCacheTime));
+                    AddToCache(GetViewQueryTimeChangedCacheKey(viewCacheKey), DateTime.Now, GetAbsExpirePolicy());
                 }
 
                 if (selectedList.LastItemDeletedDate > lastTimeLoaded ||
@@ -317,10 +314,10 @@ namespace EPiServer.ConnectForSharePoint.Providers
             }
 
             // Store this view loaded time (root Folder of the List) equals to the first level under the EntryPoint
-            AddToCache(viewCacheKey, DateTime.Now, GetAbsExpirePolicy(_numberMultiplyCacheTime));
+            AddToCache(viewCacheKey, DateTime.Now, GetAbsExpirePolicy());
 
             // Store ths view's query, because there is no way to know the time this view's query has changed
-            AddToCache(viewQueryCacheKey, selectedView.ListViewXml, GetAbsExpirePolicy(_numberMultiplyCacheTime));
+            AddToCache(viewQueryCacheKey, selectedView.ListViewXml, GetAbsExpirePolicy());
         }
 
         private ContentReference AddRootFolder(SPList selectedList, SPListView selectedView, Dictionary<string, List<IModelWrapper>> folderDictionary)
@@ -412,7 +409,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
             }
 
             // Store loaded time for this level (in the folder tree)
-            AddToCache(timeLoadedCacheKey, DateTime.Now, GetAbsExpirePolicy(_numberMultiplyCacheTime));
+            AddToCache(timeLoadedCacheKey, DateTime.Now, GetAbsExpirePolicy());
         }
 
         private void AddFolder(SPListItem itemFolder, SPList selectedList, SPListView selectedView, string parentContentLink, ref Dictionary<string, List<IModelWrapper>> folderDictionary)
@@ -638,14 +635,14 @@ namespace EPiServer.ConnectForSharePoint.Providers
         }
 
         /// <summary>
-        /// Return a absolute <see cref="CacheItemPolicy"/> bases on Expiration Time in configuration settings
+        /// Return a absolute <see cref="CacheItemPolicy"/> of 30 minutes
         /// </summary>
         /// <param name="multiplyNumber">Number to multiply the Expiration Time.</param>
-        private CacheItemPolicy GetAbsExpirePolicy(int multiplyNumber)
+        private CacheItemPolicy GetAbsExpirePolicy()
         {
             return new CacheItemPolicy()
             {
-                AbsoluteExpiration = DateTime.Now.AddMinutes(_currentSettings.ExpirationTime * multiplyNumber)
+                AbsoluteExpiration = DateTime.Now.AddMinutes(30)
             };
         }
 
@@ -654,8 +651,8 @@ namespace EPiServer.ConnectForSharePoint.Providers
             return new CacheItemPolicy
             {
                 UpdateCallback = new CacheEntryUpdateCallback(CachedItemUpdateCallback),
-                //AbsoluteExpiration = DateTime.Now.AddMinutes(2)   // use small time when debugging
-                AbsoluteExpiration = DateTime.Now.AddMinutes(_currentSettings.ExpirationTime)
+                // AbsoluteExpiration = DateTime.Now.AddMinutes(2)   // use small time when debugging
+                AbsoluteExpiration = DateTime.Now.AddMinutes(5)
             };
         }
 
