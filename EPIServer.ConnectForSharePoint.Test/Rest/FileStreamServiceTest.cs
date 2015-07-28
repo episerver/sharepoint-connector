@@ -122,6 +122,8 @@ namespace EPiServer.ConnectForSharePoint.Test
         [TestMethod]
         public void GetFileStream_with_SPListItem_not_have_url_expected_not_null_and_length_equal_zero()
         {
+            _fileItem.File.ServerRelativeUrl = ""; // make sure its not null and length = zero.. not sure y we would have this test.
+
             var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000), false);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Length, 0); // Empty memory stream
