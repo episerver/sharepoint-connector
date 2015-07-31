@@ -7,19 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPiServer.ConnectForSharePo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPiServer.ConnectForSharePoint.Test", "EPiServer.ConnectForSharePoint.Test\EPiServer.ConnectForSharePoint.Test.csproj", "{50B63761-87D3-4E00-9EB2-AA973D077CCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPIServer.ConnectForSharePoint.Messaging", "EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj", "{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}"
+EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://tfs:8080/ektron
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = EPiServer.ConnectForSharePoint\\EPiServer.ConnectForSharePoint.csproj
-		SccProjectName1 = EPiServer.ConnectForSharePoint
-		SccLocalPath1 = EPiServer.ConnectForSharePoint
-		SccProjectUniqueName2 = EPiServer.ConnectForSharePoint.Test\\EPiServer.ConnectForSharePoint.Test.csproj
-		SccProjectName2 = EPiServer.ConnectForSharePoint.Test
-		SccLocalPath2 = EPiServer.ConnectForSharePoint.Test
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -33,6 +23,10 @@ Global
 		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

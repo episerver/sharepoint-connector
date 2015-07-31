@@ -14,7 +14,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
-    <IsCodedUITest>False</IsCodedUITest>
+    <IsCodedUITest>True</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -151,6 +151,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -176,7 +178,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -195,6 +199,12 @@
     <Compile Include="Helpers\WebHelperTest.cs" />
     <Compile Include="Helpers\SharePointHelperTest.cs" />
     <Compile Include="MemoryContentTypeRepository.cs" />
+    <Compile Include="Messaging\FanOutMessageDispatcherTests.cs" />
+    <Compile Include="Messaging\InMemoryMessageReceiverTests.cs" />
+    <Compile Include="Messaging\InMemory\InMemoryMessageEmitterTests.cs" />
+    <Compile Include="Messaging\InMemory\InMemoryMessageReceiverTests.cs" />
+    <Compile Include="Messaging\InMemory\InMemoryQueueStoreTests.cs" />
+    <Compile Include="Messaging\MessageHandlerRegistryTests.cs" />
     <Compile Include="Providers\Constructions\SharePointFolderBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\Constructions\SharePointImageBuilderTest.cs" />
@@ -207,6 +217,10 @@
     <Compile Include="TestScopeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj">
+      <Project>{6c6e8f61-8a4f-4c49-a85b-9d637a9c1d34}</Project>
+      <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EPiServer.ConnectForSharePoint\EPiServer.ConnectForSharePoint.csproj">
       <Project>{cfb2557c-26b4-406b-8ada-7c66365cfae9}</Project>
       <Name>EPiServer.ConnectForSharePoint</Name>
@@ -222,6 +236,7 @@
   <ItemGroup>
     <None Include="PerformancePerceptionTest\loadspitems-test_phantomjs_guide.docx" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
