@@ -1,4 +1,8 @@
 ﻿using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Handlers;
+using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Framework;
 using EPiServer.Framework.Blobs;
@@ -6,6 +10,7 @@ using EPiServer.Logging;
 using EPiServer.Packaging;
 using EPiServer.Web.Hosting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Reflection;
@@ -22,6 +27,8 @@ namespace EPiServer.ConnectForSharePoint
     public class InitializationModule : PackageInitializer
     {
         private static readonly ILogger _logger = LogManager.GetLogger();
+        MessageHandlerRegistry registry;
+        MessagingApplicationBuilder appBuilder;
 
         #region IInitializableModule implementation
 
@@ -60,6 +67,39 @@ namespace EPiServer.ConnectForSharePoint
             AddSharePointBlobProvider();
             AddSharePointMediaProvider();
             SetAccessToClientResources();
+            InitializeMessagingSystem();
+        }
+
+        private void InitializeMessagingSystem()
+        {
+            _logger.Information("InitializeMessagingSystem");
+            var handler = new SharePointContentModificationHandler();
+
+            // RegisterMessageHandlers
+            registry = new MessageHandlerRegistry();
+            registry.Register<SharePointContentAddMessage>(handler);
+            registry.Register<SharePointContentUpdateMessage>(handler);
+            registry.Register<SharePointContentDeleteMessage>(handler);
+
+            // Initialize message queue and the message dispatcher
+            var messageDispatcher = new FanOutMessageDispatcher(registry);
+            var queue = GetQueue("sharepointmod"); // Queue name has to match what is in SharePointMessageEmitterFactory
+            var messageReceiver = new InMemoryMessageReceiver(messageDispatcher, queue);
+
+            // Initialize the message application builder
+            appBuilder = new MessagingApplicationBuilder();
+            appBuilder.Add(messageReceiver);
+            appBuilder.App.Start();
+        }
+
+        private BlockingCollection<object> GetQueue(string queueName)
+        {
+            _logger.Information("GetQueue [" + queueName + "]");
+
+            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+            var queue = queueStore.Get(queueName);
+
+            return queue;
         }
 
         private void AddSharePointBlobProvider()
