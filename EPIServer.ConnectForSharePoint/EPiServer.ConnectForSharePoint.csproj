@@ -215,6 +215,11 @@
     <Compile Include="Mappers\SPListMapper.cs" />
     <Compile Include="Mappers\SPUserMapper.cs" />
     <Compile Include="Mappers\SPViewMapper.cs" />
+    <Compile Include="Messaging\Handlers\SharePointContentModificationHandler.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentUpdateMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentAddMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentMessage.cs" />
     <Compile Include="Models\ContextWebInformation.cs" />
     <Compile Include="Models\SPFile.cs" />
     <Compile Include="Models\SPFolder.cs" />
@@ -387,7 +392,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Messaging\" />
+    <ProjectReference Include="..\EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj">
+      <Project>{6c6e8f61-8a4f-4c49-a85b-9d637a9c1d34}</Project>
+      <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
