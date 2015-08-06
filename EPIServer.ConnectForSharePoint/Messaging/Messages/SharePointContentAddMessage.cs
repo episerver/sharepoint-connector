@@ -5,7 +5,8 @@ using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Messaging.Messages
 {
-    public class SharePointContentAddMessage
+    public class SharePointContentAddMessage : SharePointMessage
     {
+        
     }
 }

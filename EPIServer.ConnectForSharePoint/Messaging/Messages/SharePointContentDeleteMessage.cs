@@ -5,7 +5,7 @@ using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Messaging.Messages
 {
-    public class SharePointContentDeleteMessage
+    public class SharePointContentDeleteMessage : SharePointMessage
     {
     }
 }

@@ -190,7 +190,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -206,6 +208,8 @@
     <Compile Include="Messaging\InMemory\InMemoryQueueStoreTests.cs" />
     <Compile Include="Messaging\MessageHandlerRegistryTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointMessageEmitterFactoryTests.cs" />
+    <Compile Include="Messaging\SP_Specific\SharePointMessageHandlerTests.cs" />
+    <Compile Include="Messaging\SP_Specific\SharePointProcessFactoryTests.cs" />
     <Compile Include="Providers\Constructions\SharePointFolderBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\Constructions\SharePointImageBuilderTest.cs" />
@@ -225,6 +229,10 @@
     <ProjectReference Include="..\EPiServer.ConnectForSharePoint\EPiServer.ConnectForSharePoint.csproj">
       <Project>{cfb2557c-26b4-406b-8ada-7c66365cfae9}</Project>
       <Name>EPiServer.ConnectForSharePoint</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharePointMessageProcessor\SharePointMessageProcessor.csproj">
+      <Project>{f71b913e-635e-457e-bfff-62a86d9f5efd}</Project>
+      <Name>SharePointMessageProcessor</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

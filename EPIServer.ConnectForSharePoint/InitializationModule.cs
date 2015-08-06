@@ -73,7 +73,7 @@ namespace EPiServer.ConnectForSharePoint
         private void InitializeMessagingSystem()
         {
             _logger.Information("InitializeMessagingSystem");
-            var handler = new SharePointContentModificationHandler();
+            var handler = new SharePointMessageHandler();
 
             // RegisterMessageHandlers
             registry = new MessageHandlerRegistry();

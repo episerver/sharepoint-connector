@@ -7,12 +7,38 @@ using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 {
-    public class SharePointContentModificationHandler :
+    public class SharePointMessageHandler :
         IMessageHandler<SharePointContentAddMessage>,
         IMessageHandler<SharePointContentUpdateMessage>,
-        IMessageHandler<SharePointContentDeleteMessage>
+        IMessageHandler<SharePointContentDeleteMessage>,
+        IMessageHandler<SharePointFolderAddMessage>,
+        IMessageHandler<SharePointFolderDeleteMessage>
     {
-        private static readonly ILogger _logger = LogManager.GetLogger();
+        private ILogger _logger;
+        private ISharePointProcessor _documentProcessor;
+
+        public SharePointMessageHandler()
+        {
+            var aFactory = new SharePointProcessorFactory();
+            _documentProcessor = aFactory.GetSharePointProcessor();
+            _logger = LogManager.GetLogger();
+        }
+
+        internal SharePointMessageHandler(ILogger theLogger, ISharePointProcessor theProcessor)
+        {
+            _logger = theLogger;
+            _documentProcessor = theProcessor;
+        }
+
+        public void Handle(SharePointFolderAddMessage message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Handle(SharePointFolderDeleteMessage message)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Handles a SharePointContentAddMessage
@@ -20,7 +46,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            _logger.Warning("SharePointContentAddMessage notimplemented");
+            _documentProcessor.AddDocument(message.JSON);
         }
 
         /// <summary>
