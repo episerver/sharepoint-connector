@@ -18,17 +18,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             throw new NotImplementedException();
         }
 
-        public void AddFolder()
+        public void AddFolder(string jsonData)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteDocument()
+        public void DeleteDocument(string jsonData)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteFolder()
+        public void DeleteFolder(string jsonData)
         {
             throw new NotImplementedException();
         }

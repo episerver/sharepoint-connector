@@ -32,12 +32,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 
         public void Handle(SharePointFolderAddMessage message)
         {
-            throw new NotImplementedException();
+            _documentProcessor.AddFolder(message.JSON);
         }
 
         public void Handle(SharePointFolderDeleteMessage message)
         {
-            throw new NotImplementedException();
+            _documentProcessor.DeleteFolder(message.JSON);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentDeleteMessage message)
         {
-            _logger.Warning("SharePointContentDeleteMessage notimplemented");
+            _documentProcessor.DeleteDocument(message.JSON);
         }
     }
 }

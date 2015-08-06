@@ -9,8 +9,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
     public interface ISharePointProcessor
     {
         void AddDocument(string jsonData);
-        void AddFolder();
-        void DeleteDocument();
-        void DeleteFolder();
+        void AddFolder(string jsonData);
+        void DeleteDocument(string jsonData);
+        void DeleteFolder(string jsonData);
     }
 }
