@@ -237,6 +237,8 @@
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
     <Compile Include="Models\SPUser.cs" />
+    <Compile Include="Processor\ISharePointProcessor.cs" />
+    <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
     <Compile Include="Rest\Models\JsonUser.cs" />
     <Compile Include="Rest\Models\JsonFile.cs" />
@@ -406,10 +408,6 @@
     <ProjectReference Include="..\EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj">
       <Project>{6c6e8f61-8a4f-4c49-a85b-9d637a9c1d34}</Project>
       <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharePointMessageProcessor\SharePointMessageProcessor.csproj">
-      <Project>{f71b913e-635e-457e-bfff-62a86d9f5efd}</Project>
-      <Name>SharePointMessageProcessor</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

@@ -230,10 +230,6 @@
       <Project>{cfb2557c-26b4-406b-8ada-7c66365cfae9}</Project>
       <Name>EPiServer.ConnectForSharePoint</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharePointMessageProcessor\SharePointMessageProcessor.csproj">
-      <Project>{f71b913e-635e-457e-bfff-62a86d9f5efd}</Project>
-      <Name>SharePointMessageProcessor</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
