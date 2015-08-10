@@ -17,11 +17,16 @@ namespace EPiServer.ConnectForSharePoint.Messaging
     public class SharePointProcessor : ISharePointProcessor
     {
         // The content repository we use to create folders and objects in episerver
-        IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+        IContentRepository _contentRepository;
 
         public SharePointProcessor()
         {
+            _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+        }
 
+        internal SharePointProcessor( IContentRepository repository)
+        {
+            _contentRepository = repository;
         }
 
         public void AddDocument(SPListItem item)

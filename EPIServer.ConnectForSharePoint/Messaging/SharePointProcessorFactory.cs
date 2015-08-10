@@ -13,5 +13,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             return new SharePointProcessor();
         }
+
+        internal ISharePointProcessor GetSharePointProcessor(IContentRepository repository)
+        {
+            return new SharePointProcessor(repository);
+        }
     }
 }
