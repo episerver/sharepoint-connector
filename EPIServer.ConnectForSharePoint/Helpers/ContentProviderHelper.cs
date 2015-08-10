@@ -116,10 +116,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
 
             // Set access level to 'Read' on the SharePoint's root folder and its children
-            AccessRightsHelper.SetAccessRight(EntryPoint, AccessLevel.Read);
-
-            _contentSecurityRepository.ContentSecuritySaved -= ContentSecurityRepository_ContentSecuritySaved;
-            _contentSecurityRepository.ContentSecuritySaved += ContentSecurityRepository_ContentSecuritySaved;
+// hem_remove - removed the event listener that sets all the nodes to read only for now
+//            AccessRightsHelper.SetAccessRight(EntryPoint, AccessLevel.Read);
+//           _contentSecurityRepository.ContentSecuritySaved -= ContentSecurityRepository_ContentSecuritySaved;
+//           _contentSecurityRepository.ContentSecuritySaved += ContentSecurityRepository_ContentSecuritySaved;
         }
 
         /// <summary>

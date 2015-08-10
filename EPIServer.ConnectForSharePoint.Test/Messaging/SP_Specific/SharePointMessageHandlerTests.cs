@@ -5,6 +5,7 @@ using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.Logging;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Models;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -21,70 +22,120 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             return new SharePointMessageHandler(logger.Object, processor.Object);
         }
-
+         
 
         [TestMethod]
-        public void Handle_For_AddContentMessage_Passes_Message_To_SharePointProcessor()
+        public void Handle_For_AddDocumentMessage_Passes_Message_To_SharePointProcessor()
         {
             var handler = GetUnitUnderTest();
-            processor.Setup(p => p.AddDocument(It.IsAny<string>()));
+            processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>()));
 
             var message = new SharePointContentAddMessage()
             {
-                JSON = "Test"
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
             };
 
             handler.Handle(message);
 
-            processor.Verify(p => p.AddDocument(It.Is<string>(json => json == message.JSON)), Times.Once, "Did not call into the processor with the expected string");
+            processor.Verify(p => p.AddDocument(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }
 
         [TestMethod]
-        public void Handle_For_DeleteContentMessage_Passes_Message_To_SharePointProcessor()
+        public void Handle_For_UpdateDocumentMessage_Passes_Message_To_SharePointProcessor()
         {
             var handler = GetUnitUnderTest();
-            processor.Setup(p => p.DeleteDocument(It.IsAny<string>()));
+            processor.Setup(p => p.UpdateDocument(It.IsAny<SPListItem>()));
 
-            var message = new SharePointContentDeleteMessage()
+            var message = new SharePointContentUpdateMessage()
             {
-                JSON = "Test"
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
             };
 
             handler.Handle(message);
 
-            processor.Verify(p => p.DeleteDocument(It.Is<string>(json => json == message.JSON)), Times.Once, "Did not call into the processor with the expected string");
+            processor.Verify(p => p.UpdateDocument(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
+        }
+
+        [TestMethod]
+        public void Handle_For_DeleteDocumentMessage_Passes_Message_To_SharePointProcessor()
+        {
+            var handler = GetUnitUnderTest();
+            processor.Setup(p => p.DeleteDocument(It.IsAny<SPListItem>()));
+
+            var message = new SharePointContentDeleteMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
+            };
+
+            handler.Handle(message);
+
+            processor.Verify(p => p.DeleteDocument(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }
 
         [TestMethod]
         public void Handle_For_AddFolderMessage_Passes_Message_To_SharePointProcessor()
         {
             var handler = GetUnitUnderTest();
-            processor.Setup(p => p.AddFolder(It.IsAny<string>()));
+            processor.Setup(p => p.AddFolder(It.IsAny<SPListItem>()));
 
             var message = new SharePointFolderAddMessage()
             {
-                JSON = "Test"
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
             };
 
             handler.Handle(message);
 
-            processor.Verify(p => p.AddFolder(It.Is<string>(json => json == message.JSON)), Times.Once, "Did not call into the processor with the expected string");
+            processor.Verify(p => p.AddFolder(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
+        }
+
+        [TestMethod]
+        public void Handle_For_UpdateFolderMessage_Passes_Message_To_SharePointProcessor()
+        {
+            var handler = GetUnitUnderTest();
+            processor.Setup(p => p.AddFolder(It.IsAny<SPListItem>()));
+
+            var message = new SharePointFolderUpdateMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
+            };
+
+            handler.Handle(message);
+
+            processor.Verify(p => p.UpdateFolder(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }
 
         [TestMethod]
         public void Handle_For_DeleteFolderMessage_Passes_Message_To_SharePointProcessor()
         {
             var handler = GetUnitUnderTest();
-            processor.Setup(p => p.DeleteFolder(It.IsAny<string>()));
+            processor.Setup(p => p.DeleteFolder(It.IsAny<SPListItem>()));
 
             var message = new SharePointFolderDeleteMessage()
             {
-                JSON = "Test"
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
             };
 
             handler.Handle(message);
 
-            processor.Verify(p => p.DeleteFolder(It.Is<string>(json => json == message.JSON)), Times.Once, "Did not call into the processor with the expected string");
+            processor.Verify(p => p.DeleteFolder(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }
     }
 }

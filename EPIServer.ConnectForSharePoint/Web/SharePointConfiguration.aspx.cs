@@ -1,5 +1,7 @@
 using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.ConnectForSharePoint.Rest;
@@ -281,6 +283,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                     CacheManager.Remove(SharePointHelper.CookieContainerCacheKey);
                 }
 
+                // Put all the add folder messages on the queue
+                QueueFoldersForDelete(CurrentSettings.ListIds, lists);
+
                 // Assign new setting values to CurrentSettings 
                 CurrentSettings.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
                 CurrentSettings.Username = ConfiguredUsername;
@@ -293,8 +298,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Save settings into DDS first
                 CurrentSettings.Save();
 
+                // Put all the add folder messages on the queue
+                QueueFoldersForAdd(CurrentSettings.ListIds, lists);
+
                 // Re-initialize the provider for new settings
-                ContentProviderHelper.CreateSharePointMediaProvider();
+//                ContentProviderHelper.CreateSharePointMediaProvider();
             }
             catch (Exception ex)
             {
@@ -312,6 +320,90 @@ namespace EPiServer.ConnectForSharePoint.Web
             ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
 
             #endregion
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listids"></param>
+        /// <param name="splists"></param>
+        protected void QueueFoldersForDelete(string listids, IEnumerable<SPList> splists)
+        {
+            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
+            foreach (var item in selectedLists)
+            {
+                // The idListAndView is an object that contains two quids, one for the list and one for the view.
+                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
+
+                // Get the selected list using the first quid
+                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                // Get the selected view to from the second quid
+                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
+
+                // The message on the queue will be SPListItem
+                // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
+                // that contains some aspects of both.
+                SPListItem tbd = new SPListItem()
+                {
+                    Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
+                    GUID = selectedView.Id,
+                    entryPointId = CurrentSettings.EntryPoint.ID,
+                    Folder = new SPFolder()
+                    {
+                        Name = selectedList.Title + " - " + selectedView.Title,
+                    },
+                };
+
+                _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
+                SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                fact2.Create().Emit<SharePointFolderDeleteMessage>(new SharePointFolderDeleteMessage()
+                {
+                    Item = tbd,
+                });
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listids"></param>
+        /// <param name="splists"></param>
+        protected void QueueFoldersForAdd(string listids, IEnumerable<SPList> splists)
+        {
+            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
+            foreach (var item in selectedLists)
+            {
+                // The idListAndView is an object that contains two quids, one for the list and one for the view.
+                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
+
+                // Get the selected list using the first quid
+                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                // Get the selected view to from the second quid
+                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
+
+                // The message on the queue will be SPListItem
+                // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
+                // that contains some aspects of both.
+                SPListItem tbd = new SPListItem()
+                {
+                    Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
+                    GUID = selectedView.Id,
+                    entryPointId = CurrentSettings.EntryPoint.ID,
+                    Folder = new SPFolder()
+                    {
+                        Name = selectedList.Title + " - " + selectedView.Title,
+                    }, 
+                };
+
+                _logger.Information("Adding SharePointFolderAddMessage to the queue " + tbd.Title);
+                SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                {
+                    Item = tbd,
+                });
+            }
         }
 
         /// <summary>

@@ -230,6 +230,7 @@
     <Compile Include="Messaging\Messages\SharePointContentAddMessage.cs" />
     <Compile Include="Messaging\Messages\SharePointContentMessage.cs" />
     <Compile Include="Messaging\Messages\SharePointFolderDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointFolderUpdateMessage.cs" />
     <Compile Include="Messaging\SharePointMessageEmitterFactory.cs" />
     <Compile Include="Messaging\SharePointProcessorFactory.cs" />
     <Compile Include="Models\ContextWebInformation.cs" />
@@ -315,6 +316,7 @@
     </Compile>
     <Compile Include="Web\SharePointConfiguration.aspx.cs">
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Web\SharePointConfiguration.aspx.designer.cs">
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>

@@ -77,9 +77,16 @@ namespace EPiServer.ConnectForSharePoint
 
             // RegisterMessageHandlers
             registry = new MessageHandlerRegistry();
+
+            // document add/update/delete messages
             registry.Register<SharePointContentAddMessage>(handler);
             registry.Register<SharePointContentUpdateMessage>(handler);
             registry.Register<SharePointContentDeleteMessage>(handler);
+            
+            // folder add/update/delete messages
+            registry.Register<SharePointFolderAddMessage>(handler);
+            registry.Register<SharePointFolderUpdateMessage>(handler);
+            registry.Register<SharePointFolderDeleteMessage>(handler);
 
             // Initialize message queue and the message dispatcher
             var messageDispatcher = new FanOutMessageDispatcher(registry);

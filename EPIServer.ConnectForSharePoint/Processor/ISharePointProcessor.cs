@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPiServer.ConnectForSharePoint.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 {
     public interface ISharePointProcessor
     {
-        void AddDocument(string jsonData);
-        void AddFolder(string jsonData);
-        void DeleteDocument(string jsonData);
-        void DeleteFolder(string jsonData);
+        void AddDocument(SPListItem item);
+        void AddFolder(SPListItem item);
+        void UpdateDocument(SPListItem item);
+        void UpdateFolder(SPListItem item);
+        void DeleteDocument(SPListItem item);
+        void DeleteFolder(SPListItem item);
     }
 }

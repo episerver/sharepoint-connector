@@ -12,6 +12,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         IMessageHandler<SharePointContentUpdateMessage>,
         IMessageHandler<SharePointContentDeleteMessage>,
         IMessageHandler<SharePointFolderAddMessage>,
+        IMessageHandler<SharePointFolderUpdateMessage>,
         IMessageHandler<SharePointFolderDeleteMessage>
     {
         private ILogger _logger;
@@ -32,12 +33,21 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 
         public void Handle(SharePointFolderAddMessage message)
         {
-            _documentProcessor.AddFolder(message.JSON);
+            _documentProcessor.AddFolder(message.Item);
+        }
+
+        /// <summary>
+        /// Handles a ContentUpdatedMessage
+        /// </summary>
+        /// <param name="message">Message describing the operation</param>
+        public void Handle(SharePointFolderUpdateMessage message)
+        {
+            _documentProcessor.UpdateFolder(message.Item);
         }
 
         public void Handle(SharePointFolderDeleteMessage message)
         {
-            _documentProcessor.DeleteFolder(message.JSON);
+            _documentProcessor.DeleteFolder(message.Item);
         }
 
         /// <summary>
@@ -46,7 +56,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            _documentProcessor.AddDocument(message.JSON);
+            _documentProcessor.AddDocument(message.Item);
         }
 
         /// <summary>
@@ -55,7 +65,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentUpdateMessage message)
         {
-            _logger.Warning("SharePointContentUpdateMessage notimplemented");
+            _documentProcessor.UpdateDocument(message.Item);
         }
 
         /// <summary>
@@ -64,7 +74,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentDeleteMessage message)
         {
-            _documentProcessor.DeleteDocument(message.JSON);
+            _documentProcessor.DeleteDocument(message.Item);
         }
     }
 }

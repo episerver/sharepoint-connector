@@ -567,6 +567,8 @@ namespace EPiServer.ConnectForSharePoint.Providers
         private void CachedItemUpdateCallback(CacheEntryUpdateArguments arguments)
         {
             _logger.Debug("CacheEntryUpdate for key = '{0}' at '{1}'.", arguments.Key, DateTime.Now);
+// hem_removed - disabled the update of the cache so that no sub folders etc were created.
+/*
             if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
             {
                 ContentReference contentLink;
@@ -587,6 +589,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 }
             }
             _logger.Debug("CacheEntryUpdate done key = '{0}' at '{1}'.", arguments.Key, DateTime.Now);
+ */
         }
 
         /// <summary>

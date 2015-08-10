@@ -60,5 +60,10 @@ namespace EPiServer.ConnectForSharePoint.Models
         public bool? VideoSetShowDownloadLink { get; set; }
 
         public bool? VideoSetShowEmbedLink { get; set; }
+
+        /// <summary>
+        ///  Entry point id to create the object in cms.
+        /// </summary>
+        public int entryPointId { get; set; }
     }
 }
