@@ -64,9 +64,9 @@ namespace EPiServer.ConnectForSharePoint
 
         private void InitializationEngine_InitComplete(object sender, EventArgs e)
         {
-            AddSharePointBlobProvider();
-            AddSharePointMediaProvider();
-            SetAccessToClientResources();
+ //           AddSharePointBlobProvider();
+ //           AddSharePointMediaProvider();
+ //           SetAccessToClientResources();
             InitializeMessagingSystem();
         }
 

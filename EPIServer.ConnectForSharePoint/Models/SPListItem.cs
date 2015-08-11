@@ -65,5 +65,11 @@ namespace EPiServer.ConnectForSharePoint.Models
         ///  Entry point id to create the object in cms.
         /// </summary>
         public int entryPointId { get; set; }
+
+        /// <summary>
+        ///  The parent folder name in cms
+        /// </summary>
+        public string ParentFolderName { get; set; }
+
     }
 }

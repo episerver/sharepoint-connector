@@ -92,9 +92,9 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 Dictionary<string, List<IModelWrapper>> files;
                 Dictionary<string, List<IModelWrapper>> folders;
 
-                GetFilesAndFoldersBelongToContent(parentLink, out files, out folders);
+        //        GetFilesAndFoldersBelongToContent(parentLink, out files, out folders);
 
-                AddToMapping(files, folders);
+        //       AddToMapping(files, folders);
             }
         }
 
@@ -248,7 +248,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
 
                         var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
-                        AddRootFilesAndFolders(selectedList, selectedView, ref fileDictionary, ref folderDictionary);
+       //                 AddRootFilesAndFolders(selectedList, selectedView, ref fileDictionary, ref folderDictionary);
                     }
                 }
             }
