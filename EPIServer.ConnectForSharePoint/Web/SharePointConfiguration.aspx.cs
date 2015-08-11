@@ -372,46 +372,64 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected void QueueFoldersForAdd(string listids, IEnumerable<SPList> splists)
         {
             var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
-            var item = selectedLists.First();
-
-            // The idListAndView is an object that contains two quids, one for the list and one for the view.
-            var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
-
-            // Get the selected list using the first quid
-            var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-            // Get the selected view to from the second quid
-            var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-
-            // Get items in a folder filter by view
-            var parentFolder = selectedList.RootFolder;
-
-            var items = SharePointHelper.SPServicesHub.SPListsViewsService.GetItems(selectedList, selectedView, parentFolder);
-            var iterator = items.GetEnumerator();
-            while (iterator.MoveNext())
+            foreach (var item in selectedLists) // For each view selected
             {
-                var spItem = iterator.Current;
-                spItem.entryPointId = CurrentSettings.EntryPoint.ID;
+                // The idListAndView is an object that contains two quids, one for the list and one for the view.
+                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
 
-                if (spItem.Folder != null)
-                {
-                    _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
-                    {
-                        Item = spItem,
-                    });
+                // Get the selected list using the first quid
+                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
 
-                    AddSubItems(spItem.Folder, selectedList, selectedView);
-                }
-                else if (spItem.File != null)
+                // Get the selected view to from the second quid
+                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
+
+                // Get items in a folder filter by view
+                var parentFolder = selectedList.RootFolder;
+                SPListItem viewListItem = new SPListItem()
                 {
-                    _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
+                    entryPointId = CurrentSettings.EntryPoint.ID,
+                    Title = selectedView.Title, Folder = new SPFolder()
                     {
-                        Item = spItem,
-                    });
+                        Name = selectedView.Title,
+                    }
+
+                };
+
+                SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
+                spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                {
+                    Item = viewListItem,
+                });
+
+
+                var items = SharePointHelper.SPServicesHub.SPListsViewsService.GetItems(selectedList, selectedView, parentFolder);
+                var iterator = items.GetEnumerator();
+                while (iterator.MoveNext())
+                {
+                    var spItem = iterator.Current;
+                    spItem.entryPointId = -1;
+                    spItem.ParentFolderName = selectedView.Title;
+
+                    if (spItem.Folder != null)
+                    {
+                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
+                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                        fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                        {
+                            Item = spItem,
+                        });
+
+                        AddSubItems(spItem.Folder, selectedList, selectedView);
+                    }
+                    else if (spItem.File != null)
+                    {
+                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
+                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                        fact2.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
                 }
             }
         }
