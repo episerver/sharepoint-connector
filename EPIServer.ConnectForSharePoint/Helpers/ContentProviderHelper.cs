@@ -242,5 +242,24 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             return null;
         }
+
+        public static ContentReference FindRecursive(string name, ContentReference startRef)
+        {
+            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+            var rootFolders = contentRepository.GetChildren<ContentFolder>(startRef);
+            foreach (var rootFolder in rootFolders)
+            {
+                if (rootFolder.Name == name)
+                    return rootFolder.ContentLink;
+                else
+                {
+                    ContentReference cref = FindRecursive(name, rootFolder.ContentLink);
+                    if (cref != null)
+                        return cref;
+                }
+            }
+
+            return null;
+        }
     }
 }

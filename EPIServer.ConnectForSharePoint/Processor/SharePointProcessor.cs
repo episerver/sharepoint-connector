@@ -60,7 +60,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                parentFolder = FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot);
+                parentFolder = ContentProviderHelper.FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot);
             }
             AccessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
@@ -104,7 +104,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                cref = FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot); 
+                cref = ContentProviderHelper.FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot); 
             }
             AccessRightsHelper.SetAccessRight(cref, AccessLevel.FullAccess);
 
@@ -149,25 +149,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public void DeleteDocument(SPListItem item)
         {
             throw new NotImplementedException();
-        }
-
-        public ContentReference FindRecursive(string name, ContentReference startRef)
-        {
-            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-            var rootFolders = contentRepository.GetChildren<ContentFolder>(startRef);
-            foreach (var rootFolder in rootFolders)
-            {
-                if (rootFolder.Name == name)
-                    return rootFolder.ContentLink;
-                else
-                {
-                    ContentReference cref = FindRecursive(name, rootFolder.ContentLink);
-                    if (cref != null)
-                        return cref;
-                }
-            }
-
-            return null;
         }
     }
 }

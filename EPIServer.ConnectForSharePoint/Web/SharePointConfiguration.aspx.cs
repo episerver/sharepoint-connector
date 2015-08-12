@@ -343,27 +343,30 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 // Get the selected view to from the second quid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-
                 var FolderName = selectedList.Title + " - " + selectedView.Title;
-                // Get items in a folder filter by view
                 var parentFolder = selectedList.RootFolder;
-                SPListItem viewListItem = new SPListItem()
+
+                // Add the folder if its not already there
+                if (ContentProviderHelper.FindRecursive(FolderName, SharePointSettings.Current.EntryPoint) == null)
                 {
-                    entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                    Title = selectedView.Title, Folder = new SPFolder()
+                    SPListItem viewListItem = new SPListItem()
                     {
-                        Name = FolderName,
-                    }
+                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
+                        Title = selectedView.Title,
+                        Folder = new SPFolder()
+                        {
+                            Name = FolderName,
+                        }
 
-                };
+                    };
 
-                // Add the view folder.
-                SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
-                spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
-                {
-                    Item = viewListItem,
-                });
-
+                    // Add the view folder.
+                    SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
+                    spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                    {
+                        Item = viewListItem,
+                    });
+                }
 
                 AddSubItems(parentFolder, selectedList, selectedView, FolderName);
             }
@@ -392,12 +395,17 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 if (spItem.Folder != null)
                 {
-                    _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                    // Only add the folder if its not already there.
+                    // Add the folder if its not already there
+                    if (ContentProviderHelper.FindRecursive(spItem.Folder.Name, SharePointSettings.Current.EntryPoint) == null)
                     {
-                        Item = spItem,
-                    });
+                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
+                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                        fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
 
                     AddSubItems(spItem.Folder, selectedList, selectedView);
                 }
