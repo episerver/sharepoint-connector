@@ -77,15 +77,15 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             // Set attibutes of the media
             media.Name = fileName;
+            media.Created = item.File.TimeCreated;
 
-            // Test code HEM_FIXME - get the real stuff from sharepoint
             // Create a blob in the binary container
-            var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(@"C:\test.jpg"));
-            using (var fs = new FileStream(@"C:\test.jpg", FileMode.Open))
+            if (item.File.DataStream != null)
             {
-                blob.Write(fs);
+                var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+                blob.Write(item.File.DataStream);
+                media.BinaryData = blob;
             }
-            media.BinaryData = blob;
 
             try
             {

@@ -184,7 +184,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return memoryStream;
         }
 
-        private Stream GetFileSteam(string relativeUrl, bool isThumbnail)
+        public Stream GetFileSteam(string relativeUrl, bool isThumbnail)
         {
             // get stream from SharePoint site
             var stream = OpenDirectFile(relativeUrl);
@@ -311,7 +311,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return thumbnailUrl.ToString();
         }
 
-        private string GetFileRelativeUrl(SPListItem listItem, bool isThumbnail)
+        public string GetFileRelativeUrl(SPListItem listItem, bool isThumbnail)
         {
             if (listItem.File == null)
             {

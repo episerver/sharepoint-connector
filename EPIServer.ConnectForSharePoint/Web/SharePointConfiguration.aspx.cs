@@ -8,6 +8,7 @@ using EPiServer.ConnectForSharePoint.Rest;
 using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
+using EPiServer.Framework.Blobs;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
 using EPiServer.ServiceLocation;
@@ -299,9 +300,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 CurrentSettings.Save();
 
                 // Put all the add folder messages on the queue
-                QueueFoldersForAdd(CurrentSettings.ListIds, lists);
+                QueueItemsForAdd(CurrentSettings.ListIds, lists);
 
-                // Re-initialize the provider for new settings
+                // TODO Remove -- Re -initialize the provider for new settings
 //                ContentProviderHelper.CreateSharePointMediaProvider();
             }
             catch (Exception ex)
@@ -365,11 +366,11 @@ namespace EPiServer.ConnectForSharePoint.Web
         }
 
         /// <summary>
-        /// 
+        /// Adds all items to be added (SPFolders and SPItems) to the queue to be added
         /// </summary>
         /// <param name="listids"></param>
         /// <param name="splists"></param>
-        protected void QueueFoldersForAdd(string listids, IEnumerable<SPList> splists)
+        protected void QueueItemsForAdd(string listids, IEnumerable<SPList> splists)
         {
             var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists) // For each view selected
@@ -395,6 +396,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 };
 
+                // Add the view folder.
                 SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
                 spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
                 {
@@ -402,39 +404,19 @@ namespace EPiServer.ConnectForSharePoint.Web
                 });
 
 
-                var items = SharePointHelper.SPServicesHub.SPListsViewsService.GetItems(selectedList, selectedView, parentFolder);
-                var iterator = items.GetEnumerator();
-                while (iterator.MoveNext())
-                {
-                    var spItem = iterator.Current;
-                    spItem.entryPointId = -1;
-                    spItem.ParentFolderName = selectedView.Title;
-
-                    if (spItem.Folder != null)
-                    {
-                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                        fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
-                        {
-                            Item = spItem,
-                        });
-
-                        AddSubItems(spItem.Folder, selectedList, selectedView);
-                    }
-                    else if (spItem.File != null)
-                    {
-                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                        fact2.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
-                        {
-                            Item = spItem,
-                        });
-                    }
-                }
+                AddSubItems(parentFolder, selectedList, selectedView, selectedView.Title);
             }
         }
+        
 
-        protected void AddSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView)
+        /// <summary>
+        /// Adds all the subfolders and subitems for the given parent folder
+        /// </summary>
+        /// <param name="parentFolder">The parent folder to use as selection criterea items and as a source for the cms folder name</param>
+        /// <param name="selectedList">The list of items associated with all the selected views</param>
+        /// <param name="selectedView">The selected views in the configuration</param>
+        /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
+        protected void AddSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
         {
             var items = SharePointHelper.SPServicesHub.SPListsViewsService.GetItems(selectedList, selectedView, parentFolder);
             var iterator = items.GetEnumerator();
@@ -442,7 +424,10 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 var spItem = iterator.Current;
                 spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
-                spItem.ParentFolderName = parentFolder.Name;
+                if (string.IsNullOrEmpty(ParentFolderName))
+                    spItem.ParentFolderName = parentFolder.Name;
+                else
+                    spItem.ParentFolderName = ParentFolderName;
 
                 if (spItem.Folder != null)
                 {
@@ -457,6 +442,12 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else if (spItem.File != null)
                 {
+                    // Before we emit the message and have it passed to the processor, we need to populate the data in the 
+                    // spItem.
+                    var relativeUrl = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileRelativeUrl(spItem, false);
+                    spItem.File.DataStream = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileSteam(relativeUrl, false);
+
+                    // now emit the message
                     _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
                     SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
                     fact2.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
@@ -474,12 +465,16 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void Refresh_Click(object sender, EventArgs e)
         {
-            // Get the previous Lits-View Ids (the one was saved before this time)
-            var oldListIds = CurrentSettings != null ? CurrentSettings.ListIds : string.Empty;
-            // Remove cache for old list-views
-            RemoveCMSCache(oldListIds);
+            string errorMessage;
+            var lists = GetMediaLists(true, out errorMessage);
 
-            ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>().RebuildMapping();
+            // Put all the add folder messages on the queue
+//            QueueFoldersForDelete(CurrentSettings.ListIds, lists);
+
+            // Put all the add folder messages on the queue
+            QueueItemsForAdd(CurrentSettings.ListIds, lists);
+
+            ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
         }
 
         /// <summary>

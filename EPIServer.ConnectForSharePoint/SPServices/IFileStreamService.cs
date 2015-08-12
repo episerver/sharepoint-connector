@@ -21,5 +21,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         /// <param name="contentLink">The content link has been mapped identity</param>
         /// <returns></returns>
         Stream GetFileStream(SPListItem listItem, ContentReference contentLink, bool isThumbnail);
+
+        Stream GetFileSteam(string relativeUrl, bool isThumbnail);
+
+        string GetFileRelativeUrl(SPListItem listItem, bool isThumbnail);
     }
 }
