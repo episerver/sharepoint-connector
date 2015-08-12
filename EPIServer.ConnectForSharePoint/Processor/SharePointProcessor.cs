@@ -1,7 +1,5 @@
-﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Helpers;
+﻿using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
@@ -9,14 +7,8 @@ using EPiServer.Framework.Blobs;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
-using EPiServer.Web.Hosting;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Hosting;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {

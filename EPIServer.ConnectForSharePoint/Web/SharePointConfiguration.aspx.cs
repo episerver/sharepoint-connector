@@ -8,7 +8,6 @@ using EPiServer.ConnectForSharePoint.Rest;
 using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
-using EPiServer.Framework.Blobs;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
 using EPiServer.ServiceLocation;
@@ -38,31 +37,9 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly ISharePointContentMappingRepository _spContentMappingRepository = ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>();
         private static readonly ISharePointContentCacheProvider _spContentCacheProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
 
-        private IServicesHub _spServicesHub;
-        private IServicesHub SPServicesHub
-        {
-            get
-            {
-                if (_spServicesHub == null)
-                {
-                    try
-                    {
-                        ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
-                    }
-                    catch { }
-
-                    if (_spServicesHub == null)
-                    {
-                        _spServicesHub = new ServicesHub();
-
-                        ServiceLocator.Current.Buildup(_spServicesHub);
-                    }
-                }
-
-                return _spServicesHub;
-            }
-        }
-
+        /// <summary>
+        /// Called by web page during data bind operation
+        /// </summary>
         protected SharePointSettings CurrentSettings
         {
             get { return SharePointSettings.Current; }
@@ -113,7 +90,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             // Get saved SharePoint's user password from setting storage and then load it to the current session for the first time.
             if (!Page.IsPostBack)
             {
-                Session[SharePointUserPassword] = CurrentSettings.Password;
+                Session[SharePointUserPassword] = SharePointSettings.Current.Password;
             }
 
             DataBind();
@@ -146,7 +123,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 rbThumbnailOption.Items.Add(
                     new ListItem(Translate("/sharepoint/admin/thumbnailoptions/createthumbnailforall"), ThumbnailOptions.CreateThumbnailForAll.ToString()));
 
-                rbThumbnailOption.SelectedValue = CurrentSettings.ThumbnailOption.ToString();
+                rbThumbnailOption.SelectedValue = SharePointSettings.Current.ThumbnailOption.ToString();
             }
         }
 
@@ -254,7 +231,6 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             // Get current selected Lits-View Ids
             var selectedListViewIds = SharePointListCheckBox.Items.Cast<ListItem>().Where(li => li.Selected).Select(li => li.Value);
-
             if (!IsAnyMatchedId(selectedListViewIds, lists))
             {
                 ShowMessage(Translate("/sharepoint/admin/message/listviewnotmatched"), true);
@@ -263,51 +239,33 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             try
             {
-                // Remove all cached values related to previous settings
-                if (CurrentSettings != null)
-                {
-                    // Get the previous Lists-View Ids (the one was saved before this time)
-                    var oldListIds = CurrentSettings.ListIds;
-                    // Remove cache for old list-views
-                    RemoveCMSCache(oldListIds);
+                // Get the previous Lists-View Ids (the one was saved before this time)
+                var oldListIds = SharePointSettings.Current.ListIds;
+                var oldEntryPoint = SharePointSettings.Current.EntryPoint;
 
-                    var oldEntryPoint = CurrentSettings.EntryPoint;
-                    if (oldEntryPoint != null)
-                    {
-                        // Remove children cache for old entry point
-                        CacheManager.Remove(DataFactoryCache.ChildrenCacheKey(oldEntryPoint));
-                    }
+                // Queues up All folders under the entry point for delete.
+                QueueFoldersForDelete(oldListIds, lists);
 
-                    // Remove cache for FormDigestValue
-                    CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
-                    // Remove cache for CookieContainer
-                    CacheManager.Remove(SharePointHelper.CookieContainerCacheKey);
-                }
-
-                // Put all the add folder messages on the queue
-                QueueFoldersForDelete(CurrentSettings.ListIds, lists);
-
-                // Assign new setting values to CurrentSettings 
-                CurrentSettings.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
-                CurrentSettings.Username = ConfiguredUsername;
-                CurrentSettings.Password = ConfiguredPassword;
+                // Assign new setting values to SharePointSettings.Current 
+                SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
+                SharePointSettings.Current.Username = ConfiguredUsername;
+                SharePointSettings.Current.Password = ConfiguredPassword;
                 // Assign current selected Lits-View Ids to the Setting before storing in DDS
-                CurrentSettings.ListIds = String.Join(";", selectedListViewIds);
-                CurrentSettings.EntryPoint = new ContentReference(entryPointId);
-                CurrentSettings.ThumbnailOption = (ThumbnailOptions)Enum.Parse(typeof(ThumbnailOptions), rbThumbnailOption.SelectedValue);
+                SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
+                SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
+
+                // TODO Thumbnail option really doesnt make sense anymore since episerver creates the thumbnails.
+                SharePointSettings.Current.ThumbnailOption = (ThumbnailOptions)Enum.Parse(typeof(ThumbnailOptions), rbThumbnailOption.SelectedValue);
 
                 // Save settings into DDS first
-                CurrentSettings.Save();
+                SharePointSettings.Current.Save();
 
                 // Put all the add folder messages on the queue
-                QueueItemsForAdd(CurrentSettings.ListIds, lists);
-
-                // TODO Remove -- Re -initialize the provider for new settings
-//                ContentProviderHelper.CreateSharePointMediaProvider();
+                QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
             }
             catch (Exception ex)
             {
-                CurrentSettings.Reset();
+                SharePointSettings.Current.Reset();
                 ShowMessage(string.Format(Translate("/sharepoint/admin/message/saveerror"), ex.Message), true);
                 return;
             }
@@ -342,6 +300,8 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the selected view to from the second quid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
+                var FolderName = selectedList.Title + " - " + selectedView.Title;
+
                 // The message on the queue will be SPListItem
                 // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
                 // that contains some aspects of both.
@@ -349,10 +309,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 {
                     Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
                     GUID = selectedView.Id,
-                    entryPointId = CurrentSettings.EntryPoint.ID,
+                    entryPointId = SharePointSettings.Current.EntryPoint.ID,
                     Folder = new SPFolder()
                     {
-                        Name = selectedView.Title,
+                        Name = FolderName,
                     },
                 };
 
@@ -384,14 +344,15 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the selected view to from the second quid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
+                var FolderName = selectedList.Title + " - " + selectedView.Title;
                 // Get items in a folder filter by view
                 var parentFolder = selectedList.RootFolder;
                 SPListItem viewListItem = new SPListItem()
                 {
-                    entryPointId = CurrentSettings.EntryPoint.ID,
+                    entryPointId = SharePointSettings.Current.EntryPoint.ID,
                     Title = selectedView.Title, Folder = new SPFolder()
                     {
-                        Name = selectedView.Title,
+                        Name = FolderName,
                     }
 
                 };
@@ -404,7 +365,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 });
 
 
-                AddSubItems(parentFolder, selectedList, selectedView, selectedView.Title);
+                AddSubItems(parentFolder, selectedList, selectedView, FolderName);
             }
         }
         
@@ -469,10 +430,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             var lists = GetMediaLists(true, out errorMessage);
 
             // Put all the add folder messages on the queue
-//            QueueFoldersForDelete(CurrentSettings.ListIds, lists);
-
-            // Put all the add folder messages on the queue
-            QueueItemsForAdd(CurrentSettings.ListIds, lists);
+            QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
 
             ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
         }
@@ -655,7 +613,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             listControl.Items.Clear();
 
             var enumerator = idPairs.GetEnumerator();
-            var previousSelectedListIds = CurrentSettings.ListIds.Split(new string[] { ";" }, StringSplitOptions.None);
+            var previousSelectedListIds = SharePointSettings.Current.ListIds.Split(new string[] { ";" }, StringSplitOptions.None);
 
             ListItem newListItem;
             KeyValuePair<string, string> pair;
