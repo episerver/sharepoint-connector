@@ -351,7 +351,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     entryPointId = CurrentSettings.EntryPoint.ID,
                     Folder = new SPFolder()
                     {
-                        Name = selectedList.Title + " - " + selectedView.Title,
+                        Name = selectedView.Title,
                     },
                 };
 
