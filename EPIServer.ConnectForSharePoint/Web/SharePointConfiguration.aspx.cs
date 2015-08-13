@@ -235,21 +235,21 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
 
-                // Queues up All folders under the entry point for delete.
-                QueueFoldersForDelete(oldListIds, lists);
+                // if the entry point is different we need to queue all the current folders for delete
+                if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
+                    QueueFoldersForDelete(lists);
+                else // else we only delete folders that have been deselected
+                    QueueFoldersForDelete(lists, selectedListViewIds);
 
-                // Assign new setting values to SharePointSettings.Current 
+                // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
                 SharePointSettings.Current.Username = ConfiguredUsername;
                 SharePointSettings.Current.Password = ConfiguredPassword;
-                // Assign current selected Lits-View Ids to the Setting before storing in DDS
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
-
-                // Save settings into DDS first
                 SharePointSettings.Current.Save();
 
-                // Put all the add folder messages on the queue
+                // Put all the add folder messages on the queue, this will take care of any new folders selected.
                 QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
             }
             catch (Exception ex)
@@ -271,11 +271,11 @@ namespace EPiServer.ConnectForSharePoint.Web
         }
 
         /// <summary>
-        /// 
+        /// Deletes all folders in the specified splists collection, UNLESS there list ids to exclude from deletion.
         /// </summary>
-        /// <param name="listids"></param>
         /// <param name="splists"></param>
-        protected void QueueFoldersForDelete(string listids, IEnumerable<SPList> splists)
+        /// <param name="listids"></param>
+        protected void QueueFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null)
         {
             var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists)
@@ -289,28 +289,46 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the selected view to from the second quid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
-                var FolderName = selectedList.Title + " - " + selectedView.Title;
-
-                // The message on the queue will be SPListItem
-                // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
-                // that contains some aspects of both.
-                SPListItem tbd = new SPListItem()
+                // Make sure that the view quid and the view quid is in the listids, if its not then it needs to be deleted.
+                var FolderName = selectedList.Title + " - " + selectedView.Title; // assume we are deleting it.
+                if (listids != null) // we are some folders
                 {
-                    Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
-                    GUID = selectedView.Id,
-                    entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                    Folder = new SPFolder()
+                    foreach (var id in listids)
                     {
-                        Name = FolderName,
-                    },
-                };
+                        var listIds = id.Split('~');
+                        if(selectedList.Id == Guid.Parse(listIds[0]) && selectedView.Id == Guid.Parse(listIds[1]) )
+                        {
+                            // We found a match, this means the view is in the current selection - don't delete it!  
+                            // else all the items in the folder will be deleted and existing pages will lose content.
+                            FolderName = string.Empty;
+                            break;
+                        }
+                    }
+                }
 
-                _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
-                SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                fact2.Create().Emit<SharePointFolderDeleteMessage>(new SharePointFolderDeleteMessage()
+                if ( !string.IsNullOrEmpty(FolderName) )
                 {
-                    Item = tbd,
-                });
+                    // The message on the queue will be SPListItem
+                    // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
+                    // that contains some aspects of both.
+                    SPListItem tbd = new SPListItem()
+                    {
+                        Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
+                        GUID = selectedView.Id,
+                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
+                        Folder = new SPFolder()
+                        {
+                            Name = FolderName,
+                        },
+                    };
+
+                    _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
+                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
+                    fact2.Create().Emit<SharePointFolderDeleteMessage>(new SharePointFolderDeleteMessage()
+                    {
+                        Item = tbd,
+                    });
+                }
             }
         }
 
