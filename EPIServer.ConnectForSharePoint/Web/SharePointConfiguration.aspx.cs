@@ -115,15 +115,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                     }
                     BindListData(lists);
                 }
-
-                rbThumbnailOption.Items.Add(
-                    new ListItem(Translate("/sharepoint/admin/thumbnailoptions/usegenericthumbnailforall"), ThumbnailOptions.GenericThumbnailForAll.ToString()));
-                rbThumbnailOption.Items.Add(
-                    new ListItem(Translate("/sharepoint/admin/thumbnailoptions/usesharepointthumbnail"), ThumbnailOptions.OnlySharePointThumbnail.ToString()));
-                rbThumbnailOption.Items.Add(
-                    new ListItem(Translate("/sharepoint/admin/thumbnailoptions/createthumbnailforall"), ThumbnailOptions.CreateThumbnailForAll.ToString()));
-
-                rbThumbnailOption.SelectedValue = SharePointSettings.Current.ThumbnailOption.ToString();
             }
         }
 
@@ -254,9 +245,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Assign current selected Lits-View Ids to the Setting before storing in DDS
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
-
-                // TODO Thumbnail option really doesnt make sense anymore since episerver creates the thumbnails.
-                SharePointSettings.Current.ThumbnailOption = (ThumbnailOptions)Enum.Parse(typeof(ThumbnailOptions), rbThumbnailOption.SelectedValue);
 
                 // Save settings into DDS first
                 SharePointSettings.Current.Save();

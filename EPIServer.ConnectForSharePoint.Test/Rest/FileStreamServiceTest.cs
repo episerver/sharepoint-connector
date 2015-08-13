@@ -92,7 +92,6 @@ namespace EPiServer.ConnectForSharePoint.Test
                 new SharePointSettings
                 {
                     Id = Data.Identity.NewIdentity(),
-                    ThumbnailOption = ThumbnailOptions.GenericThumbnailForAll
                 }
             };
         }

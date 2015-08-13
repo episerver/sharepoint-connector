@@ -31,12 +31,6 @@
                     <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
                     <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
                 </message>
-                <thumbnailoptions>
-                  <description>Select an option for generating thumbnails for SharePoint media.</description>
-                  <usegenericthumbnailforall>Use generic thumbnails for all media</usegenericthumbnailforall>
-                  <usesharepointthumbnail>Show thumbnails for images with SharePoint thumbnails, otherwise use generic thumbnails. Generating the SharePoint thumbnails may take some time.</usesharepointthumbnail>
-                  <createthumbnailforall>Create thumbnails for all media</createthumbnailforall>
-              </thumbnailoptions>
             </admin>
             <plugin>
                 <spcontentindexjob>

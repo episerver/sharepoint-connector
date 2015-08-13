@@ -146,8 +146,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
             // if require thumbnail and always using generic default icon(image) or 
             // the item does not support thumbnail implicitly
-            if (isThumbnail && (SharePointSettings.Current.ThumbnailOption == ThumbnailOptions.GenericThumbnailForAll || (
-                SharePointSettings.Current.ThumbnailOption == ThumbnailOptions.OnlySharePointThumbnail && !HasThumbnailImplicitly(listItem))))
+            if (isThumbnail)
             {
                 return OpenGenericDefaultImage();
             }

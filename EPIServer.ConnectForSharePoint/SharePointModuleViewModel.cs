@@ -17,13 +17,5 @@ namespace EPiServer.ConnectForSharePoint
                 return ContentProviderHelper.ContentProviderKey;
             }
         }
-
-        public string ThumbnailMode
-        {
-            get
-            {
-                return SharePointSettings.Current.ThumbnailOption.ToString();
-            }
-        }
     }
 }

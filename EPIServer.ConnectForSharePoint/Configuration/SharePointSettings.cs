@@ -42,6 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// </summary>
         public ContentReference EntryPoint { get; set; }
 
+        // Todo we should get rid of the thumbnail field but when we do it causes an issue loading the config in an existing environment
         /// <summary>
         /// Gets or sets the selected thumbnail option.
         /// </summary>

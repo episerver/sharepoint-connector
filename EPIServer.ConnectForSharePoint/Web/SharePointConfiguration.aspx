@@ -8,22 +8,6 @@
 </asp:content>
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
-    <style type="text/css">
-        #<%= rbThumbnailOption.ClientID %> tr {
-            display: block;
-            margin: 10px 0;
-        }
-            #<%= rbThumbnailOption.ClientID %> tr td {
-                display: table-row;
-                padding: 5px 0;
-            }
-                #<%= rbThumbnailOption.ClientID %> tr td > input, #<%= rbThumbnailOption.ClientID %> tr td > label {
-                    display: table-cell;
-                }
-                #<%= rbThumbnailOption.ClientID %> tr td > input {
-                    float: left;
-                }
-    </style>
     <div class="epi-contentContainer epi-padding">
         <div class="epi-contentArea">
             <h1 class="EP-prefix">
@@ -74,13 +58,6 @@
                   ForeColor="Red" 
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
-            </div>
-
-            <div class="epi-size15">
-                 <p class="EP-systemInfo">
-                    <%= Translate("/sharepoint/admin/thumbnailoptions/description")%>
-                </p>
-                <asp:RadioButtonList id="rbThumbnailOption" runat="server" />
             </div>
 
             </fieldset>
