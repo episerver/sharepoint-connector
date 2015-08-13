@@ -1,4 +1,5 @@
-﻿using EPiServer.ConnectForSharePoint.Helpers;
+﻿using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
@@ -27,19 +28,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentRepository = repository;
         }
 
-        public ContentReference FindMediaFolderByID(ContentReference parentFolder, ContentReference defaultFolder = null)
-        {
-            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-            var rootFolders = contentRepository.GetChildren<ContentFolder>(SiteDefinition.Current.GlobalAssetsRoot);
-
-            foreach (var rootFolder in rootFolders)
-            {
-                if (rootFolder.ContentLink.ID == parentFolder.ID) return rootFolder.ContentLink;
-            }
-
-            return defaultFolder;
-        }
-
         public void AddDocument(SPListItem item)
         {
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
@@ -60,33 +48,38 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                parentFolder = ContentProviderHelper.FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot);
+                // Only search from the entry point down
+                parentFolder = ContentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint);
             }
             AccessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
-            //Get a new empty media object
-            var media = contentRepository.GetDefault<MediaData>(parentFolder, contentType.ID);
-
-            // Set attibutes of the media
-            media.Name = fileName;
-            media.Created = item.File.TimeCreated;
-
-            // Create a blob in the binary container
-            if (item.File.DataStream != null)
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = ContentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            if (cref == null)
             {
-                var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
-                blob.Write(item.File.DataStream);
-                media.BinaryData = blob;
-            }
+                //Get a new empty media object
+                var media = contentRepository.GetDefault<MediaData>(parentFolder, contentType.ID);
 
-            try
-            {
-                var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
-                // contentRepository.Move(file1ID, parentContent);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception caught.", e);
+                // Set attibutes of the media
+                media.Name = fileName;
+                media.Created = item.File.TimeCreated;
+
+                // Create a blob in the binary container
+                if (item.File.DataStream != null)
+                {
+                    var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+                    blob.Write(item.File.DataStream);
+                    media.BinaryData = blob;
+                }
+
+                try
+                {
+                    var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("{0} Exception caught.", e);
+                }
             }
         }
 
@@ -104,7 +97,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                cref = ContentProviderHelper.FindRecursive(item.ParentFolderName, SiteDefinition.Current.GlobalAssetsRoot); 
+                cref = ContentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint); 
             }
             AccessRightsHelper.SetAccessRight(cref, AccessLevel.FullAccess);
 
@@ -120,12 +113,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public void DeleteFolder(SPListItem item)
         {
             // Set access level to 'Read' on the SharePoint's root folder and its children
-            ContentReference cref = new ContentReference(item.entryPointId);
-            AccessRightsHelper.SetAccessRight(cref, AccessLevel.FullAccess);
+            ContentReference RootRef = new ContentReference(item.entryPointId);
+            AccessRightsHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
 
-            ContentReference rootRef = new ContentReference(item.entryPointId);
-            var cmsFolder = _contentRepository.GetDefault<ContentFolder>(rootRef);
-            var children = _contentRepository.GetChildren<ContentFolder>(rootRef);
+            var cmsFolder = _contentRepository.GetDefault<ContentFolder>(RootRef);
+            var children = _contentRepository.GetChildren<ContentFolder>(RootRef);
             foreach (var child in children)
             {
                 if( child.Name.Equals(item.Folder.Name) )

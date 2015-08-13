@@ -6,6 +6,7 @@ using EPiServer.DataAccess;
 using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using EPiServer.Web;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -243,8 +244,17 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             return null;
         }
 
-        public static ContentReference FindRecursive(string name, ContentReference startRef)
+        /// <summary>
+        /// Recursively searches for specific ContentFolder given a name and a startRef (if null uses SiteDefinition.Current.GlobalAssetsRoot)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="startRef">if null, it will use SiteDefinition.Current.GlobalAssetsRoot as starting ref</param>
+        /// <returns></returns>
+        public static ContentReference FindRecursiveFolders(string name, ContentReference startRef = null)
         {
+            if( startRef == null )
+                startRef = SiteDefinition.Current.GlobalAssetsRoot;
+
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
             var rootFolders = contentRepository.GetChildren<ContentFolder>(startRef);
             foreach (var rootFolder in rootFolders)
@@ -253,7 +263,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     return rootFolder.ContentLink;
                 else
                 {
-                    ContentReference cref = FindRecursive(name, rootFolder.ContentLink);
+                    ContentReference cref = FindRecursiveFolders(name, rootFolder.ContentLink);
                     if (cref != null)
                         return cref;
                 }
@@ -261,5 +271,26 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             return null;
         }
+
+        /// <summary>
+        /// checks the current folder for the media item.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="startRef"></param>
+        /// <returns></returns>
+        public static ContentReference FindMediaInFolder(string name, ContentReference folderRef)
+        {
+            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+
+            // Check this folder
+            var medialist = contentRepository.GetChildren<MediaData>(folderRef);
+            foreach (var item in medialist)
+            {
+                if (item.Name == name)
+                    return item.ContentLink;
+            }
+            return null;
+        }
+
     }
 }

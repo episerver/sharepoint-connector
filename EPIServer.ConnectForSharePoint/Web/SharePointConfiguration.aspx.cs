@@ -192,10 +192,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
                     }
-                    else if (contentRepository.GetChildren<IContent>(contentLink).Any(f => string.IsNullOrEmpty(f.ContentLink.ProviderName)
-                                || !f.ContentLink.ProviderName.Equals(ContentProviderHelper.ContentProviderKey, StringComparison.InvariantCultureIgnoreCase)))
+                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any childred.
                     {
-                        strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+                        var children = contentRepository.GetChildren<IContent>(contentLink);
+                        if (children.Count<IContent>() > 0 )
+                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
                     }
                 }
                 catch (Exception exc)
@@ -347,7 +348,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var parentFolder = selectedList.RootFolder;
 
                 // Add the folder if its not already there
-                if (ContentProviderHelper.FindRecursive(FolderName, SharePointSettings.Current.EntryPoint) == null)
+                if (ContentProviderHelper.FindRecursiveFolders(FolderName, SharePointSettings.Current.EntryPoint) == null)
                 {
                     SPListItem viewListItem = new SPListItem()
                     {
@@ -397,7 +398,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 {
                     // Only add the folder if its not already there.
                     // Add the folder if its not already there
-                    if (ContentProviderHelper.FindRecursive(spItem.Folder.Name, SharePointSettings.Current.EntryPoint) == null)
+                    if (ContentProviderHelper.FindRecursiveFolders(spItem.Folder.Name, SharePointSettings.Current.EntryPoint) == null)
                     {
                         _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
                         SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
