@@ -64,12 +64,20 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
 
-                // Create a blob in the binary container
-                if (item.File.DataStream != null)
+                try
                 {
+                    // Get the data and add it to the item
+                    var relativeUrl = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileRelativeUrl(item, false);
+                    var data = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileSteam(relativeUrl, false);
+
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
-                    blob.Write(item.File.DataStream);
+                    blob.Write(data);
                     media.BinaryData = blob;
+                }
+                catch (Exception e)
+                {
+                    // todo we should be using logging
+                    // failed to read data
                 }
 
                 try
@@ -78,7 +86,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("{0} Exception caught.", e);
+                    // todo we should be using logging
+                    // failed to save data in cms
                 }
             }
         }

@@ -400,11 +400,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else if (spItem.File != null)
                 {
-                    // Before we emit the message and have it passed to the processor, we need to populate the data in the 
-                    // spItem.
-                    var relativeUrl = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileRelativeUrl(spItem, false);
-                    spItem.File.DataStream = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileSteam(relativeUrl, false);
-
                     // now emit the message
                     _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
                     SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();

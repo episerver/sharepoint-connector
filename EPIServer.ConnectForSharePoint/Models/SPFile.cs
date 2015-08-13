@@ -25,9 +25,5 @@ namespace EPiServer.ConnectForSharePoint.Models
         public SPListItem ListItem { get; set; }
         public SPUser Author { get; set; }
         public SPUser ModifiedBy { get; set; }
-        /// <summary>
-        /// The stream data associated with the SPFile object
-        /// </summary>
-        public Stream DataStream { get; set; }
     }
 }
