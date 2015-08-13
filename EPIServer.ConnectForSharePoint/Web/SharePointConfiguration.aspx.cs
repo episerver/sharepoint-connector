@@ -424,7 +424,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             // Put all the add folder messages on the queue
             QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
 
-            ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
+            ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
         }
 
         /// <summary>
