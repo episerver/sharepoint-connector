@@ -1,6 +1,5 @@
 ﻿using EPiServer.Core;
 using EPiServer.DataAbstraction;
-using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 
@@ -11,26 +10,37 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// </summary>
     public class AccessRightsHelper
     {
-        private static readonly ILogger _logger = LogManager.GetLogger();
-        private static readonly IContentSecurityRepository _contentSecurityRepository = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
+        private IServiceLocator _serviceLocator;
+        private static IContentSecurityRepository _contentSecurityRepository;
+
+        public AccessRightsHelper()
+        {
+            _serviceLocator = ServiceLocator.Current;
+            _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
+        }
+
+        internal AccessRightsHelper(IServiceLocator serviceLocator)
+        {
+            _serviceLocator = serviceLocator;
+            _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
+        }
+
 
         /// <summary>
         /// Set the given access rights for the given content reference
         /// </summary>
         /// <param name="contentReference">The given content reference</param>
         /// <param name="accessLevel">The given access rights</param>
-        public static void SetAccessRight(ContentReference contentReference, AccessLevel accessLevel)
+        public void SetAccessRight(ContentReference contentReference, AccessLevel accessLevel)
         {
             if (contentReference == null)
             {
-                _logger.Debug("SetAccessRight: The content link is empty");
                 return;
             }
 
             var contentSecurity = _contentSecurityRepository.Get(contentReference).CreateWritableClone() as IContentSecurityDescriptor;
             if (contentSecurity == null)
             {
-                _logger.Debug("SetAccessRight: The content security descriptor is null");
                 return;
             }
 

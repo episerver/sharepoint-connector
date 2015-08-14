@@ -17,13 +17,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// The helper class for content provider
     /// At the moment, it only support SharePointMediaProvider class
     /// </summary>
-    public class ContentProviderHelper
+    public class ContentProviderHelper : IContentProviderHelper
     {
+        private IServiceLocator _serviceLocator;
         private static readonly ILogger _logger = LogManager.GetLogger();
 
-        private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-        private static readonly IContentProviderManager _contentProviderManager = ServiceLocator.Current.GetInstance<IContentProviderManager>();
-        private static readonly IContentSecurityRepository _contentSecurityRepository = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
+        private static IContentRepository _contentRepository;
+        private static IContentProviderManager _contentProviderManager;
+        private static IContentSecurityRepository _contentSecurityRepository;
 
         private static object _lockObject = new Object();
         private static SharePointMediaProvider _sharePointMediaProvider = null;
@@ -33,6 +34,21 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         public const string ContentProviderKey = "sharepointcontent";
 
+        public ContentProviderHelper()
+        {
+            _serviceLocator = ServiceLocator.Current;
+            _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+            _contentProviderManager = ServiceLocator.Current.GetInstance<IContentProviderManager>();
+            _contentSecurityRepository = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
+        }
+
+        internal ContentProviderHelper(IServiceLocator serviceLocator)
+        {
+            _serviceLocator = serviceLocator;
+            _contentRepository = serviceLocator.GetInstance<IContentRepository>();
+            _contentProviderManager = serviceLocator.GetInstance<IContentProviderManager>();
+            _contentSecurityRepository = serviceLocator.GetInstance<IContentSecurityRepository>();
+        }
         /// <summary>
         /// Return entry point from settings
         /// </summary>
@@ -192,8 +208,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _logger.Debug("The existing entry is read only");
                 return;
             }
-
-            AccessRightsHelper.SetAccessRight(sharePointRoot, _readAccessLevel);
+            var accessHelper = new AccessRightsHelper();
+            accessHelper.SetAccessRight(sharePointRoot, _readAccessLevel);
         }
 
         /// <summary>
@@ -250,7 +266,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="name"></param>
         /// <param name="startRef">if null, it will use SiteDefinition.Current.GlobalAssetsRoot as starting ref</param>
         /// <returns></returns>
-        public static ContentReference FindRecursiveFolders(string name, ContentReference startRef = null)
+        public ContentReference FindRecursiveFolders(string name, ContentReference startRef = null)
         {
             if( startRef == null )
                 startRef = SiteDefinition.Current.GlobalAssetsRoot;
@@ -292,5 +308,30 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             return null;
         }
 
+        /// <summary>
+        /// Set the given access rights for the given content reference
+        /// </summary>
+        /// <param name="contentReference">The given content reference</param>
+        /// <param name="accessLevel">The given access rights</param>
+        public void SetAccessRight(ContentReference contentReference, AccessLevel accessLevel)
+        {
+            var contentSecurity = _contentSecurityRepository.Get(contentReference).CreateWritableClone() as IContentSecurityDescriptor;
+            if (contentSecurity == null)
+            {
+                return;
+            }
+
+            // The Access Control List does not support adding or modifying entries when it is set to inherited
+            // So that, convert it to local
+            if (contentSecurity.IsInherited)
+            {
+                contentSecurity.ToLocal();
+            }
+
+            contentSecurity.Clear();
+            // Add access right for the default groups
+            contentSecurity.AddEntry(new AccessControlEntry("Everyone", accessLevel));
+            _contentSecurityRepository.Save(contentReference, contentSecurity, SecuritySaveType.Replace);
+        }
     }
 }

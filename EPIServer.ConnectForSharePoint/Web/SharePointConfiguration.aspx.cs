@@ -354,7 +354,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var parentFolder = selectedList.RootFolder;
 
                 // Add the folder if its not already there
-                if (ContentProviderHelper.FindRecursiveFolders(FolderName, SharePointSettings.Current.EntryPoint) == null)
+                var helper = new ContentProviderHelper();
+                var contentRef = helper.FindRecursiveFolders(FolderName, SharePointSettings.Current.EntryPoint);
+                if (contentRef == null)
                 {
                     SPListItem viewListItem = new SPListItem()
                     {
@@ -404,7 +406,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 {
                     // Only add the folder if its not already there.
                     // Add the folder if its not already there
-                    if (ContentProviderHelper.FindRecursiveFolders(spItem.Folder.Name, SharePointSettings.Current.EntryPoint) == null)
+                    var helper = new ContentProviderHelper();
+                    var contentRef = helper.FindRecursiveFolders(spItem.Folder.Name, SharePointSettings.Current.EntryPoint);
+                    if (contentRef == null)
                     {
                         _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
                         SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();

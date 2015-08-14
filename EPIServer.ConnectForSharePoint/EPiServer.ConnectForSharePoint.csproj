@@ -215,6 +215,7 @@
   <ItemGroup>
     <Compile Include="Consts.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\SPFileMapper.cs" />
     <Compile Include="Mappers\SPFolderMapper.cs" />

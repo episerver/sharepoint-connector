@@ -15,25 +15,29 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 {
     public class SharePointProcessor : ISharePointProcessor
     {
-        // The content repository we use to create folders and objects in episerver
-        IContentRepository _contentRepository;
-
+        IServiceLocator _serviceLocator;
+        IContentSecurityRepository _contentSecurityRepository;
+        IContentProviderHelper _contentProviderHelper;
         public SharePointProcessor()
         {
-            _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+            _serviceLocator = ServiceLocator.Current;
+            _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
+            _contentProviderHelper = new ContentProviderHelper();
         }
 
-        internal SharePointProcessor( IContentRepository repository)
+        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper)
         {
-            _contentRepository = repository;
+            _serviceLocator = serviceLocator;
+            _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
+            _contentProviderHelper = contentProviderHelper;
         }
 
         public void AddDocument(SPListItem item)
         {
-            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-            var contentTypeRepository = ServiceLocator.Current.GetInstance<IContentTypeRepository>();
-            var mediaDataResolver = ServiceLocator.Current.GetInstance<ContentMediaResolver>();
-            var blobFactory = ServiceLocator.Current.GetInstance<BlobFactory>();
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+            var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
+            var blobFactory = _serviceLocator.GetInstance<BlobFactory>();
             var fileName = item.File.Name; //  @"C:\test.jpg";
 
             //Get a suitable MediaData type from extension
@@ -49,9 +53,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             else
             {
                 // Only search from the entry point down
-                parentFolder = ContentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint);
+                var helper = new ContentProviderHelper();
+                parentFolder = helper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint);
             }
-            AccessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
             // Now check the folder to see if the item already exists. 
             ContentReference cref = ContentProviderHelper.FindMediaInFolder(fileName, parentFolder);
@@ -100,38 +105,42 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             // Set access level to 'Read' on the SharePoint's root folder and its children
             ContentReference cref;
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             if (item.entryPointId != -1)
             {
                 cref = new ContentReference(item.entryPointId);
             }
             else
             {
-                cref = ContentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint); 
+                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint); 
             }
-            AccessRightsHelper.SetAccessRight(cref, AccessLevel.FullAccess);
+
+            _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);
 
             // Create a folder for the list under SharePoint entry point
-            var cmsFolder = _contentRepository.GetDefault<ContentFolder>(cref);
+            var cmsFolder = contentRepository.GetDefault<ContentFolder>(cref);
             cmsFolder.Name = item.Folder.Name;
             cmsFolder.ParentLink = cref;
-        
+
             // Save the folder
-            _contentRepository.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
+            contentRepository.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
         }
 
         public void DeleteFolder(SPListItem item)
         {
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             // Set access level to 'Read' on the SharePoint's root folder and its children
             ContentReference RootRef = new ContentReference(item.entryPointId);
-            AccessRightsHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
 
-            var cmsFolder = _contentRepository.GetDefault<ContentFolder>(RootRef);
-            var children = _contentRepository.GetChildren<ContentFolder>(RootRef);
+            _contentProviderHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
+
+            var cmsFolder = contentRepository.GetDefault<ContentFolder>(RootRef);
+            var children = contentRepository.GetChildren<ContentFolder>(RootRef);
             foreach (var child in children)
             {
                 if( child.Name.Equals(item.Folder.Name) )
                 {
-                    _contentRepository.Delete(child.ContentLink,true,AccessLevel.Delete);
+                    contentRepository.Delete(child.ContentLink,true,AccessLevel.Delete);
                     break;
                 }
             }
@@ -151,5 +160,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             throw new NotImplementedException();
         }
+
+
     }
 }

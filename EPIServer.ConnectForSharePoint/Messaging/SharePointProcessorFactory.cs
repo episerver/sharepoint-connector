@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ServiceLocation;
+using System;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -14,9 +16,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             return new SharePointProcessor();
         }
 
-        internal ISharePointProcessor GetSharePointProcessor(IContentRepository repository)
+        internal ISharePointProcessor GetSharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentHelper)
         {
-            return new SharePointProcessor(repository);
+            return new SharePointProcessor(serviceLocator, contentHelper);
         }
     }
 }
