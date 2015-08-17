@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
-    interface IMessageEmitterFactory
+    public interface IMessageEmitterFactory
     {
         IMessageEmitter Create();
     }

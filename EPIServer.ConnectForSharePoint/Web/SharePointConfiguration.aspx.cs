@@ -234,12 +234,12 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the previous Lists-View Ids (the one was saved before this time)
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
-
+                var messageHelper = new SharePointMessageHelper();
                 // if the entry point is different we need to queue all the current folders for delete
                 if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                    QueueFoldersForDelete(lists);
+                    messageHelper.QueueFoldersForDelete(lists);
                 else // else we only delete folders that have been deselected
-                    QueueFoldersForDelete(lists, selectedListViewIds);
+                    messageHelper.QueueFoldersForDelete(lists, selectedListViewIds);
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
@@ -250,7 +250,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Save();
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
-                QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+                messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
             }
             catch (Exception ex)
             {
@@ -271,169 +271,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         }
 
         /// <summary>
-        /// Deletes all folders in the specified splists collection, UNLESS there list ids to exclude from deletion.
-        /// </summary>
-        /// <param name="splists"></param>
-        /// <param name="listids"></param>
-        protected void QueueFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null)
-        {
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
-            foreach (var item in selectedLists)
-            {
-                // The idListAndView is an object that contains two quids, one for the list and one for the view.
-                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
-
-                // Get the selected list using the first quid
-                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-                // Get the selected view to from the second quid
-                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-
-                // Make sure that the view quid and the view quid is in the listids, if its not then it needs to be deleted.
-                var FolderName = selectedList.Title + " - " + selectedView.Title; // assume we are deleting it.
-                if (listids != null) // we are some folders
-                {
-                    foreach (var id in listids)
-                    {
-                        var listIds = id.Split('~');
-                        if(selectedList.Id == Guid.Parse(listIds[0]) && selectedView.Id == Guid.Parse(listIds[1]) )
-                        {
-                            // We found a match, this means the view is in the current selection - don't delete it!  
-                            // else all the items in the folder will be deleted and existing pages will lose content.
-                            FolderName = string.Empty;
-                            break;
-                        }
-                    }
-                }
-
-                if ( !string.IsNullOrEmpty(FolderName) )
-                {
-                    // The message on the queue will be SPListItem
-                    // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
-                    // that contains some aspects of both.
-                    SPListItem tbd = new SPListItem()
-                    {
-                        Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
-                        GUID = selectedView.Id,
-                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                        Folder = new SPFolder()
-                        {
-                            Name = FolderName,
-                        },
-                    };
-
-                    _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointFolderDeleteMessage>(new SharePointFolderDeleteMessage()
-                    {
-                        Item = tbd,
-                    });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds all items to be added (SPFolders and SPItems) to the queue to be added
-        /// </summary>
-        /// <param name="listids"></param>
-        /// <param name="splists"></param>
-        protected void QueueItemsForAdd(string listids, IEnumerable<SPList> splists)
-        {
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
-            foreach (var item in selectedLists) // For each view selected
-            {
-                // The idListAndView is an object that contains two quids, one for the list and one for the view.
-                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
-
-                // Get the selected list using the first quid
-                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-                // Get the selected view to from the second quid
-                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-                var FolderName = selectedList.Title + " - " + selectedView.Title;
-                var parentFolder = selectedList.RootFolder;
-
-                // Add the folder if its not already there
-                var helper = new ContentProviderHelper();
-                var contentRef = helper.FindRecursiveFolders(FolderName, SharePointSettings.Current.EntryPoint);
-                if (contentRef == null)
-                {
-                    SPListItem viewListItem = new SPListItem()
-                    {
-                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                        Title = selectedView.Title,
-                        Folder = new SPFolder()
-                        {
-                            Name = FolderName,
-                        }
-
-                    };
-
-                    // Add the view folder.
-                    SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
-                    spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
-                    {
-                        Item = viewListItem,
-                    });
-                }
-
-                AddSubItems(parentFolder, selectedList, selectedView, FolderName);
-            }
-        }
-        
-
-        /// <summary>
-        /// Adds all the subfolders and subitems for the given parent folder
-        /// </summary>
-        /// <param name="parentFolder">The parent folder to use as selection criterea items and as a source for the cms folder name</param>
-        /// <param name="selectedList">The list of items associated with all the selected views</param>
-        /// <param name="selectedView">The selected views in the configuration</param>
-        /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
-        protected void AddSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
-        {
-            var items = SharePointHelper.SPServicesHub.SPListsViewsService.GetItems(selectedList, selectedView, parentFolder);
-            var iterator = items.GetEnumerator();
-            while (iterator.MoveNext())
-            {
-                var spItem = iterator.Current;
-                spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
-                if (string.IsNullOrEmpty(ParentFolderName))
-                    spItem.ParentFolderName = parentFolder.Name;
-                else
-                    spItem.ParentFolderName = ParentFolderName;
-
-                if (spItem.Folder != null)
-                {
-                    // Only add the folder if its not already there.
-                    // Add the folder if its not already there
-                    var helper = new ContentProviderHelper();
-                    var contentRef = helper.FindRecursiveFolders(spItem.Folder.Name, SharePointSettings.Current.EntryPoint);
-                    if (contentRef == null)
-                    {
-                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                        SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                        fact2.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
-                        {
-                            Item = spItem,
-                        });
-                    }
-
-                    AddSubItems(spItem.Folder, selectedList, selectedView);
-                }
-                else if (spItem.File != null)
-                {
-                    // now emit the message
-                    _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
-                    {
-                        Item = spItem,
-                    });
-                }
-            }
-        }
-
-        /// <summary>
         /// Refresh sharepoint data.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -442,9 +279,9 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             string errorMessage;
             var lists = GetMediaLists(true, out errorMessage);
-
+            var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
-            QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
 
             ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
         }

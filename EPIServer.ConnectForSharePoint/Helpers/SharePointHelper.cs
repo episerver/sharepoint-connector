@@ -17,8 +17,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// <summary>
     /// The helper class for SharePoint
     /// </summary>
-    public class SharePointHelper
+    public class SharePointHelper : ISharePointHelper
     {
+        public SharePointHelper()
+        {
+
+        }
+
+        internal SharePointHelper(IServicesHub serviceHub)
+        {
+            _spServicesHub = serviceHub;
+        }
+
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
@@ -29,22 +39,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             get
             {
+                try
+                {
+                    ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
+                }
+                catch { }
+
                 if (_spServicesHub == null)
                 {
-                    try
-                    {
-                        ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
-                    }
-                    catch { }
+                    _spServicesHub = new ServicesHub();
 
-                    if (_spServicesHub == null)
-                    {
-                        _spServicesHub = new ServicesHub();
-
-                        ServiceLocator.Current.Buildup(_spServicesHub);
-                    }
+                    ServiceLocator.Current.Buildup(_spServicesHub);
                 }
-
                 return _spServicesHub;
             }
         }
@@ -180,6 +186,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var regex = new Regex(@"@[^\s\.]+\.onmicrosoft\.com$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
             return regex.IsMatch(username);
+        }
+
+        public IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder)
+        {
+            return _spServicesHub.SPListsViewsService.GetItems(list, view, folder);
         }
     }
 }
