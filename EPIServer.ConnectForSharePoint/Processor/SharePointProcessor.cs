@@ -135,7 +135,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             _contentProviderHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
 
-            var cmsFolder = contentRepository.GetDefault<ContentFolder>(RootRef);
             var children = contentRepository.GetChildren<ContentFolder>(RootRef);
             foreach (var child in children)
             {

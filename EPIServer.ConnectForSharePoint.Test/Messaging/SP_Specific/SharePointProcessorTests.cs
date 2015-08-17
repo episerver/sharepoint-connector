@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ServiceLocation;
@@ -9,6 +8,7 @@ using EPiServer.Security;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.DataAccess;
+using System.Collections.Generic;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -89,8 +89,46 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 "Save was called with unexpected values");
         }
 
+        [TestMethod]
+        public void DeleteFolder_Calls_SetAccessRight()
+        {
+            var processor = GetUnitUnderTest();
+            contentHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
 
+            var item = new SPListItem()
+            {
+                Folder = new SPFolder() { Name = "My Folder Name" },
+                entryPointId = 42
+            };
 
+            processor.DeleteFolder(item);
 
+            contentHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
+        }
+
+        [TestMethod]
+        public void DeleteFolder_Calls_Repository_Delete_When_Item_Is_Found()
+        {
+            var processor = GetUnitUnderTest();
+            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<bool>(), It.IsAny<AccessLevel>())).Verifiable();
+            var item = new SPListItem()
+            {
+                Folder = new SPFolder() { Name = "FolderToBeDeleted" },
+                entryPointId = 42
+            };
+
+            var folders = new List<ContentFolder>();
+            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1)  } );
+            folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            folders.Add(new ContentFolder() { Name = "FolderToBeDeleted", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
+                .Returns(folders);
+
+            processor.DeleteFolder(item);
+
+            contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42 ), 
+                It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once, 
+                "Delete needs to be called once with proper Content reference");
+        }
     }
 }
