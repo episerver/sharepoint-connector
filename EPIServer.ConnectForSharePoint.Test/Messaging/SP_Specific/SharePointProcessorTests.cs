@@ -9,9 +9,19 @@ using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.DataAccess;
 using System.Collections.Generic;
+using System;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
+
+    class MyContentMediaResolver : ContentMediaResolver
+    {
+        public override Type GetFirstMatching(string extension)
+        {
+            return new MediaData().GetType();
+        }
+    }
+
     [TestClass]
     public class SharePointProcessorTests
     {
@@ -19,14 +29,21 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentSecurityRepository> contentSecurityRepo;
         private Mock<IContentProviderHelper> contentHelper;
         private Mock<IContentRepository> contentRepo;
+        private Mock<IContentTypeRepository> contentTypeRepo;
 
         private SharePointProcessor GetUnitUnderTest()
         {
-            serviceLocator = new Mock<IServiceLocator>();
             contentSecurityRepo = new Mock<IContentSecurityRepository>();
             contentRepo = new Mock<IContentRepository>();
+            contentTypeRepo = new Mock<IContentTypeRepository>();
+
+            // Initialize our service locator instance.
+            serviceLocator = new Mock<IServiceLocator>();
             serviceLocator.Setup(sl => sl.GetInstance<IContentSecurityRepository>()).Returns(contentSecurityRepo.Object);
             serviceLocator.Setup(sl => sl.GetInstance<IContentRepository>()).Returns(contentRepo.Object);
+            serviceLocator.Setup(sl => sl.GetInstance<IContentTypeRepository>()).Returns(contentTypeRepo.Object);
+            ContentMediaResolver cmr = new ContentMediaResolver();
+            serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns( new MyContentMediaResolver() );
 
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object);
@@ -65,10 +82,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Setup(cr => cr.GetDefault<ContentFolder>(It.IsAny<ContentReference>())).Returns(new ContentFolder());
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
 
-            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(), 
+            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
                 It.IsAny<ContentReference>())).Returns(new ContentReference()
                 {
-                    ID = 10, ProviderName = "Some Provider"
+                    ID = 10,
+                    ProviderName = "Some Provider"
                 });
 
             var item = new SPListItem()
@@ -117,8 +135,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 entryPointId = 42
             };
 
+            // Return contentfolders list for getchildren
             var folders = new List<ContentFolder>();
-            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1)  } );
+            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
             folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
             folders.Add(new ContentFolder() { Name = "FolderToBeDeleted", ContentLink = new ContentReference(42) });
             contentRepo.Setup(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
@@ -126,9 +145,41 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.DeleteFolder(item);
 
-            contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42 ), 
-                It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once, 
+            // Verify that the code found the specified contentreference that matches the entry point in the entrypoint id
+            // specified in the splistitem
+            contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42),
+                It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
                 "Delete needs to be called once with proper Content reference");
+        }
+
+        [TestMethod]
+        public void AddDocument_Calls_ContentTypeRepository_Load()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns( new ContentType() { ID = 4 } );
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.AddDocument(item);
+
+            contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(),It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
     }
 }

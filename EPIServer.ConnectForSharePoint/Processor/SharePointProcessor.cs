@@ -9,6 +9,7 @@ using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
@@ -18,6 +19,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IServiceLocator _serviceLocator;
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
+
+        [ExcludeFromCodeCoverage] // Exclude this constructor
         public SharePointProcessor()
         {
             _serviceLocator = ServiceLocator.Current;
@@ -59,7 +62,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
             // Now check the folder to see if the item already exists. 
-            ContentReference cref = ContentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(fileName, parentFolder);
             if (cref == null)
             {
                 //Get a new empty media object
