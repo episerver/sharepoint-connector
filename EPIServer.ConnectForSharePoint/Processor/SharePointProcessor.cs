@@ -54,7 +54,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 // Only search from the entry point down
                 var helper = new ContentProviderHelper();
-                parentFolder = helper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint);
+                parentFolder = helper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
             _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
@@ -112,7 +112,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint); 
+                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, 
+                    new ContentReference(item.rootCMSFolderEntryPointID)); 
             }
 
             _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);

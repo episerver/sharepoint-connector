@@ -396,7 +396,8 @@ namespace EPiServer.ConnectForSharePoint.Web
             while (iterator.MoveNext())
             {
                 var spItem = iterator.Current;
-                spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
+                spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name
+                spItem.rootCMSFolderEntryPointID = SharePointSettings.Current.EntryPoint.ID;
                 if (string.IsNullOrEmpty(ParentFolderName))
                     spItem.ParentFolderName = parentFolder.Name;
                 else

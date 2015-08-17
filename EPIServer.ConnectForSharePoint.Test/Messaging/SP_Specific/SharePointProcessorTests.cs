@@ -33,7 +33,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        public void AddFolder_Processes_AddFolder_Message_And_Calls_CMS_To_Do_Add()
+        public void AddFolder_Processes_AddFolder_Message_And_Calls_CMS_To_Do_Add_With_EntryPointID()
         {
             var processor = GetUnitUnderTest();
 
@@ -55,7 +55,41 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 "Save was called with unexpected values");
         }
 
-        
+
+        [TestMethod]
+        public void AddFolder_Processes_AddFolder_Message_And_Calls_CMS_To_Do_Add_With_ParentFolderName()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentRepo.Setup(cr => cr.GetDefault<ContentFolder>(It.IsAny<ContentReference>())).Returns(new ContentFolder());
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+
+            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(), 
+                It.IsAny<ContentReference>())).Returns(new ContentReference()
+                {
+                    ID = 10, ProviderName = "Some Provider"
+                });
+
+            var item = new SPListItem()
+            {
+                Folder = new SPFolder() { Name = "My Folder Name" },
+                ParentFolderName = "Parent Folder Name",
+                entryPointId = -1
+            };
+            processor.AddFolder(item);
+
+            contentHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
+
+            // Make sure the find recursive was called and the parent link id was set, and that the proper access control level was set.
+            contentRepo.Verify(cr => cr.Save(It.Is<IContent>(con => con.Name == item.Folder.Name && con.ParentLink != null &&
+                con.ParentLink.ID == 10),
+                It.Is<SaveAction>(sa => sa == SaveAction.Publish), It.Is<AccessLevel>(al => al == AccessLevel.FullAccess)),
+                Times.Once,
+                "Save was called with unexpected values");
+        }
+
+
 
 
     }
