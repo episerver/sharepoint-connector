@@ -43,7 +43,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<IContentRepository>()).Returns(contentRepo.Object);
             serviceLocator.Setup(sl => sl.GetInstance<IContentTypeRepository>()).Returns(contentTypeRepo.Object);
             ContentMediaResolver cmr = new ContentMediaResolver();
-            serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns( new MyContentMediaResolver() );
+            serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
 
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object);
@@ -159,7 +159,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
-            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns( new ContentType() { ID = 4 } );
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
 
             var item = new SPListItem()
             {
@@ -180,7 +180,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             processor.AddDocument(item);
 
             contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
-            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(),It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
         [TestMethod]
@@ -225,9 +225,32 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
             contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
                 It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called.");
-            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>( str => str == item.ParentFolderName), 
+            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>(str => str == item.ParentFolderName),
                 It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called with proper arguments.");
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void UpdateDocument_NotImplemented()
+        {
+            var processor = GetUnitUnderTest();
+            processor.UpdateDocument(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void UpdateFolder_NotImplemented()
+        {
+            var processor = GetUnitUnderTest();
+            processor.UpdateFolder(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void DeleteDocument_NotImplemented()
+        {
+            var processor = GetUnitUnderTest();
+            processor.UpdateFolder(null);
+        }
     }
 }

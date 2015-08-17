@@ -150,16 +150,19 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
         public void UpdateDocument(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 
         public void UpdateFolder(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 
         public void DeleteDocument(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 
