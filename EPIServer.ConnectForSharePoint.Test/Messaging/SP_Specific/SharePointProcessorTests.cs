@@ -173,6 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
             contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
                 .Returns(data);
+
             contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
                 .Returns(new MediaData());
 
@@ -181,5 +182,52 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(),It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
+
+        [TestMethod]
+        public void AddDocument_Calls_SearchForParentFolder()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = -1,
+                ParentFolderName = "SomeParentFolder",
+                rootCMSFolderEntryPointID = 4000
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            // Return contentfolders list for getchildren
+            var folders = new List<ContentFolder>();
+            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            folders.Add(new ContentFolder() { Name = "SomeParentFolder", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
+                .Returns(folders);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.AddDocument(item);
+
+            contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
+                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called.");
+            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>( str => str == item.ParentFolderName), 
+                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called with proper arguments.");
+        }
+
     }
 }
