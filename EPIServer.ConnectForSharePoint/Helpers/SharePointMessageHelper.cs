@@ -51,6 +51,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 var spItem = iterator.Current;
                 spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
+                spItem.rootCMSFolderEntryPointID = _settingsHelper.GetEntryPoint().ID;
                 if (string.IsNullOrEmpty(ParentFolderName))
                     spItem.ParentFolderName = parentFolder.Name;
                 else
