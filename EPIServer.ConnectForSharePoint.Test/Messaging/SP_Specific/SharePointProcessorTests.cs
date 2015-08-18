@@ -241,15 +241,15 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.IsAny<bool>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.IsAny<bool>())).Returns("hereissomepath");
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
 
             MemoryStream mstream = new MemoryStream();
             StreamWriter myStreamWriter = new StreamWriter(mstream);
             myStreamWriter.Write("Some stream data");
 
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>(), It.IsAny<bool>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>(), It.IsAny<bool>())).Returns(mstream);
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
 
             var item = new SPListItem()
             {
@@ -269,8 +269,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.AddDocument(item);
 
-            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>(), It.Is<bool>(val => val == false)), Times.Once, "GetFileSteam not called or thumbnail arg not false");
-            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.Is<bool>(val => val == false)), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
+            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
+            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 

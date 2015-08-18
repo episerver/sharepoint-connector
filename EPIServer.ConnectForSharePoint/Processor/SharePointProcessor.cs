@@ -78,8 +78,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 try
                 {
                     // Get the data and add it to the item
-                    var relativeUrl = _fileStreamService.GetFileRelativeUrl(item, false);
-                    var data = _fileStreamService.GetFileSteam(relativeUrl, false);
+                    var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
+                    var data = _fileStreamService.GetFileSteam(relativeUrl);
 
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
 
