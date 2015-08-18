@@ -9,7 +9,5 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             return SharePointSettings.Current.EntryPoint;
         }
-
-
     }
 }

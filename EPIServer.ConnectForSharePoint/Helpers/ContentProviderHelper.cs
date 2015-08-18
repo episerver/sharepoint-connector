@@ -110,7 +110,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var contentProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
             contentProvider.RebuildMapping();
             var supportedLists = contentProvider.CachedMediaLists;
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(supportedLists);
+            var helper = new SharePointHelper();
+            var selectedLists = helper.GetSelectedListViewIds(supportedLists);
 
             foreach (var list in selectedLists)
             {

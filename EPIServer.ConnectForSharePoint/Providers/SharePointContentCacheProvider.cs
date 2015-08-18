@@ -226,7 +226,8 @@ namespace EPiServer.ConnectForSharePoint.Providers
             if (parentLink.Equals(EntryPoint))
             {
                 var listCollection = GetSupportedMediaLists(true);
-                var selectedListViewIds = SharePointHelper.GetSelectedListViewIds(listCollection);
+                var helper = new SharePointHelper();
+                var selectedListViewIds = helper.GetSelectedListViewIds(listCollection);
                 string[] idListAndView;
 
                 foreach (var item in selectedListViewIds)
@@ -234,7 +235,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
                     // use lock to make sure that cache and view query is kept seperately
                     lock (_lockObject)
                     {
-                        idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
+                        idListAndView = helper.GetListAndViewIds(item.Key);
                         if (idListAndView == null)
                         {
                             continue;

@@ -10,5 +10,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     public interface ISharePointHelper
     {
         IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder);
+        string[] GetListAndViewIds(string mappingId);
+        IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists);
+        
     }
 }

@@ -81,7 +81,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// Gets SharePoint's list and view Id from the given mapping identification
         /// </summary>
         /// <param name="MappingKey">The given mapping identification</param>
-        public static string[] GetListAndViewIds(string mappingId)
+        public string[] GetListAndViewIds(string mappingId)
         {
             if (string.IsNullOrEmpty(mappingId) || (!string.IsNullOrEmpty(mappingId) & !mappingId.Contains('~')))
             {
@@ -96,7 +96,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// Get list of id pair of list and view from given list and the Settings's Id list
         /// </summary>
         /// <param name="lists">List of <see cref="SPList"/> for filtering.</param>
-        public static IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists)
+        public IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists)
         {
             var listIds = SharePointSettings.Current.ListIds.Split(new string[] { ";" }, StringSplitOptions.None);
             var idListViewPairs = GetListViewPairs(lists);

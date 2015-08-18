@@ -64,7 +64,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     if (contentRef == null)
                     {
                         _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                        _emitterFactory.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                        _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
                         {
                             Item = spItem,
                         });
@@ -76,7 +76,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 {
                     // now emit the message
                     _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    _emitterFactory.Create().Emit<SharePointContentAddMessage>(new SharePointContentAddMessage()
+                    _emitterFactory.Create().Emit(new SharePointContentAddMessage()
                     {
                         Item = spItem,
                     });
@@ -91,19 +91,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="listids"></param>
         public void QueueFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null)
         {
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
+            var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists)
             {
-                // The idListAndView is an object that contains two quids, one for the list and one for the view.
-                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
+                // The idListAndView is an object that contains two guids, one for the list and one for the view.
+                var idListAndView = _helper.GetListAndViewIds(item.Key);
 
-                // Get the selected list using the first quid
+                // Get the selected list using the first guid
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
 
-                // Get the selected view to from the second quid
+                // Get the selected view to from the second guid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
-                // Make sure that the view quid and the view quid is in the listids, if its not then it needs to be deleted.
+                // Make sure that the view guid and the view guid is in the listids, if its not then it needs to be deleted.
                 var FolderName = selectedList.Title + " - " + selectedView.Title; // assume we are deleting it.
                 if (listids != null) // we are some folders
                 {
@@ -129,7 +129,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     {
                         Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
                         GUID = selectedView.Id,
-                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
+                        entryPointId = _settingsHelper.GetEntryPoint().ID,
                         Folder = new SPFolder()
                         {
                             Name = FolderName,
@@ -137,8 +137,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     };
 
                     _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
-                    SharePointMessageEmitterFactory fact2 = new SharePointMessageEmitterFactory();
-                    fact2.Create().Emit<SharePointFolderDeleteMessage>(new SharePointFolderDeleteMessage()
+                    _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
                     {
                         Item = tbd,
                     });
@@ -153,11 +152,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="splists"></param>
         public void QueueItemsForAdd(string listids, IEnumerable<SPList> splists)
         {
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(splists);
+            var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists) // For each view selected
             {
                 // The idListAndView is an object that contains two quids, one for the list and one for the view.
-                var idListAndView = SharePointHelper.GetListAndViewIds(item.Key);
+                var idListAndView = _helper.GetListAndViewIds(item.Key);
 
                 // Get the selected list using the first quid
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
@@ -168,13 +167,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 var parentFolder = selectedList.RootFolder;
 
                 // Add the folder if its not already there
-                var helper = new ContentProviderHelper();
-                var contentRef = helper.FindRecursiveFolders(FolderName, SharePointSettings.Current.EntryPoint);
+                var entryPoint = _settingsHelper.GetEntryPoint();
+                var contentRef = _contentProviderHelper.FindRecursiveFolders(FolderName, entryPoint);
                 if (contentRef == null)
                 {
                     SPListItem viewListItem = new SPListItem()
                     {
-                        entryPointId = SharePointSettings.Current.EntryPoint.ID,
+                        entryPointId = entryPoint.ID,
                         Title = selectedView.Title,
                         Folder = new SPFolder()
                         {
@@ -184,8 +183,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     };
 
                     // Add the view folder.
-                    SharePointMessageEmitterFactory spfact = new SharePointMessageEmitterFactory();
-                    spfact.Create().Emit<SharePointFolderAddMessage>(new SharePointFolderAddMessage()
+                    _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
                     {
                         Item = viewListItem,
                     });
