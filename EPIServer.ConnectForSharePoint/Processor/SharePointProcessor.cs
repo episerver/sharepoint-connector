@@ -1,6 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
@@ -19,6 +20,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IServiceLocator _serviceLocator;
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
+        IFileStreamService _fileStreamService;
 
         [ExcludeFromCodeCoverage] // Exclude this constructor
         public SharePointProcessor()
@@ -26,13 +28,15 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _serviceLocator = ServiceLocator.Current;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = new ContentProviderHelper();
+            _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
         }
 
-        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper)
+        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, IFileStreamService fileStreamService)
         {
             _serviceLocator = serviceLocator;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = contentProviderHelper;
+            _fileStreamService = fileStreamService;
         }
 
         public void AddDocument(SPListItem item)
@@ -74,10 +78,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 try
                 {
                     // Get the data and add it to the item
-                    var relativeUrl = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileRelativeUrl(item, false);
-                    var data = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileSteam(relativeUrl, false);
+                    var relativeUrl = _fileStreamService.GetFileRelativeUrl(item, false);
+                    var data = _fileStreamService.GetFileSteam(relativeUrl, false);
 
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+
+                    // Can't test this part of the code path...
                     blob.Write(data);
                     media.BinaryData = blob;
                 }

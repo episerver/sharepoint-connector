@@ -10,6 +10,8 @@ using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.DataAccess;
 using System.Collections.Generic;
 using System;
+using EPiServer.ConnectForSharePoint.SPServices;
+using System.IO;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -22,6 +24,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
     }
 
+    
     [TestClass]
     public class SharePointProcessorTests
     {
@@ -30,12 +33,14 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentProviderHelper> contentHelper;
         private Mock<IContentRepository> contentRepo;
         private Mock<IContentTypeRepository> contentTypeRepo;
+        private Mock<IFileStreamService> fileStreamService;
 
         private SharePointProcessor GetUnitUnderTest()
         {
             contentSecurityRepo = new Mock<IContentSecurityRepository>();
             contentRepo = new Mock<IContentRepository>();
             contentTypeRepo = new Mock<IContentTypeRepository>();
+            fileStreamService = new Mock<IFileStreamService>();
 
             // Initialize our service locator instance.
             serviceLocator = new Mock<IServiceLocator>();
@@ -46,9 +51,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
 
             contentHelper = new Mock<IContentProviderHelper>();
-            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object);
+            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);
         }
-
+         
         [TestMethod]
         public void AddFolder_Processes_AddFolder_Message_And_Calls_CMS_To_Do_Add_With_EntryPointID()
         {
@@ -230,6 +235,46 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
+        public void AddDocument_Calls_FileStreamMethods()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.IsAny<bool>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.IsAny<bool>())).Returns("hereissomepath");
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            myStreamWriter.Write("Some stream data");
+
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>(), It.IsAny<bool>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>(), It.IsAny<bool>())).Returns(mstream);
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.AddDocument(item);
+
+            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>(), It.Is<bool>(val => val == false)), Times.Once, "GetFileSteam not called or thumbnail arg not false");
+            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>(), It.Is<bool>(val => val == false)), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
         public void UpdateDocument_NotImplemented()
         {
@@ -250,7 +295,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         public void DeleteDocument_NotImplemented()
         {
             var processor = GetUnitUnderTest();
-            processor.UpdateFolder(null);
+            processor.DeleteDocument(null);
         }
     }
 }
