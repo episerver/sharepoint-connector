@@ -1,6 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
@@ -9,6 +10,7 @@ using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
@@ -18,18 +20,23 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IServiceLocator _serviceLocator;
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
+        IFileStreamService _fileStreamService;
+
+        [ExcludeFromCodeCoverage] // Exclude this constructor
         public SharePointProcessor()
         {
             _serviceLocator = ServiceLocator.Current;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = new ContentProviderHelper();
+            _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
         }
 
-        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper)
+        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, IFileStreamService fileStreamService)
         {
             _serviceLocator = serviceLocator;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = contentProviderHelper;
+            _fileStreamService = fileStreamService;
         }
 
         public void AddDocument(SPListItem item)
@@ -53,13 +60,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             else
             {
                 // Only search from the entry point down
-                var helper = new ContentProviderHelper();
-                parentFolder = helper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint);
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
             _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
 
             // Now check the folder to see if the item already exists. 
-            ContentReference cref = ContentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(fileName, parentFolder);
             if (cref == null)
             {
                 //Get a new empty media object
@@ -72,10 +78,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 try
                 {
                     // Get the data and add it to the item
-                    var relativeUrl = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileRelativeUrl(item, false);
-                    var data = SharePointHelper.SPServicesHub.SPFileStreamService.GetFileSteam(relativeUrl, false);
+                    var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
+                    var data = _fileStreamService.GetFileSteam(relativeUrl);
 
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+
+                    // Can't test this part of the code path...
                     blob.Write(data);
                     media.BinaryData = blob;
                 }
@@ -112,7 +120,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, SharePointSettings.Current.EntryPoint); 
+                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, 
+                    new ContentReference(item.rootCMSFolderEntryPointID)); 
             }
 
             _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);
@@ -134,7 +143,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             _contentProviderHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
 
-            var cmsFolder = contentRepository.GetDefault<ContentFolder>(RootRef);
             var children = contentRepository.GetChildren<ContentFolder>(RootRef);
             foreach (var child in children)
             {
@@ -148,16 +156,19 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
         public void UpdateDocument(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 
         public void UpdateFolder(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 
         public void DeleteDocument(SPListItem item)
         {
+            // When you implement these make sure you do the unit tests
             throw new NotImplementedException();
         }
 

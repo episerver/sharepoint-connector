@@ -4,6 +4,7 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using Moq;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.SPServices;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging
 {
@@ -12,7 +13,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
     {
         Mock<IServiceLocator> serviceLocator = new Mock<IServiceLocator>();
         Mock<IContentProviderHelper> contentHelper = new Mock<IContentProviderHelper>();
-
+        Mock<IFileStreamService> fileStreamService = new Mock<IFileStreamService>();
         private SharePointProcessorFactory GetUnitUnderTest()
         {
             return new SharePointProcessorFactory();
@@ -22,7 +23,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
         public void GetSharePointProcessor_ReturnsASharePointProcessor()
         {
             var myFactory = GetUnitUnderTest();
-            var aProcessor = myFactory.GetSharePointProcessor(serviceLocator.Object, contentHelper.Object);
+            var aProcessor = myFactory.GetSharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);
 
             Assert.IsInstanceOfType(aProcessor, typeof(SharePointProcessor));
         }

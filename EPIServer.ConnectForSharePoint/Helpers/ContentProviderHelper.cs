@@ -295,12 +295,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="name"></param>
         /// <param name="startRef"></param>
         /// <returns></returns>
-        public static ContentReference FindMediaInFolder(string name, ContentReference folderRef)
+        public ContentReference FindMediaInFolder(string name, ContentReference folderRef)
         {
-            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-
             // Check this folder
-            var medialist = contentRepository.GetChildren<MediaData>(folderRef);
+            var medialist = _contentRepository.GetChildren<MediaData>(folderRef);
             foreach (var item in medialist)
             {
                 if (item.Name == name)

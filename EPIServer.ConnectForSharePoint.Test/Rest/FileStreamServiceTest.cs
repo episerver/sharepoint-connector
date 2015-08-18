@@ -77,7 +77,7 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             // Mock for SendRequest method of base class            
             var jsonString = "Mock";
-            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object, _spContentMappingRepository.Object, _spContentCacheProvider.Object, new byte[1]) { CallBase = true };
+            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object, _spContentMappingRepository.Object, _spContentCacheProvider.Object) { CallBase = true };
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null)).Returns(jsonString);
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null, false)).Returns(jsonString);
             _serviceTesting.Setup(x => x.GetResponseStream(It.IsAny<IRestRequest>(), It.IsAny<string>(), It.IsAny<NameValueCollection>())).Returns(new MemoryStream());
@@ -113,7 +113,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         public void GetFileStream_with_uri_and_not_thumbnail_expected_not_null_and_length_equal_zero()
         {
             var url = string.Format("http://Test/{0}/abc.gif", Guid.NewGuid());
-            var result = _serviceTesting.Object.GetFileStream(new Uri(url), false);
+            var result = _serviceTesting.Object.GetFileStream(new Uri(url));
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Length, 0); // Empty memory stream
         }
@@ -123,7 +123,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         {
             _fileItem.File.ServerRelativeUrl = ""; // make sure its not null and length = zero.. not sure y we would have this test.
 
-            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000), false);
+            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000));
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Length, 0); // Empty memory stream
         }
@@ -133,19 +133,9 @@ namespace EPiServer.ConnectForSharePoint.Test
         {
             _fileItem.File.ServerRelativeUrl = "http://test/abc.gif";
 
-            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000), false);
+            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000));
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Length, 0); // Empty memory stream
-        }
-
-        [TestMethod]
-        public void GetFileStream_with_SPListItem_and_ContentReference_and_thumbnail_expected_not_null_and_length_equal_zero()
-        {
-            _fileItem.File.ServerRelativeUrl = "http://test/abc.gif";
-
-            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000), true);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Length, 1); // Default thumbnail
         }
     }
 }

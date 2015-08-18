@@ -12,7 +12,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         /// </summary>
         /// <param name="blobId">The given blob identification</param>
         /// <returns>File stream</returns>
-        Stream GetFileStream(Uri blobId, bool isThumbnail);
+        Stream GetFileStream(Uri blobId);
 
         /// <summary>
         /// Get file stream of a SharePoint's ListItem
@@ -20,10 +20,10 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         /// <param name="listItem">The file item from share point site</param>
         /// <param name="contentLink">The content link has been mapped identity</param>
         /// <returns></returns>
-        Stream GetFileStream(SPListItem listItem, ContentReference contentLink, bool isThumbnail);
+        Stream GetFileStream(SPListItem listItem, ContentReference contentLink);
 
-        Stream GetFileSteam(string relativeUrl, bool isThumbnail);
+        Stream GetFileSteam(string relativeUrl);
 
-        string GetFileRelativeUrl(SPListItem listItem, bool isThumbnail);
+        string GetFileRelativeUrl(SPListItem listItem);
     }
 }

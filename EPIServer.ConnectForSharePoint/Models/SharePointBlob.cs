@@ -53,11 +53,11 @@ namespace EPiServer.ConnectForSharePoint
                 else
                 {
                     _logger.Information("Get file stream of Uri: {0}", ID.OriginalString);
-                    return SharePointHelper.SPServicesHub.SPFileStreamService.GetFileStream(ID, IsThumbnail);
+                    return SharePointHelper.SPServicesHub.SPFileStreamService.GetFileStream(ID);
                 }
             }
 
-            return SharePointHelper.SPServicesHub.SPFileStreamService.GetFileStream(FileItem, ContentLink, IsThumbnail);
+            return SharePointHelper.SPServicesHub.SPFileStreamService.GetFileStream(FileItem, ContentLink);
         }
     }
 }

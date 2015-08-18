@@ -28,47 +28,13 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private ISharePointContentCacheProvider _spContentCacheProvider;
 
         private static object _lock = new object();
-        private static byte[] _defaultThumbnailData;
-        /// <summary>
-        /// Gets default thumbnail for any SharePoint's image
-        /// </summary>
-        private static byte[] DefaultThumbnailData
-        {
-            get
-            {
-                if (_defaultThumbnailData == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_defaultThumbnailData == null)
-                        {
-                            var defaultThumbnailFilePath = ModuleHelper.ToResource("ClientResources/Images/DefaultThumbnail.png");
-
-                            // reading resources in a zip file
-                            if (VirtualPathUnifiedProvider.HasAccessToVirtualPath(defaultThumbnailFilePath))
-                            {
-                                using (var fileStream = VirtualPathUnifiedProvider.OpenFile(defaultThumbnailFilePath))
-                                {
-                                    _defaultThumbnailData = new byte[fileStream.Length];
-
-                                    fileStream.Read(_defaultThumbnailData, 0, (int)fileStream.Length);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return _defaultThumbnailData;
-            }
-        }
 
         public FileStreamService()
             : this(
                 SharePointHelper.SPServicesHub.SPListsViewsService,
                 SharePointHelper.SPServicesHub.SPFilesFoldersService,
                 ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>(),
-                ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>(),
-                null)
+                ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>())
         {
         }
 
@@ -76,14 +42,12 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             IListsViewsService spListsService,
             IFilesFoldersService spFilesFoldersService,
             ISharePointContentMappingRepository spContentMappingRepository,
-            ISharePointContentCacheProvider spContentCacheProvider,
-            byte[] defaultThumbnailData)
+            ISharePointContentCacheProvider spContentCacheProvider)
         {
             _spListsService = spListsService;
             _spFilesFoldersService = spFilesFoldersService;
             _spContentMappingRepository = spContentMappingRepository;
             _spContentCacheProvider = spContentCacheProvider;
-            _defaultThumbnailData = defaultThumbnailData;
         }
 
         /// <summary>
@@ -91,9 +55,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         /// </summary>
         /// <param name="blobId">The given blob identification</param>
         /// <returns>File stream</returns>
-        public Stream GetFileStream(Uri blobId, bool isThumbnail)
+        public Stream GetFileStream(Uri blobId)
         {
-            _logger.Information("GetFileStream blobId: {0} - isThumbnail: {1}.", blobId, isThumbnail);
+            _logger.Information("GetFileStream blobId: {0} .", blobId);
             var memoryStream = new MemoryStream();
 
             try
@@ -120,7 +84,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 var parentList = _spListsService.GetList(segments[0]);
                 var listItem = (parentList != null) ? _spListsService.GetListItem(parentList, segments[2]) : null;
 
-                return GetFileStream(listItem, mappedIdentity.ContentLink, isThumbnail);
+                return GetFileStream(listItem, mappedIdentity.ContentLink);
             }
             catch (Exception ex)
             {
@@ -136,7 +100,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         /// <param name="listItem">The file item from share point site</param>
         /// <param name="contentLink">The content link has been mapped identity</param>
         /// <returns></returns>
-        public Stream GetFileStream(SPListItem listItem, ContentReference contentLink, bool isThumbnail)
+        public Stream GetFileStream(SPListItem listItem, ContentReference contentLink)
         {
             if (listItem == null || listItem.File == null)
             {
@@ -144,16 +108,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 return null;
             }
 
-            // if require thumbnail and always using generic default icon(image) or 
-            // the item does not support thumbnail implicitly
-            if (isThumbnail)
-            {
-                return OpenGenericDefaultImage();
-            }
-
-            var relativeUrl = GetFileRelativeUrl(listItem, isThumbnail);
+            var relativeUrl = GetFileRelativeUrl(listItem);
             // Try get data memory stream from SharePoint site first
-            var memoryStream = GetFileSteam(relativeUrl, isThumbnail);
+            var memoryStream = GetFileSteam(relativeUrl);
 
             // The file was renamed or even the item was deleted then try to reload the item (along with the file)
             if (memoryStream == null)
@@ -170,30 +127,22 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     _logger.Information("The file has been deleted, remove it from cache.");
                     // code removes the item before returning
                     RemoveFile(relativeUrl, contentLink);
-                    // return a replaced stream if thumbnail required
-                    return isThumbnail ? OpenGenericDefaultImage() : memoryStream;
+                    return memoryStream;
                 }
 
                 // get refreshed file URL then stream
-                relativeUrl = GetFileRelativeUrl(listItem, isThumbnail);
+                relativeUrl = GetFileRelativeUrl(listItem);
                 _logger.Information("The file has been renamed, try to read it based on the new Url.");
-                memoryStream = GetFileSteam(relativeUrl, isThumbnail);
+                memoryStream = GetFileSteam(relativeUrl);
             }
 
             return memoryStream;
         }
 
-        public Stream GetFileSteam(string relativeUrl, bool isThumbnail)
+        public Stream GetFileSteam(string relativeUrl)
         {
             // get stream from SharePoint site
-            var stream = OpenDirectFile(relativeUrl);
-            if (stream != null)
-            {
-                _logger.Information("Return binary data for file, relativeUrl: {0} - isThumbnail: {1}.", relativeUrl, isThumbnail);
-                return (!isThumbnail) ? stream :
-                    MakeThumbnail(stream, relativeUrl);
-            }
-            return null;
+            return OpenDirectFile(relativeUrl);
         }
 
         /// <summary>
@@ -226,41 +175,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Generate default icon (image) 
-        /// </summary>
-        /// <returns></returns>
-        private MemoryStream OpenGenericDefaultImage()
-        {
-            return new MemoryStream(DefaultThumbnailData);
-        }
-
-        /// <summary>
-        /// Gets thumbnail data by ImageServiceClient
-        /// </summary>
-        /// <param name="reader">The given Stream reader</param>
-        /// <param name="itemFileName">The given file name</param>
-        /// <returns></returns>
-        private MemoryStream MakeThumbnail(Stream reader, string itemFileName)
-        {
-            if (reader == null)
-            {
-                return null;
-            }
-
-            var originalImageBuffer = new byte[checked((long)reader.Length)];
-            reader.Read(originalImageBuffer, 0, (int)reader.Length);
-
-            var imageOperations = new List<ImageOperation>() {
-                new ImageOperation(ImageEditorCommand.ResizeKeepScale, 48, 48)
-            };
-
-            // Render new image
-            var byteArray = new ImageServiceClient("ImageServiceClientEndPoint").RenderImage(originalImageBuffer, imageOperations, MimeMapping.GetMimeMapping(itemFileName), 1f, 50);
-
-            return new MemoryStream(byteArray);
         }
 
         /// <summary>
@@ -310,27 +224,14 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return thumbnailUrl.ToString();
         }
 
-        public string GetFileRelativeUrl(SPListItem listItem, bool isThumbnail)
+        public string GetFileRelativeUrl(SPListItem listItem)
         {
             if (listItem.File == null)
             {
                 return string.Empty;
             }
 
-            var serverRelativeUrl = EncodeDataForRESTRequest(listItem.File.ServerRelativeUrl);
-
-            return (isThumbnail && HasThumbnailImplicitly(listItem)) ? GetSharePointThumbnailUrl(serverRelativeUrl) : serverRelativeUrl;
-        }
-
-        private bool HasThumbnailImplicitly(SPListItem listItem)
-        {
-            if (listItem.ParentList == null)
-            {
-                return false;
-            }
-
-            return (listItem.ParentList.BaseTemplate == (int)SupportedBaseTemplates.AssetLibary ||
-               listItem.ParentList.BaseTemplate == (int)SupportedBaseTemplates.PictureLibrary);
+            return EncodeDataForRESTRequest(listItem.File.ServerRelativeUrl);
         }
     }
 }
