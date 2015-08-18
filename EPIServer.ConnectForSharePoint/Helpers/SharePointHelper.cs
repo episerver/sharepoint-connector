@@ -17,8 +17,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// <summary>
     /// The helper class for SharePoint
     /// </summary>
-    public class SharePointHelper
+    public class SharePointHelper : ISharePointHelper
     {
+        public SharePointHelper()
+        {
+
+        }
+
+        internal SharePointHelper(IServicesHub serviceHub)
+        {
+            _spServicesHub = serviceHub;
+        }
+
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
@@ -29,22 +39,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             get
             {
+                try
+                {
+                    ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
+                }
+                catch { }
+
                 if (_spServicesHub == null)
                 {
-                    try
-                    {
-                        ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
-                    }
-                    catch { }
+                    _spServicesHub = new ServicesHub();
 
-                    if (_spServicesHub == null)
-                    {
-                        _spServicesHub = new ServicesHub();
-
-                        ServiceLocator.Current.Buildup(_spServicesHub);
-                    }
+                    ServiceLocator.Current.Buildup(_spServicesHub);
                 }
-
                 return _spServicesHub;
             }
         }
@@ -75,7 +81,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// Gets SharePoint's list and view Id from the given mapping identification
         /// </summary>
         /// <param name="MappingKey">The given mapping identification</param>
-        public static string[] GetListAndViewIds(string mappingId)
+        public string[] GetListAndViewIds(string mappingId)
         {
             if (string.IsNullOrEmpty(mappingId) || (!string.IsNullOrEmpty(mappingId) & !mappingId.Contains('~')))
             {
@@ -90,7 +96,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// Get list of id pair of list and view from given list and the Settings's Id list
         /// </summary>
         /// <param name="lists">List of <see cref="SPList"/> for filtering.</param>
-        public static IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists)
+        public IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists)
         {
             var listIds = SharePointSettings.Current.ListIds.Split(new string[] { ";" }, StringSplitOptions.None);
             var idListViewPairs = GetListViewPairs(lists);
@@ -180,6 +186,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var regex = new Regex(@"@[^\s\.]+\.onmicrosoft\.com$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
             return regex.IsMatch(username);
+        }
+
+        public IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder)
+        {
+            return _spServicesHub.SPListsViewsService.GetItems(list, view, folder);
         }
     }
 }

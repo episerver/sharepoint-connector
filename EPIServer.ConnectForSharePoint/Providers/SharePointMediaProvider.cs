@@ -133,7 +133,8 @@ namespace EPiServer.ConnectForSharePoint.Providers
         /// <returns>The content link</returns>
         public ContentReference LookupList(string key)
         {
-            var idListAndView = SharePointHelper.GetListAndViewIds(key);
+            var helper = new SharePointHelper();
+            var idListAndView = helper.GetListAndViewIds(key);
             if (idListAndView == null)
             {
                 return ContentReference.EmptyReference;

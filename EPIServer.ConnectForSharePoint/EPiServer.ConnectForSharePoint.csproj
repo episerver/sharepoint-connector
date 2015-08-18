@@ -216,6 +216,11 @@
     <Compile Include="Consts.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
+    <Compile Include="Helpers\ISharePointHelper.cs" />
+    <Compile Include="Helpers\ISharePointMessageHelper.cs" />
+    <Compile Include="Helpers\ISharePointSettingsHelper.cs" />
+    <Compile Include="Helpers\SharePointMessageHelper.cs" />
+    <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\SPFileMapper.cs" />
     <Compile Include="Mappers\SPFolderMapper.cs" />

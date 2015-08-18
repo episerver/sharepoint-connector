@@ -109,7 +109,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             var contentProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
             var supportedLists = contentProvider.CachedMediaLists;
-            var selectedLists = SharePointHelper.GetSelectedListViewIds(supportedLists);
+            var helper = new SharePointHelper();
+            var selectedLists = helper.GetSelectedListViewIds(supportedLists);
 
             foreach (var list in selectedLists)
             {
@@ -270,8 +271,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             if( startRef == null )
                 startRef = SiteDefinition.Current.GlobalAssetsRoot;
 
-            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-            var rootFolders = contentRepository.GetChildren<ContentFolder>(startRef);
+            var rootFolders = _contentRepository.GetChildren<ContentFolder>(startRef);
             foreach (var rootFolder in rootFolders)
             {
                 if (rootFolder.Name == name)
