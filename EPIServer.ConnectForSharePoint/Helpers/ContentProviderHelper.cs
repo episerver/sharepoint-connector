@@ -108,7 +108,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             InitializeSharePointMediaProvider();
 
             var contentProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
-            contentProvider.RebuildMapping();
             var supportedLists = contentProvider.CachedMediaLists;
             var selectedLists = SharePointHelper.GetSelectedListViewIds(supportedLists);
 

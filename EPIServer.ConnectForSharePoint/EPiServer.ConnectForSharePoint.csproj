@@ -289,7 +289,6 @@
     <Compile Include="Rest\Requests\IRestRequest.cs" />
     <Compile Include="Rest\Requests\RestJsonRequest.cs" />
     <Compile Include="Rest\Responses\RestResponse.cs" />
-    <Compile Include="Rest\SharePointContentStore.cs" />
     <Compile Include="Rest\SPRestClient.cs" />
     <Compile Include="Authentication\WcfClientContracts.cs" />
     <Compile Include="SharePointContentMappingRepository.cs" />

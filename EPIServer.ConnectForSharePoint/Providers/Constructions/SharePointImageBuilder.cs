@@ -41,7 +41,6 @@ namespace EPiServer.ConnectForSharePoint.Providers.Constructions
             }
             
             var blob = CreateSharePointBlob(mediaData, modelWrapper);
-            blob.IsThumbnail = true;
             mediaData.Thumbnail = blob;
 
             return content;

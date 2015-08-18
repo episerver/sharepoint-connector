@@ -184,10 +184,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         /// <param name="contentLink">The content link of file</param>
         private void RemoveFile(string serverRelativeUrl, ContentReference contentLink)
         {
-            // Note: a file (associate with a list item) can be in different folders (of different views of a list)
-            // then need to remove the file from all folders contain it, the file relative URL is unique
-            _spContentCacheProvider.RemoveFileFromCache(contentLink, serverRelativeUrl);
-
             _spContentMappingRepository.Delete(contentLink);
         }
 

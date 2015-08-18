@@ -73,7 +73,6 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             // Init dependency and mock functions for SPContentCacheProvider 
             _spContentCacheProvider = new Mock<ISharePointContentCacheProvider>();
-            _spContentCacheProvider.Setup(s => s.RemoveFileFromCache(It.IsAny<ContentReference>(), It.IsAny<string>()));
 
             // Mock for SendRequest method of base class            
             var jsonString = "Mock";
