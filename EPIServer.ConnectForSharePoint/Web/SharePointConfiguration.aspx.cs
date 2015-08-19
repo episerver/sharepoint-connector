@@ -1,11 +1,8 @@
 using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
-using EPiServer.ConnectForSharePoint.Messaging;
-using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.ConnectForSharePoint.Rest;
-using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
 using EPiServer.Logging;
@@ -17,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Web.Services;
 using System.Web.UI.WebControls;
 
 namespace EPiServer.ConnectForSharePoint.Web
@@ -59,6 +57,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return (string)Session[SharePointUserPassword]; }
         }
 
+        public string QueueCount
+        {
+            get
+            {
+                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+                var queue = queueStore.Get("sharepointmod");
+                return queue.Count.ToString();
+            }
+        }
         /// <summary>
         /// HelpUrl of current SharePoint Connector Shell Module
         /// </summary>
@@ -112,7 +119,17 @@ namespace EPiServer.ConnectForSharePoint.Web
                         ActivateControls(false);
                         ShowMessage(errorMessage, true);
                     }
-                    BindListData(lists);
+                    else
+                    {
+                        BindListData(lists);
+                    }
+
+                    if (Convert.ToInt32(QueueCount) > 0)
+                    {
+                        Connect.Enabled = false;
+                        ActivateControls(false);
+                        Response.AddHeader("Refresh", "10");
+                    }
                 }
             }
         }
@@ -250,6 +267,11 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
                 messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+
+                QueueCountTB.Text = QueueCount;
+                Connect.Enabled = false;
+                ActivateControls(false);
+                Response.AddHeader("Refresh", "10");
             }
             catch (Exception ex)
             {
@@ -283,59 +305,11 @@ namespace EPiServer.ConnectForSharePoint.Web
             messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
 
             ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
-        }
 
-        /// <summary>
-        /// Remove CMS cache for old list-view collection
-        /// </summary>
-        /// <param name="oldListIds">The old list-view ids</param>
-        private static void RemoveCMSCache(string oldListIds)
-        {
-            // Remove CMS content cache for old list-view collection
-            if (!string.IsNullOrEmpty(oldListIds))
-            {
-                var previousSelectedListIds = oldListIds.Split(new string[] { ";" }, StringSplitOptions.None);
-
-                foreach (var mappingKey in previousSelectedListIds)
-                {
-                    var contentLink = _spContentMappingRepository.GetContentLink(mappingKey);
-
-                    if (!ContentReference.IsNullOrEmpty(contentLink))
-                    {
-                        try
-                        {
-                            // Remove common cache for all children of mapping key
-                            var descendents = _contentRepository.GetDescendents(contentLink);
-                            if (descendents != null)
-                            {
-                                foreach (var child in descendents)
-                                {
-                                    // TECHNOTE:
-                                    //  In the "SharePointContentStore" class, we added this cache key for each loaded sharepoint's content.
-                                    //  So that, we should remove this cache key here in order to get updated sharepoint's tags for this content.
-                                    CacheManager.Remove(DataFactoryCache.PageMasterLanguageCacheKey(child));
-
-                                    CacheManager.Remove(DataFactoryCache.PageCommonCacheKey(child));
-                                }
-                            }
-
-                        }
-                        catch (Exception exc)
-                        {
-                            _logger.Error("Error occurs when remove common cache for all previously mapped SharePoint content", exc);
-                            // NOTE: Try to clear cache, that why do nothing if there are any exception
-                        }
-
-                        // TECHNOTE:
-                        //  In the "SharePointContentStore" class, we added this cache key for each loaded sharepoint's content.
-                        //  So that, we should remove this cache key here in order to get updated sharepoint's tags for this content.
-                        CacheManager.Remove(DataFactoryCache.PageMasterLanguageCacheKey(contentLink));
-
-                        // Remove common cache of this mapping key
-                        CacheManager.Remove(DataFactoryCache.PageCommonCacheKey(contentLink));
-                    }
-                }
-            }
+            QueueCountTB.Text = QueueCount;
+            Connect.Enabled = false;
+            ActivateControls(false);
+            Response.AddHeader("Refresh", "10");
         }
 
         #endregion
@@ -501,8 +475,14 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="active">if set to <c>true</c> [active].</param>
         private void ActivateControls(bool active)
         {
-            ListSelector.Visible = active;
+            ListSelector.Visible = true;
+            ListSelector.Enabled = active;
             Refresh.Enabled = Save.Enabled = active;
+
+            if (active == true)
+            {
+                Connect.Enabled = true;
+            }
         }
 
         /// <summary>
