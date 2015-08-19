@@ -35,7 +35,6 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static readonly ISharePointContentMappingRepository _spContentMappingRepository = ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>();
-        private static readonly ISharePointContentCacheProvider _spContentCacheProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
 
         /// <summary>
         /// Called by web page during data bind operation
@@ -367,8 +366,16 @@ namespace EPiServer.ConnectForSharePoint.Web
             errorMessage = string.Empty;
             try
             {
-                return isTest ? GetMediaListsTest() :
-                    _spContentCacheProvider.LatestMediaLists;
+                if( isTest )
+                {
+                    // just test the connection and return a new list that may or may not match what is in the UI
+                    return TestConnection();
+                }
+                else
+                {
+                    // Use the service to get the list.
+                    return SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+                }
             }
             catch (Exception e)
             {
@@ -397,7 +404,12 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
         }
 
-        private IEnumerable<SPList> GetMediaListsTest()
+        /// <summary>
+        /// Uses the configuredurl, username, and password specified in the UI and attempts to connect and get 
+        /// the ListBaseType.DocumentLibrary
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<SPList> TestConnection()
         {
             var newSettings = new SharePointSettings()
             {

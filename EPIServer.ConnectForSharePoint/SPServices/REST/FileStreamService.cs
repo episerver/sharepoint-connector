@@ -25,7 +25,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private IListsViewsService _spListsService;
         private IFilesFoldersService _spFilesFoldersService;
         private ISharePointContentMappingRepository _spContentMappingRepository;
-        private ISharePointContentCacheProvider _spContentCacheProvider;
 
         private static object _lock = new object();
 
@@ -33,21 +32,18 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             : this(
                 SharePointHelper.SPServicesHub.SPListsViewsService,
                 SharePointHelper.SPServicesHub.SPFilesFoldersService,
-                ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>(),
-                ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>())
+                ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>())
         {
         }
 
         public FileStreamService(
             IListsViewsService spListsService,
             IFilesFoldersService spFilesFoldersService,
-            ISharePointContentMappingRepository spContentMappingRepository,
-            ISharePointContentCacheProvider spContentCacheProvider)
+            ISharePointContentMappingRepository spContentMappingRepository)
         {
             _spListsService = spListsService;
             _spFilesFoldersService = spFilesFoldersService;
             _spContentMappingRepository = spContentMappingRepository;
-            _spContentCacheProvider = spContentCacheProvider;
         }
 
         /// <summary>

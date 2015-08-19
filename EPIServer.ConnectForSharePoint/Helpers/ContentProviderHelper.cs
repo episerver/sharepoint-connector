@@ -107,8 +107,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             // Create SharePoint Media Provider and add to ProviderMap
             InitializeSharePointMediaProvider();
 
-            var contentProvider = ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>();
-            var supportedLists = contentProvider.CachedMediaLists;
+            var supportedLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                .GetLists((int)ListBaseType.DocumentLibrary);
+
             var helper = new SharePointHelper();
             var selectedLists = helper.GetSelectedListViewIds(supportedLists);
 

@@ -30,7 +30,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
         private readonly IContentRepository _contentRepository;
         private IEnumerable<ISharePointDataBuilder> _contentBuilders;
 
-        private ISharePointContentCacheProvider _contentCache;
         private ISharePointContentMappingRepository _sharePointRepository;
         private Func<ContentReference, object> _getCMSCachedContent;
         private Func<ContentReference> _getEntryPoint;
@@ -47,14 +46,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
             get
             {
                 return _providerKey;
-            }
-        }
-
-        public ISharePointContentCacheProvider ContentCache
-        {
-            get
-            {
-                return _contentCache;
             }
         }
 
@@ -76,8 +67,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 ServiceLocator.Current.GetAllInstances<ISharePointDataBuilder>(),
                 ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>(),
                 (contentLink) => { return CacheManager.Get(DataFactoryCache.PageMasterLanguageCacheKey(contentLink)); },
-                () => { return SharePointSettings.Current.EntryPoint; },
-                ServiceLocator.Current.GetInstance<ISharePointContentCacheProvider>()) { }
+                () => { return SharePointSettings.Current.EntryPoint; }) { }
 
         public SharePointMediaProvider(
             string providerKey,
@@ -95,8 +85,7 @@ namespace EPiServer.ConnectForSharePoint.Providers
             IEnumerable<ISharePointDataBuilder> sharePointDataBuilders,
             ISharePointContentMappingRepository sharePointRepository,
             Func<ContentReference, object> getCMSCachedContent,
-            Func<ContentReference> getEntryPoint,
-            ISharePointContentCacheProvider contentCache)
+            Func<ContentReference> getEntryPoint)
             : base(contentFactory,
                 serviceAccessor,
                 templateResolver,
@@ -108,7 +97,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
         {
             _providerKey = providerKey;
             _contentEvents = contentEvents;
-            _contentCache = contentCache;
             _contentMediaResolver = contentMediaResolver;
             _contentRepository = contentRepository;
             _contentBuilders = sharePointDataBuilders;
