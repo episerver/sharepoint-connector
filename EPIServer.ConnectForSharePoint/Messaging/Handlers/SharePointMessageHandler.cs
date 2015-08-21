@@ -18,10 +18,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         private ILogger _logger;
         private ISharePointProcessor _documentProcessor;
 
+        /// <summary>
+        /// Default Constructor
+        /// </summary>
         public SharePointMessageHandler()
         {
-            var aFactory = new SharePointProcessorFactory();
-            _documentProcessor = aFactory.GetSharePointProcessor();
             _logger = LogManager.GetLogger();
         }
 
@@ -31,9 +32,27 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
             _documentProcessor = theProcessor;
         }
 
+        /// <summary>
+        /// Used internally to instantiate a share point processor only when needed. 
+        /// </summary>
+        private ISharePointProcessor processor
+        {
+            get
+            {
+                if (_documentProcessor != null)
+                    return _documentProcessor;
+                else
+                {
+                    var aFactory = new SharePointProcessorFactory();
+                    _documentProcessor = aFactory.GetSharePointProcessor();
+                    return _documentProcessor;
+                }
+            }
+        }
+
         public void Handle(SharePointFolderAddMessage message)
         {
-            _documentProcessor.AddFolder(message.Item);
+            processor.AddFolder(message.Item);
         }
 
         /// <summary>
@@ -42,12 +61,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointFolderUpdateMessage message)
         {
-            _documentProcessor.UpdateFolder(message.Item);
+            processor.UpdateFolder(message.Item);
         }
 
         public void Handle(SharePointFolderDeleteMessage message)
         {
-            _documentProcessor.DeleteFolder(message.Item);
+            processor.DeleteFolder(message.Item);
         }
 
         /// <summary>
@@ -56,7 +75,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            _documentProcessor.AddDocument(message.Item);
+            processor.AddDocument(message.Item);
         }
 
         /// <summary>
@@ -65,7 +84,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentUpdateMessage message)
         {
-            _documentProcessor.UpdateDocument(message.Item);
+            processor.UpdateDocument(message.Item);
         }
 
         /// <summary>
@@ -74,7 +93,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentDeleteMessage message)
         {
-            _documentProcessor.DeleteDocument(message.Item);
+            processor.DeleteDocument(message.Item);
         }
     }
 }

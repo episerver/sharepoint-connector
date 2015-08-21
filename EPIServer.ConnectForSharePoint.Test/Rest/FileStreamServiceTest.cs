@@ -24,7 +24,6 @@ namespace EPiServer.ConnectForSharePoint.Test
         Mock<IListsViewsService> _spListsService;
         Mock<IFilesFoldersService> _spFilesFoldersService;
         Mock<ISharePointContentMappingRepository> _spContentMappingRepository;
-        Mock<ISharePointContentCacheProvider> _spContentCacheProvider;
 
         Mock<FileStreamService> _serviceTesting;
 
@@ -71,12 +70,9 @@ namespace EPiServer.ConnectForSharePoint.Test
             _spContentMappingRepository.Setup(s => s.GetIdentity(It.IsAny<Guid>())).Returns(_mappedIdentity);
             _spContentMappingRepository.Setup(s => s.Delete(It.IsAny<ContentReference>()));
 
-            // Init dependency and mock functions for SPContentCacheProvider 
-            _spContentCacheProvider = new Mock<ISharePointContentCacheProvider>();
-
             // Mock for SendRequest method of base class            
             var jsonString = "Mock";
-            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object, _spContentMappingRepository.Object, _spContentCacheProvider.Object) { CallBase = true };
+            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object, _spContentMappingRepository.Object) { CallBase = true };
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null)).Returns(jsonString);
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null, false)).Returns(jsonString);
             _serviceTesting.Setup(x => x.GetResponseStream(It.IsAny<IRestRequest>(), It.IsAny<string>(), It.IsAny<NameValueCollection>())).Returns(new MemoryStream());

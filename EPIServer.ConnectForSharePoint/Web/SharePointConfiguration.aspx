@@ -19,7 +19,6 @@
         </div>
                
         <asp:Panel runat="server" class="epi-formArea">
-            
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/description")%></legend>
             <div class="epi-size15">
@@ -59,15 +58,22 @@
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
             </div>
+            </fieldset>
 
+            <fieldset>
+            <div class="epi-size15">
+                <asp:Label AssociatedControlID="QueueCountTB" runat="server">Number of Items in Queue</asp:Label>
+                <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
+            </div>
             </fieldset>
 
             <div class="epi-buttonContainer">
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
                      Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" />
-                <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" Enabled="False" OnClick="Refresh_Click"
+                <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" ReadOnly="False" OnClick="Refresh_Click"
                      Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" />
             </div>
+
         </asp:Panel>
     </div>
 </asp:content>

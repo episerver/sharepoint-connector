@@ -64,9 +64,6 @@ namespace EPiServer.ConnectForSharePoint
 
         private void InitializationEngine_InitComplete(object sender, EventArgs e)
         {
- //           AddSharePointBlobProvider();
- //           AddSharePointMediaProvider();
- //           SetAccessToClientResources();
             InitializeMessagingSystem();
         }
 
@@ -107,47 +104,6 @@ namespace EPiServer.ConnectForSharePoint
             var queue = queueStore.Get(queueName);
 
             return queue;
-        }
-
-        private void AddSharePointBlobProvider()
-        {
-            var sharePointBlobProvider = (SharePointBlobProvider)ProvidersHelper
-                .InstantiateProvider(new ProviderSettings("sharepoint", typeof(SharePointBlobProvider).AssemblyQualifiedName), typeof(SharePointBlobProvider));
-
-            // Inject it into the blob factory providers
-            var field = BlobFactory.Instance.GetType().GetField("_providers", BindingFlags.NonPublic | BindingFlags.Instance);
-            var providers = field.GetValue(BlobFactory.Instance) as Dictionary<string, BlobProvider>;
-            providers.Add("sharepoint", sharePointBlobProvider);
-            field.SetValue(BlobFactory.Instance, providers);
-        }
-
-        private void AddSharePointMediaProvider()
-        {
-            var contentProviderType = typeof(SharePointMediaProvider);
-
-            try
-            {
-                ContentProviderHelper.CreateSharePointMediaProvider();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(String.Format("Cannot initialize {0} content provider in initialization phase", contentProviderType), ex);
-                return;
-            }
-
-            _logger.Debug("Initialize {0} content provider successfully", contentProviderType);
-        }
-
-        private void SetAccessToClientResources()
-        {
-            // TECHNOTE: allow access to protected module's client resources
-            // because when viewing Video's elements in viewmode, we need to inject .js file in which anonymous user can access
-            var publicVpp = new System.Collections.Specialized.NameValueCollection();
-            publicVpp.Add("virtualPath", "~" + ModuleHelper.PublicVirtualPath);
-            publicVpp.Add("physicalPath", ModuleHelper.ToPhysicalVPPClientResource("ClientResources"));
-            publicVpp.Add("bypassAccessCheck", "true");
-
-            HostingEnvironment.RegisterVirtualPathProvider(new VirtualPathNonUnifiedProvider("PublicSharePointClientResourceVpp", publicVpp));
         }
     }
 }

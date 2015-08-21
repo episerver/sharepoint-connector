@@ -40,8 +40,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Providers
                                                                         null, //SharePointDataBuilder,
                                                                         mockSharePointContentMappingRepository.Object,
                                                                         null,
-                                                                        null, //EntryPoint
-                                                                        null); //SharePointContentCacheProvider.Object);
+                                                                        null); //EntryPoint
             var result = sharePointMediaProvider.LoadOrBuildContent(new ContentReference(), null);
             Assert.IsNull(result);
         }
@@ -68,8 +67,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Providers
                 IEnumerable<ISharePointDataBuilder> sharePointDataBuilders,
                 ISharePointContentMappingRepository sharePointRepository,
                 Func<ContentReference, object> getCMSCachedContent,
-                Func<ContentReference> getEntryPoint,
-                ISharePointContentCacheProvider contentCache)
+                Func<ContentReference> getEntryPoint)
                 : base(providerKey,
                     contentFactory,
                     serviceAccessor,
@@ -85,8 +83,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Providers
                     sharePointDataBuilders,
                     sharePointRepository,
                     getCMSCachedContent,
-                    getEntryPoint,
-                    contentCache)
+                    getEntryPoint)
             { }
 
             public IContent LoadOrBuildContent(ContentReference contentLink, ILanguageSelector languageSelector)

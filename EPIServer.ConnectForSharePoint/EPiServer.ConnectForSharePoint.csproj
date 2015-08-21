@@ -274,9 +274,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Providers\ISharePointContentCacheProvider.cs" />
     <Compile Include="Helpers\ModuleHelper.cs" />
-    <Compile Include="Providers\SharePointContentCacheProvider.cs" />
     <Compile Include="InitializationModule.cs" />
     <Compile Include="Models\ModelWrapper.cs" />
     <Compile Include="Models\SharePointBlob.cs" />
