@@ -5,6 +5,7 @@ using Moq;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Models;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging
 {
@@ -16,16 +17,76 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
         Mock<IFileStreamService> fileStreamService = new Mock<IFileStreamService>();
         private SharePointProcessorFactory GetUnitUnderTest()
         {
-            return new SharePointProcessorFactory();
+            return new SharePointProcessorFactory(serviceLocator.Object);
         }
 
         [TestMethod]
-        public void GetSharePointProcessor_ReturnsASharePointProcessor()
+        public void GetSharePointProcessor_Verifys_Returns_A_SharePointProcessor()
         {
             var myFactory = GetUnitUnderTest();
-            var aProcessor = myFactory.GetSharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);
+            serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>()).Verifiable(); // Make sure it checks for the service
+            serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>())
+                .Returns((ISharePointProcessor)null);
 
+            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object);
             Assert.IsInstanceOfType(aProcessor, typeof(SharePointProcessor));
+
+            serviceLocator.Verify(sl => sl.GetInstance<ISharePointProcessor>(), Times.Once, "ServiceLocator needs to be called at least once looking for ISharePointProcessor");
+        }
+
+        [TestMethod]
+        public void GetSharePointProcessor_Verifys_Returns_A_Plugin()
+        {
+            var myFactory = GetUnitUnderTest();
+            DemoProcessor processor = new DemoProcessor();
+
+            serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>()).Verifiable(); // Make sure it checks for the service
+            serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>())
+                .Returns(processor);
+
+            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object);
+
+            // Verify get instance was called.
+            serviceLocator.Verify(sl => sl.GetInstance<ISharePointProcessor>(), Times.Once, "ServiceLocator needs to be called at least once looking for ISharePointProcessor");
+            // Verify that we got an instance of DemoProcessor and not the default processor
+            Assert.IsInstanceOfType(aProcessor, typeof(DemoProcessor));
+
+        }
+    }
+
+    /// <summary>
+    /// Temp class used for testing factory and detection of plugins.
+    /// </summary>
+    class DemoProcessor : ISharePointProcessor
+    {
+        public void AddDocument(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddFolder(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteDocument(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteFolder(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateDocument(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateFolder(SPListItem item)
+        {
+            throw new NotImplementedException();
         }
     }
 }
