@@ -78,16 +78,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 try
                 {
                     // Get the data and add it to the item
-                    var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
-                    var data = _fileStreamService.GetFileSteam(relativeUrl);
-
+                    // Note: do not remove the getFileStream method, its public and available to 
+                    // plugin authors so that they can get the data associated with a particular
+                    // file in sharepoint
+                    var data = getFileStream(item); 
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
 
                     // Can't test this part of the code path...
                     blob.Write(data);
                     media.BinaryData = blob;
                 }
-                catch (Exception e)
+                catch
                 {
                     // todo we should be using logging
                     // failed to read data
@@ -97,7 +98,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 {
                     var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
                 }
-                catch (Exception e)
+                catch
                 {
                     // todo we should be using logging
                     // failed to save data in cms
@@ -172,6 +173,15 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             throw new NotImplementedException();
         }
 
-
+        /// <summary>
+        /// Gets the stream data assocatied with a specific SPListItem
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public Stream getFileStream(SPListItem item)
+        {
+            var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
+            return _fileStreamService.GetFileSteam(relativeUrl);
+        }
     }
 }
