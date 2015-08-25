@@ -1,6 +1,6 @@
-﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Helpers;
+﻿using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
@@ -8,7 +8,6 @@ using EPiServer.DataAccess;
 using EPiServer.Framework.Blobs;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
-using EPiServer.Web;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -74,6 +73,23 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
+                if( media is ExtraMediaData )
+                {
+                    var mediaEX = media as ExtraMediaData;
+                    mediaEX.SharePointGUID = item.GUID.ToString();
+                    mediaEX.SharePointMajorVersion = item.File.MajorVersion;
+                    mediaEX.SharePointMinorVersion = item.File.MinorVersion;
+//                                       mediaEX.ParentListID = item.File.ListItem.
+                    mediaEX.SharePointTimeCreated = item.File.TimeCreated;
+                    mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
+                    mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
+                }
+                else
+                {
+                    // NOT OF RIGHT TYPE@@@@@
+                    int x = 1;
+
+                }
 
                 try
                 {
@@ -190,6 +206,16 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
+                if (media is ExtraMediaData)
+                {
+                    var mediaEX = media as ExtraMediaData;
+                    mediaEX.SharePointGUID = item.GUID.ToString();
+                    mediaEX.SharePointMajorVersion = item.File.MajorVersion;
+                    mediaEX.SharePointMinorVersion = item.File.MinorVersion;
+                    mediaEX.SharePointTimeCreated = item.File.TimeCreated;
+                    mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
+                    mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
+                }
 
                 try
                 {

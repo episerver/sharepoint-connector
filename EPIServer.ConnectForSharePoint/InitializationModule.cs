@@ -4,16 +4,19 @@ using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Providers;
+using EPiServer.Core;
 using EPiServer.Framework;
 using EPiServer.Framework.Blobs;
 using EPiServer.Logging;
 using EPiServer.Packaging;
+using EPiServer.ServiceLocation;
 using EPiServer.Web.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Reflection;
+using System.Threading;
 using System.Web.Configuration;
 using System.Web.Hosting;
 
@@ -24,7 +27,7 @@ namespace EPiServer.ConnectForSharePoint
     /// </summary>
     [InitializableModule]
     [ModuleDependency(typeof(EPiServer.Web.InitializationModule))]
-    public class InitializationModule : PackageInitializer
+    public class InitializationModule : PackageInitializer, IConfigurableModule
     {
         private static readonly ILogger _logger = LogManager.GetLogger();
         MessageHandlerRegistry registry;
@@ -104,6 +107,21 @@ namespace EPiServer.ConnectForSharePoint
             var queue = queueStore.Get(queueName);
 
             return queue;
+        }
+
+        /// <summary>
+        /// Override the ContentMediaResolver and use our own SPContentMediaResolver so that 
+        /// we can use our media types
+        /// </summary>
+        /// <param name="context"></param>
+        public void ConfigureContainer(ServiceConfigurationContext context)
+        {
+            Thread.Sleep(5000);
+            // Replace the MediaResolver with our own
+            context.Container.Configure(ce =>
+            {
+                ce.For<ContentMediaResolver>().Use<SPContentMediaResolver>();
+            });
         }
     }
 }
