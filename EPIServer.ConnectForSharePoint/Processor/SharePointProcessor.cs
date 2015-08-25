@@ -73,7 +73,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if( media is ExtraMediaData )
+                if( media is ExtraMediaData ) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
                     var mediaEX = media as ExtraMediaData;
                     mediaEX.SharePointGUID = item.GUID.ToString();
@@ -83,12 +83,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                     mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
                     mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
-                }
-                else
-                {
-                    // NOT OF RIGHT TYPE@@@@@
-                    int x = 1;
-
                 }
 
                 try
@@ -206,7 +200,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if (media is ExtraMediaData)
+                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
                     var mediaEX = media as ExtraMediaData;
                     mediaEX.SharePointGUID = item.GUID.ToString();
