@@ -157,8 +157,69 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
         public void UpdateDocument(SPListItem item)
         {
-            // When you implement these make sure you do the unit tests
-            throw new NotImplementedException();
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+            var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
+            var blobFactory = _serviceLocator.GetInstance<BlobFactory>();
+            var fileName = item.File.Name; //  @"C:\test.jpg";
+
+            //Get a suitable MediaData type from extension
+            var mediaType = mediaDataResolver.GetFirstMatching(Path.GetExtension(fileName));
+            var contentType = contentTypeRepository.Load(mediaType);
+
+            // make sure the parent has the proper access so we can create objects in it
+            ContentReference parentFolder;
+            if (item.entryPointId != -1)
+            {
+                parentFolder = new ContentReference(item.entryPointId);
+            }
+            else
+            {
+                // Only search from the entry point down
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+            }
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            if (cref != null)
+            {
+                //Get a new empty media object
+                var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
+
+                // Set attibutes of the media
+                media.Name = fileName;
+                media.Created = item.File.TimeCreated;
+
+                try
+                {
+                    // Get the data and add it to the item
+                    // Note: do not remove the getFileStream method, its public and available to 
+                    // plugin authors so that they can get the data associated with a particular
+                    // file in sharepoint
+                    var data = getFileStream(item);
+                    var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+
+                    // Can't test this part of the code path...
+                    blob.Write(data);
+                    media.BinaryData = blob;
+                }
+                catch
+                {
+                    // todo we should be using logging
+                    // failed to read data
+                }
+
+                try
+                {
+                    var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
+                }
+                catch
+                {
+                    // todo we should be using logging
+                    // failed to save data in cms
+                }
+            }
         }
 
         public void UpdateFolder(SPListItem item)

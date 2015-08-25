@@ -7,6 +7,7 @@ using EPiServer.Logging;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.Core;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -75,12 +76,31 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 }
                 else if (spItem.File != null)
                 {
-                    // now emit the message
-                    _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                    _emitterFactory.Create().Emit(new SharePointContentAddMessage()
+                    ContentReference itemref = null; 
+                    var parentFolderRef = _contentProviderHelper.FindRecursiveFolders(spItem.ParentFolderName, _settingsHelper.GetEntryPoint());
+                    if( parentFolderRef != null )
                     {
-                        Item = spItem,
-                    });
+                        // Determine if we are adding or updating and send the appropriate message.
+                        itemref = _contentProviderHelper.FindMediaInFolder(spItem.File.Name, parentFolderRef);
+                    }
+
+                    // if there is no parent folder, or the content doesnt exist send a Add message
+                    if (parentFolderRef == null || itemref == null)
+                    {
+                        _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointContentAddMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
+                    else
+                    {
+                        _logger.Information("Adding SharePointContentUpdateMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointContentUpdateMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
                 }
             }
         }

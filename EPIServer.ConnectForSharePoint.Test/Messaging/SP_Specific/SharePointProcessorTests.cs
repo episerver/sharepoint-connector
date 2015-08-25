@@ -274,12 +274,122 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void UpdateDocument_NotImplemented()
+        public void UpdateDocument_Calls_ContentTypeRepository_Load()
         {
             var processor = GetUnitUnderTest();
-            processor.UpdateDocument(null);
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.UpdateDocument(item);
+
+            contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+        }
+
+        [TestMethod]
+        public void UpdateDocument_Calls_SearchForParentFolder()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = -1,
+                ParentFolderName = "SomeParentFolder",
+                rootCMSFolderEntryPointID = 4000
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            // Return contentfolders list for getchildren
+            var folders = new List<ContentFolder>();
+            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            folders.Add(new ContentFolder() { Name = "SomeParentFolder", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
+                .Returns(folders);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.UpdateDocument(item);
+
+            contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
+            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
+                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called.");
+            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>(str => str == item.ParentFolderName),
+                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called with proper arguments.");
+        }
+
+        [TestMethod]
+        public void UpdateDocument_Calls_FileStreamMethods()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(new ContentReference(42));
+            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(new MediaData());
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            myStreamWriter.Write("Some stream data");
+
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.UpdateDocument(item);
+
+            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
+            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
+            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
         [TestMethod]
