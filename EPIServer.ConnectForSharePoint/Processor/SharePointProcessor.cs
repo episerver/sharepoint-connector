@@ -61,10 +61,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Only search from the entry point down
                 parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
-            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess); 
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             // Now check the folder to see if the item already exists. 
-            ContentReference cref = _contentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
             if (cref == null)
             {
                 //Get a new empty media object
@@ -191,53 +191,56 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             // Now check the folder to see if the item already exists. 
-            ContentReference cref = _contentProviderHelper.FindMediaInFolder(fileName, parentFolder);
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
             if (cref != null)
             {
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
-
-                // Set attibutes of the media
-                media.Name = fileName;
-                media.Created = item.File.TimeCreated;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ExtraMediaData)
                 {
                     var mediaEX = media as ExtraMediaData;
-                    mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointMajorVersion = item.File.MajorVersion;
-                    mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-                    mediaEX.SharePointTimeCreated = item.File.TimeCreated;
-                    mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
-                    mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
-                }
 
-                try
-                {
-                    // Get the data and add it to the item
-                    // Note: do not remove the getFileStream method, its public and available to 
-                    // plugin authors so that they can get the data associated with a particular
-                    // file in sharepoint
-                    var data = getFileStream(item);
-                    var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
+                    // Only update if the last modified dates dont match
+                    if (item.File.TimeLastModified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
+                    {
+                        // Set attibutes of the media
+                        media.Name = fileName;
+                        media.Created = item.File.TimeCreated;
+                        mediaEX.SharePointGUID = item.GUID.ToString();
+                        mediaEX.SharePointMajorVersion = item.File.MajorVersion;
+                        mediaEX.SharePointMinorVersion = item.File.MinorVersion;
+                        mediaEX.SharePointTimeCreated = item.File.TimeCreated;
+                        mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
+                        mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
+                        try
+                        {
+                            // Get the data and add it to the item
+                            // Note: do not remove the getFileStream method, its public and available to 
+                            // plugin authors so that they can get the data associated with a particular
+                            // file in sharepoint
+                            var data = getFileStream(item);
+                            var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
 
-                    // Can't test this part of the code path...
-                    blob.Write(data);
-                    media.BinaryData = blob;
-                }
-                catch
-                {
-                    // todo we should be using logging
-                    // failed to read data
-                }
+                            // Can't test this part of the code path...
+                            blob.Write(data);
+                            media.BinaryData = blob;
+                        }
+                        catch
+                        {
+                            // todo we should be using logging
+                            // failed to read data
+                        }
 
-                try
-                {
-                    var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
-                }
-                catch
-                {
-                    // todo we should be using logging
-                    // failed to save data in cms
+                        try
+                        {
+                            var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
+                        }
+                        catch
+                        {
+                            // todo we should be using logging
+                            // failed to save data in cms
+                        }
+                    }
                 }
             }
         }

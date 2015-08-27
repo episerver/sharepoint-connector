@@ -81,7 +81,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     if( parentFolderRef != null )
                     {
                         // Determine if we are adding or updating and send the appropriate message.
-                        itemref = _contentProviderHelper.FindMediaInFolder(spItem.File.Name, parentFolderRef);
+                        itemref = _contentProviderHelper.FindMediaInFolder(spItem.GUID, parentFolderRef);
                     }
 
                     // if there is no parent folder, or the content doesnt exist send a Add message

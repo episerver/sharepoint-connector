@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.IO;
+using EPiServer.ConnectForSharePoint.Models.FileTypes;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -357,9 +358,16 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(new ContentReference(42));
-            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(new MediaData());
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(new ContentReference(42));
+            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
+                new SharepointGenericMedia()
+                {
+                    Name = "Filename.jpg",
+                    ContentLink = new ContentReference(42),
+                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
+                }
+            );
 
             MemoryStream mstream = new MemoryStream();
             StreamWriter myStreamWriter = new StreamWriter(mstream);
@@ -370,14 +378,19 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             var item = new SPListItem()
             {
-                File = new SPFile() { Name = "Filename.jpg" },
-                entryPointId = 42
+                File = new SPFile() { Name = "Filename.jpg", TimeLastModified = DateTime.Now },
+                entryPointId = 42, GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1")
             };
 
             var data = new List<MediaData>();
             data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
             data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
+            data.Add(new SharepointGenericMedia()
+            {
+                Name = "Filename.jpg",
+                ContentLink = new ContentReference(42),
+                SharePointTimeLastModified = new DateTime(2014,1,1)
+            });
             contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
                 .Returns(data);
 
@@ -386,7 +399,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.UpdateDocument(item);
 
-            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<string>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
+            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
             fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
             fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");

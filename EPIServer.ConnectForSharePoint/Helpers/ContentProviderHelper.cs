@@ -1,4 +1,5 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
@@ -330,6 +331,27 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             // Add access right for the default groups
             contentSecurity.AddEntry(new AccessControlEntry("Everyone", accessLevel));
             _contentSecurityRepository.Save(contentReference, contentSecurity, SecuritySaveType.Replace);
+        }
+
+        /// <summary>
+        /// Given a sharepoint object quid we will try to find it in the specified folder
+        /// </summary>
+        /// <param name="SPItemGuid"></param>
+        /// <param name="folderRef"></param>
+        /// <returns></returns>
+        public ContentReference FindMediaInFolder(Guid SPItemGuid, ContentReference folderRef)
+        {
+            var medialist = _contentRepository.GetChildren<MediaData>(folderRef);
+            foreach (var item in medialist)
+            {
+                if (item is ExtraMediaData)
+                {
+                    var mediaEX = item as ExtraMediaData;
+                    if (SPItemGuid.ToString().Equals(mediaEX.SharePointGUID))
+                        return item.ContentLink;
+                }
+            }
+            return null;
         }
     }
 }
