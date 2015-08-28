@@ -414,11 +414,58 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void DeleteDocument_NotImplemented()
+        public void DeleteDocument_Calls_Delete()
         {
             var processor = GetUnitUnderTest();
-            processor.DeleteDocument(null);
+
+            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(
+                new ContentReference(42));
+            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(
+                new SharepointGenericMedia()
+                {
+                    Name = "Filename.jpg",
+                    ContentLink = new ContentReference(42),
+                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
+                }
+            );
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            myStreamWriter.Write("Some stream data");
+
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg", TimeLastModified = DateTime.Now },
+                entryPointId = 42,
+                GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1")
+            };
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new SharepointGenericMedia()
+            {
+                Name = "Filename.jpg",
+                ContentLink = new ContentReference(42),
+                SharePointTimeLastModified = new DateTime(2014, 1, 1)
+            });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
+
+            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new MediaData());
+
+            processor.DeleteDocument(item);
+
+            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
+            contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.Is<Boolean>(force => force == true), 
+                It.Is<AccessLevel>(al => al == AccessLevel.Delete)), Times.Once, "Save needs to be called once");
         }
     }
 }
