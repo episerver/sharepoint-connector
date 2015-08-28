@@ -20,7 +20,7 @@
         // 119 - Wiki Page Library
         // Full templates list: http://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype(v=office.15).aspx
         // more info: http://techtrainingnotes.blogspot.com/2008/01/sharepoint-registrationid-list-template.html
-
+        GenericList = 100,
         DocumentLibrary = 101,
         PictureLibrary = 109,   // implicitly supports thumbnail
         AssetLibary = 851,      // implicitly supports thumbnail

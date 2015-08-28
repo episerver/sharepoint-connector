@@ -10,6 +10,9 @@ namespace EPiServer.ConnectForSharePoint
     {
         public override Type GetFirstMatching(string extension)
         {
+            if( string.IsNullOrEmpty(extension) )
+                return typeof(SharepointGenericMedia);
+
             var selectedAsDefault = base.GetFirstMatching(extension);
             // For all image data, I want to use class SharepointImageFile
             if (typeof(ImageData).IsAssignableFrom(selectedAsDefault))
