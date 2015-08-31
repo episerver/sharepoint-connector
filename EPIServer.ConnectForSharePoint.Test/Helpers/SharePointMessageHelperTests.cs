@@ -9,6 +9,7 @@ using EPiServer.Core;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using System;
 using EPiServer.ServiceLocation;
+using EPiServer.ConnectForSharePoint.Models.FileTypes;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
@@ -87,8 +88,59 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var listView = new SPListView();
             messageHelper.ProcessSubItems(pFolder, list, listView);
 
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.Item.ParentFolderName == pFolder.Name)), Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
+            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointContentAddMessage>(spm => spm.Item.ParentFolderName == pFolder.Name)), Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
         }
+
+        [TestMethod]
+        public void ProcessSubItems_Emits_Delete_Items()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            var sharepointListItems = new List<SPListItem>();
+            // The list from sharepoint will have a folder and two items in it.
+            sharepointListItems.Add(new SPListItem() { Folder = new SPFolder() { Name = "SomeFolder" } });
+            var item = new SPListItem() { Title = "Test Item One", entryPointId = 121,
+                File = new SPFile() { Name="test1"}, ParentFolderName = string.Empty,
+                GUID = new Guid("4F39D06F-B540-466C-BD97-E3DE220034B1") };
+            sharepointListItems.Add(item);
+            item = new SPListItem() { Title = "Test Item three", entryPointId = 123,
+                File = new SPFile() { Name = "test3" }, ParentFolderName = string.Empty,
+                GUID = new Guid("4F39D06F-B540-466C-BD97-E3DE220034B3")
+            };
+            sharepointListItems.Add(item);
+            _helper.SetupSequence(sph => sph.GetItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>()))
+                .Returns(sharepointListItems);
+
+            // Now make sure we return something not null indicating the folder was found and we need to check for items to delete
+            _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference()); // if its not null that means we found it and we are going to delete any items that are duplicate
+
+
+            // Now setup the cms list, it will have 3 items that are not folders, the goal is delete the correct item that 
+            // was removed from sharepoint
+            // 
+            Mock<IContentRepository> contentRepo = new Mock<IContentRepository>();
+            _serviceLocator.Setup(sl => sl.GetInstance<IContentRepository>()).Returns(contentRepo.Object);
+            // Return contentfolders list for getchildren
+            var items = new List<MediaData>();
+            items.Add(new SharepointGenericMedia() { Name = "test1", ContentLink = new ContentReference(1),
+                SharePointGUID = "4F39D06F-B540-466C-BD97-E3DE220034B1" });
+            items.Add(new SharepointGenericMedia() { Name = "ItemToBeDeleted", ContentLink = new ContentReference(2),
+            SharePointGUID = "4F39D06F-B540-466C-BD97-E3DE220034B2"});
+            items.Add(new SharepointGenericMedia() { Name = "test3", ContentLink = new ContentReference(42),
+                SharePointGUID = "4F39D06F-B540-466C-BD97-E3DE220034B3" });
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(items);
+
+            // none of the args actually matter because the mocks return test data
+            messageHelper.ProcessSubItems(new SPFolder() { Name = "Test Folder Name" },
+                new SPList(), new SPListView()); 
+
+            // Comparer the quid and make sure its the correct one.
+            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointContentDeleteMessage>(spm => spm.Item.GUID == new Guid("4F39D06F-B540-466C-BD97-E3DE220034B2"))), 
+                Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
+        }
+
 
         [TestMethod]
         public void QueueFoldersForDelete_Emits_Delete_Messages_For_Folders()
