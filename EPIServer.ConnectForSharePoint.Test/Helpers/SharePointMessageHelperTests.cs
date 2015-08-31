@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using EPiServer.Core;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using System;
+using EPiServer.ServiceLocation;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
@@ -21,6 +22,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<ISharePointSettingsHelper> _settingsHelper;
         private Mock<IMessageEmitterFactory> _emitterFactory;
         private Mock<IMessageEmitter> _messageEmitter;
+        private Mock<IServiceLocator> _serviceLocator;
 
         private SharePointMessageHelper GetUnitUnderTest()
         {
@@ -33,10 +35,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _messageEmitter.Setup(me => me.Emit(It.IsAny<SharePointMessage>()));
             _emitterFactory = new Mock<IMessageEmitterFactory>();
             _emitterFactory.Setup(ef => ef.Create()).Returns(_messageEmitter.Object);
-            return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object);
+
+            _serviceLocator = new Mock<IServiceLocator>();
+            return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
         }
         [TestMethod]
-        public void AddSubItems_Creates_Queue_Emits_Queue_Messages_For_Folders()
+        public void ProcessSubItems_Creates_Queue_Emits_Queue_Messages_For_Folders()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -56,13 +60,13 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var list = new SPList();
             var listView = new SPListView();
             var folderName = "Test Folder";
-            messageHelper.AddSubItems(pFolder, list, listView, folderName);
+            messageHelper.ProcessSubItems(pFolder, list, listView, folderName);
 
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.Item.Title == item.Title && spm.Item.ParentFolderName == folderName)), Times.AtLeastOnce, "We didn't call emit or the folder was not the one we expect");
         }
 
         [TestMethod]
-        public void AddSubItems_Creates_Queue_Emits_Queue_Messages_For_Items()
+        public void ProcessSubItems_Creates_Queue_Emits_Queue_Messages_For_Items()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -81,7 +85,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var pFolder = new SPFolder() { Name = "Test Folder Name" };
             var list = new SPList();
             var listView = new SPListView();
-            messageHelper.AddSubItems(pFolder, list, listView);
+            messageHelper.ProcessSubItems(pFolder, list, listView);
 
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.Item.ParentFolderName == pFolder.Name)), Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
         }

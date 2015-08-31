@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace EPiServer.ConnectForSharePoint.Models.FileTypes
 {
     [ContentType(GUID = "92700CD2-BCAB-4C3B-BD5E-14BBB9DFFD4F")]
-    [MediaDescriptor(ExtensionString = "flv,mp4,webm")]
+    [MediaDescriptor(ExtensionString = "flv,mp4,webm,swf")]
     public class SharepointVideoFile : VideoData, ExtraMediaData
     {
         [Editable(false, AllowInitialValue = true)]

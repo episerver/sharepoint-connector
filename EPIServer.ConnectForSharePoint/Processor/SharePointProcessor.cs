@@ -257,7 +257,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
  
-            // make sure the parent has the proper access so we can create objects in it
+            // make sure the parent has the proper access so we can delete objects in it
             ContentReference parentFolder;
             if (item.entryPointId != -1)
             {

@@ -1,4 +1,5 @@
 ﻿using EPiServer.Core;
+using EPiServer.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +8,8 @@ using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Models.FileTypes
 {
+    // todo we need decorations for generic files.. else files dont get 
+    [ContentType(GUID = "BF0967F4-27BE-4EE4-BA40-EBAE307264B2")]
     public class SharepointGenericMedia : MediaData, ExtraMediaData
     {
         [Editable(false, AllowInitialValue = true)]

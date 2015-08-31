@@ -11,6 +11,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     {
         void QueueFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null);
         void QueueItemsForAdd(string listids, IEnumerable<SPList> splists);
-        void AddSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null);
+        void ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null);
     }
 }

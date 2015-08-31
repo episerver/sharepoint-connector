@@ -8,6 +8,8 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.Core;
+using EPiServer.ServiceLocation;
+using EPiServer.ConnectForSharePoint.Models.FileTypes;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -18,6 +20,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private IContentProviderHelper _contentProviderHelper;
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
+        private IServiceLocator _serviceLocator;
 
         public SharePointMessageHelper()
         {
@@ -26,25 +29,27 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _contentProviderHelper = new ContentProviderHelper();
             _settingsHelper = new SharePointSettingsHelper();
             _emitterFactory = new SharePointMessageEmitterFactory();
+            _serviceLocator = ServiceLocator.Current;
         }
 
-        internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter)
+        internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
         {
             _logger = logger;
             _helper = helper;
             _contentProviderHelper = contentHelper;
             _settingsHelper = settings;
             _emitterFactory = emitter;
+            _serviceLocator = serviceLocator;
         }
 
         /// <summary>
-        /// Adds all the subfolders and subitems for the given parent folder
+        /// Adds all the subfolders and subitems for the given parent folder, additionally deletes any removed items in a folder.
         /// </summary>
         /// <param name="parentFolder">The parent folder to use as selection criterea items and as a source for the cms folder name</param>
         /// <param name="selectedList">The list of items associated with all the selected views</param>
         /// <param name="selectedView">The selected views in the configuration</param>
         /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
-        public void AddSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
+        public void ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
         {
             var items = _helper.GetItems(selectedList, selectedView, parentFolder);
             var iterator = items.GetEnumerator();
@@ -60,7 +65,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                 if (spItem.Folder != null)
                 {
-                    // Only add the folder if its not already there.
                     // Add the folder if its not already there
                     var contentRef = _contentProviderHelper.FindRecursiveFolders(spItem.Folder.Name, _settingsHelper.GetEntryPoint());
                     if (contentRef == null)
@@ -71,8 +75,50 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             Item = spItem,
                         });
                     }
+                    else
+                    {
+                        // The folder was already created so we can assume that we have been here before and this is a refresh.
+                        // We must now check for media items that no longer exist in share point and must be deleted from cms.
+                        // 1) get all the children items from that cms folder (contentRef)
+                        // 2) iterate through each media item and get the quid from our extra media data instance.
+                        // 3) check to see if the quid is in the sharepoint item list for this folder.
+                        // 4) if not post the delete item message.
+                        IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+                        var cmsListItems = repo.GetChildren<MediaData>(contentRef);
+                        var sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
+                        foreach (var item in cmsListItems)
+                        {
+                            if (item is ExtraMediaData)
+                            {
+                                var mediaItem = item as ExtraMediaData;
+                                Boolean delete = true;
 
-                    AddSubItems(spItem.Folder, selectedList, selectedView);
+                                // now iterate through the sharepoint list and check to see if its there. 
+                                // If its not, it needs to be deleted.
+                                foreach (var spItem2 in sharepointListItems)
+                                {
+                                    if(spItem2.GUID == new Guid(mediaItem.SharePointGUID))
+                                    {
+                                        delete = false; // the item is in both lists, we wont delete it. 
+                                        break;
+                                    }
+                                }
+                                if( delete == true)
+                                {
+                                    _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
+                                    {
+                                        Item = new SPListItem()
+                                        {
+                                            entryPointId = contentRef.ID, // id of the folder the item is in
+                                            GUID = new Guid(mediaItem.SharePointGUID),
+                                        },
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    ProcessSubItems(spItem.Folder, selectedList, selectedView);
                 }
                 else if (spItem.File != null)
                 {
@@ -210,7 +256,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     });
                 }
 
-                AddSubItems(parentFolder, selectedList, selectedView, FolderName);
+                ProcessSubItems(parentFolder, selectedList, selectedView, FolderName);
             }
         }
     }
