@@ -263,7 +263,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Password = ConfiguredPassword;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
+                SharePointSettings.Current.IsSharePointOnline = OnlineBox.Checked;
                 SharePointSettings.Current.Save();
+
+                CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
                 messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
@@ -389,7 +392,8 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 SiteUrl = ConfiguredUrl,
                 Username = ConfiguredUsername,
-                Password = ConfiguredPassword
+                Password = ConfiguredPassword,
+                IsSharePointOnline = OnlineBox.Checked
             };
 
             var contextService = new EndpointContextService();

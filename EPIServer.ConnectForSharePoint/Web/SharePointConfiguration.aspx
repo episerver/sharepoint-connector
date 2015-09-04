@@ -35,6 +35,10 @@
                 <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
             </div>
             <div class="epi-size15">
+                <asp:Label AssociatedControlID="OnlineBox" runat="server"><%# Translate("/sharepoint/admin/online") %></asp:Label>
+                <asp:CheckBox ID="OnlineBox" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>" />
+            </div>
+            <div class="epi-size15">
                 <label></label>
                 <EPiServerUI:ToolButton runat="server" SkinID="ArrowRight" ID="Connect" OnClick="Connect_Click" 
                     Text="<%$ Resources: EPiServer, sharepoint.admin.connect %>" />

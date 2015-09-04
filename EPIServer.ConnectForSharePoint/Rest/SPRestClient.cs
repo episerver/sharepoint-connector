@@ -85,7 +85,7 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
             // NOTE: the CookieContainer MUST be set before GetRequestStream() call
             // so that any POST request can work successfully
-            if (SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
+            if (_spSettings.IsSharePointOnline || SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
             {
                 webRequest.CookieContainer = _getCookieContainer(_spSettings);
             }
