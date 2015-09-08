@@ -9,6 +9,7 @@
                 <serverurl>SharePoint Site URL</serverurl>
                 <username>Username</username>
                 <password>Password</password>
+                <online>SharePoint Online</online>
                 <save>Save</save>
                 <connect>Connect to SharePoint</connect>
                 <entrypoint>Connection Entry Point</entrypoint>
