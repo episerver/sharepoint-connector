@@ -244,6 +244,7 @@
     <Compile Include="Models\FileTypes\SharepointGenericMedia.cs" />
     <Compile Include="Models\FileTypes\SharepointImageFile.cs" />
     <Compile Include="Models\FileTypes\SharepointVideoFile.cs" />
+    <Compile Include="Models\FolderData.cs" />
     <Compile Include="Models\SPFile.cs" />
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
