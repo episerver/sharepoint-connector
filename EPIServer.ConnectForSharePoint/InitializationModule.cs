@@ -88,6 +88,11 @@ namespace EPiServer.ConnectForSharePoint
             registry.Register<SharePointFolderUpdateMessage>(handler);
             registry.Register<SharePointFolderDeleteMessage>(handler);
 
+            // list item add/update/delete messages
+            registry.Register<SharePointListItemAddMessage>(handler);
+            registry.Register<SharePointListItemUpdateMessage>(handler);
+            registry.Register<SharePointListItemDeleteMessage>(handler);
+
             // Initialize message queue and the message dispatcher
             var messageDispatcher = new FanOutMessageDispatcher(registry);
             var queue = GetQueue("sharepointmod"); // Queue name has to match what is in SharePointMessageEmitterFactory

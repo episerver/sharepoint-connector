@@ -351,7 +351,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else
                 {
                     // Use the service to get the list.
-                    return SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+                    return SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.GenericList);
                 }
             }
             catch (Exception e)
@@ -401,7 +401,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             var svcLists = new ListsViewsService();
             svcLists.EndpointContextService = contextService;
 
-            return svcLists.GetLists((int)ListBaseType.DocumentLibrary);
+            return svcLists.GetLists((int)ListBaseType.GenericList);
         }
 
         private bool PreAuthenticationCheck()

@@ -109,7 +109,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             InitializeSharePointMediaProvider();
 
             var supportedLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                .GetLists((int)ListBaseType.DocumentLibrary);
+                .GetLists((int)ListBaseType.GenericList);
 
             var helper = new SharePointHelper();
             var selectedLists = helper.GetSelectedListViewIds(supportedLists);

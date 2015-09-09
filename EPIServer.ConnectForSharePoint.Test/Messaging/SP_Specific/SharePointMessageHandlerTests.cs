@@ -137,5 +137,62 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.Verify(p => p.DeleteFolder(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }
+
+        [TestMethod]
+        public void Handle_For_AddListItem_Message_Passes_Message_To_SharePointProcessor()
+        {
+            var handler = GetUnitUnderTest();
+            processor.Setup(p => p.AddFolder(It.IsAny<SPListItem>()));
+
+            var message = new SharePointListItemAddMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
+            };
+
+            handler.Handle(message);
+
+            processor.Verify(p => p.AddListItem(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
+        }
+
+        [TestMethod]
+        public void Handle_For_UpdateListItemMessage_Passes_Message_To_SharePointProcessor()
+        {
+            var handler = GetUnitUnderTest();
+            processor.Setup(p => p.UpdateListItem(It.IsAny<SPListItem>()));
+
+            var message = new SharePointListItemUpdateMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
+            };
+
+            handler.Handle(message);
+
+            processor.Verify(p => p.UpdateListItem(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
+        }
+
+        [TestMethod]
+        public void Handle_For_DeleteListItemMessage_Passes_Message_To_SharePointProcessor()
+        {
+            var handler = GetUnitUnderTest();
+            processor.Setup(p => p.DeleteListItem(It.IsAny<SPListItem>()));
+
+            var message = new SharePointListItemDeleteMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Some Title",
+                }
+            };
+
+            handler.Handle(message);
+
+            processor.Verify(p => p.DeleteListItem(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
+        }
     }
 }

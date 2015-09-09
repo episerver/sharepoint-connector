@@ -13,7 +13,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         IMessageHandler<SharePointContentDeleteMessage>,
         IMessageHandler<SharePointFolderAddMessage>,
         IMessageHandler<SharePointFolderUpdateMessage>,
-        IMessageHandler<SharePointFolderDeleteMessage>
+        IMessageHandler<SharePointFolderDeleteMessage>,
+        IMessageHandler<SharePointListItemAddMessage>,
+        IMessageHandler<SharePointListItemUpdateMessage>,
+        IMessageHandler<SharePointListItemDeleteMessage>
     {
         private ILogger _logger;
         private ISharePointProcessor _documentProcessor;
@@ -94,6 +97,21 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         public void Handle(SharePointContentDeleteMessage message)
         {
             processor.DeleteDocument(message.Item);
+        }
+
+        public void Handle(SharePointListItemAddMessage message)
+        {
+            processor.AddListItem(message.Item);
+        }
+
+        public void Handle(SharePointListItemUpdateMessage message)
+        {
+            processor.UpdateListItem(message.Item);
+        }
+
+        public void Handle(SharePointListItemDeleteMessage message)
+        {
+            processor.DeleteListItem(message.Item);
         }
     }
 }

@@ -348,5 +348,20 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
             return _fileStreamService.GetFileSteam(relativeUrl);
         }
+
+        public void AddListItem(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateListItem(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteListItem(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
