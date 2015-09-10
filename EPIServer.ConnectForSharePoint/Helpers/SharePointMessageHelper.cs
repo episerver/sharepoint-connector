@@ -66,35 +66,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 if (spItem.Folder != null)
                 {
                     // Add the folder if its not already there
-                    var contentRef = _contentProviderHelper.FindRecursiveFolders(spItem.Folder.Name, _settingsHelper.GetEntryPoint());
-                    if (contentRef == null)
+                    var contentRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
+                    if (contentRef != null)
                     {
-                        // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
-                        // then we can check the mod dates and just updated the entries.
-                        FolderData fd = new FolderData();
-                        FolderData foundData = fd.GetFolder(spItem.GUID);
-                        if (foundData.RefId != -1)
-                        {       
-                            // note that we dont have to check the mod date, we didnt find the folder by name, 
-                            // and its not cms BUT it is in our dynamic data store
-                            _logger.Information("Adding SharePointFolderUpdateMessage to the queue " + spItem.Title);
-                            _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
-                            {
-                                Item = spItem,
-                            });
-                        }
-                        else
-                        {
-                            _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                            _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
-                            {
-                                Item = spItem,
-                            });
-                        }
-                    }
-                    else
-                    {
-                        // The folder was already created so we can assume that we have been here before and this is a refresh.
+                        // The folder was previously created so we can assume that we have been here before and this is a refresh.
                         // We must now check for media items that no longer exist in share point and must be deleted from cms.
                         // 1) get all the children items from that cms folder (contentRef)
                         // 2) iterate through each media item and get the quid from our extra media data instance.
@@ -105,6 +80,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         var sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
                         foreach (var item in cmsListItems)
                         {
+                            // If its content
                             if (item is ExtraMediaData)
                             {
                                 var mediaItem = item as ExtraMediaData;
@@ -114,13 +90,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                 // If its not, it needs to be deleted.
                                 foreach (var spItem2 in sharepointListItems)
                                 {
-                                    if(spItem2.GUID == new Guid(mediaItem.SharePointGUID))
+                                    if (spItem2.GUID == new Guid(mediaItem.SharePointGUID))
                                     {
                                         delete = false; // the item is in both lists, we wont delete it. 
                                         break;
                                     }
                                 }
-                                if( delete == true)
+                                if (delete == true)
                                 {
                                     _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
                                     {
@@ -131,6 +107,39 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                         },
                                     });
                                 }
+                            }
+                        }
+
+                        // Now we must do the same thing for removed folders
+                        var cmsFolderItems = repo.GetChildren<ContentFolder>(contentRef);
+                        FolderData fd = new FolderData();
+                        foreach (var item in cmsFolderItems)
+                        {
+                            Boolean delete = true;
+
+                            // now iterate through the sharepoint list and check to see if its there. 
+                            // If its not, it needs to be deleted.
+                            foreach (var spItem2 in sharepointListItems)
+                            {
+                                fd = fd.GetFolder(item.ContentLink.ID);
+
+                                if (spItem2.GUID == fd.FolderGuid)
+                                {
+                                    delete = false; // the item is in both lists, we wont delete it. 
+                                    break;
+                                }
+                            }
+                            if (delete == true)
+                            {
+                                _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                                {
+                                    Item = new SPListItem()
+                                    {
+                                        entryPointId = contentRef.ID, // id of the folder the item is in
+                                        GUID = fd.FolderGuid,
+                                        Folder = new SPFolder() { Name = item.Name}
+                                    },
+                                });
                             }
                         }
                     }
@@ -250,31 +259,56 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 var FolderName = selectedList.Title + " - " + selectedView.Title;
                 var parentFolder = selectedList.RootFolder;
 
-                // Add the folder if its not already there
-                var entryPoint = _settingsHelper.GetEntryPoint();
-                var contentRef = _contentProviderHelper.FindRecursiveFolders(FolderName, entryPoint);
-                if (contentRef == null)
+                // Dummy splistitem used for message to processor
+                SPListItem viewListItem = new SPListItem()
                 {
-                    SPListItem viewListItem = new SPListItem()
+                    GUID = new Guid(idListAndView[0]),
+                    entryPointId = _settingsHelper.GetEntryPoint().ID,
+                    Title = selectedView.Title,
+                    Folder = new SPFolder()
                     {
-                        entryPointId = entryPoint.ID,
-                        Title = selectedView.Title,
-                        Folder = new SPFolder()
-                        {
-                            Name = FolderName,
-                        }
+                        Name = FolderName
+                    }
+                };
 
-                    };
+                // Add or update the folder if its not already there
+                AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
 
-                    // Add the view folder.
-                    _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
-                    {
-                        Item = viewListItem,
-                    });
-                }
-
+                // Process the sub items of this folder.
                 ProcessSubItems(parentFolder, selectedList, selectedView, FolderName);
             }
+        }
+
+        private ContentReference AddOrUpdateFolder(SPListItem item, ContentReference entryPoint)
+        {
+            var contentRef = _contentProviderHelper.FindRecursiveFolders(item.Folder.Name, entryPoint);
+            if (contentRef == null)
+            {
+                // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
+                // we can assume the name changed and we just need to updated it
+                FolderData fd = new FolderData();
+                FolderData foundData = fd.GetFolder(item.GUID);
+                if (foundData.RefId != -1)
+                {
+                    // note that we dont have to check the mod date, we didnt find the folder by name, 
+                    // and its not cms BUT it is in our dynamic data store
+                    _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                    _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
+                    {
+                        Item = item,
+                    });
+                }
+                else
+                {
+                    // Add the view folder.
+                    _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);
+                    _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
+                    {
+                        Item = item,
+                    });
+                }
+            }
+            return contentRef;
         }
     }
 }
