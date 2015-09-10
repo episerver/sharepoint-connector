@@ -473,6 +473,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             // make sure our dynamic data store returns a ordered list with the folder data required.
             IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
             processor.UpdateFolder(item);

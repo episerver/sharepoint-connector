@@ -156,7 +156,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             FolderData fd = new FolderData();
             var fdata = fd.GetFolder(item.GUID);
-            if (fdata != null)
+            if (fdata.RefId != -1)
             {
                 var repo = _serviceLocator.GetInstance<IContentRepository>();
                 var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).

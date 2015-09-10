@@ -69,11 +69,28 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     var contentRef = _contentProviderHelper.FindRecursiveFolders(spItem.Folder.Name, _settingsHelper.GetEntryPoint());
                     if (contentRef == null)
                     {
-                        _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
-                        _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
+                        // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
+                        // then we can check the mod dates and just updated the entries.
+                        FolderData fd = new FolderData();
+                        FolderData foundData = fd.GetFolder(spItem.GUID);
+                        if (foundData.RefId != -1)
+                        {       
+                            // note that we dont have to check the mod date, we didnt find the folder by name, 
+                            // and its not cms BUT it is in our dynamic data store
+                            _logger.Information("Adding SharePointFolderUpdateMessage to the queue " + spItem.Title);
+                            _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
+                            {
+                                Item = spItem,
+                            });
+                        }
+                        else
                         {
-                            Item = spItem,
-                        });
+                            _logger.Information("Adding SharePointFolderAddMessage to the queue " + spItem.Title);
+                            _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
+                            {
+                                Item = spItem,
+                            });
+                        }
                     }
                     else
                     {
