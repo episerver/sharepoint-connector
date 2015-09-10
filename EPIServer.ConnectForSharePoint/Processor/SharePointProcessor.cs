@@ -197,7 +197,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         /// Traverses to the bottom of the tree under this folder and deletes each item back to the ContentFolder specified.
         /// </summary>
         /// <param name="folder"></param>
-        private void DeleteSubFolders(ContentFolder folder)
+        internal void DeleteSubFolders(ContentFolder folder)
         {
             var repo = _serviceLocator.GetInstance<IContentRepository>();
             var folders = repo.GetChildren<ContentFolder>(folder.ContentLink);

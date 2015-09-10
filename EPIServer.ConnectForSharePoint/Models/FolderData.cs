@@ -73,7 +73,7 @@ namespace EPiServer.ConnectForSharePoint.Models
             // Get data store for FolderData
             var store = ddsf.CreateStore(typeof(FolderData));
 
-            // Retrieve comments
+            // Retrieve items
             var items = store.Items<FolderData>();
             var folders = items.Where(x => x.RefId == refId);
 
