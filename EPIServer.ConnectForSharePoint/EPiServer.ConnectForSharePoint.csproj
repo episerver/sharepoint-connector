@@ -154,6 +154,7 @@
       <HintPath>..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -463,6 +464,7 @@
 mkdir "$(SolutionDir)Deployment\lib"
 xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+xcopy "$(TargetDir)"\Microsoft.SharePoint.Client.Runtime.dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 
 IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" /s /q )
 mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"

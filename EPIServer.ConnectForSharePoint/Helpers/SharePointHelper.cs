@@ -6,10 +6,12 @@ using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Framework.Cache;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
+using Microsoft.SharePoint.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security;
 using System.Text.RegularExpressions;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
@@ -140,14 +142,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 }
 
                 // Store the cookies in cache
-                var firstExpireCookie = cookieContainer.GetCookies(new Uri(spSettings.SiteUrl))
-                                        .Cast<Cookie>()
-                                        .OrderByDescending(c => c.Expires)
-                                        .FirstOrDefault();
-                var cacheTimeoutSeconds = firstExpireCookie != null ?
-                    (firstExpireCookie.Expires - DateTime.Now).Subtract(TimeSpan.FromSeconds(CookieContainerCacheOffsetSeconds)).TotalSeconds
-                    : DefaultCookieContainerCacheSeconds;
-                CacheManager.Insert(CookieContainerCacheKey, cookieContainer, new CacheEvictionPolicy(TimeSpan.FromSeconds(cacheTimeoutSeconds), CacheTimeoutType.Absolute));
+                CacheManager.Insert(CookieContainerCacheKey, cookieContainer, new CacheEvictionPolicy(TimeSpan.FromSeconds(DefaultCookieContainerCacheSeconds), CacheTimeoutType.Absolute));
                 cookies = CacheManager.Get(CookieContainerCacheKey) as CookieContainer;
             }
             return cookies;
@@ -159,8 +154,16 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="spSettings">The SharePoint settings.</param>
         public static CookieContainer GetLatestCookies(SharePointSettings spSettings)
         {
-            var claimHelper = new MsOnlineClaimsHelper(spSettings.SiteUrl, spSettings.Username, spSettings.Password);
-            return claimHelper.CookieContainer;
+            //var claimHelper = new MsOnlineClaimsHelper(spSettings.SiteUrl, spSettings.Username, spSettings.Password);
+            //return claimHelper.CookieContainer;
+            var securePassword = new SecureString();
+            var siteUri = new Uri(spSettings.SiteUrl);
+            foreach (var c in spSettings.Password) { securePassword.AppendChar(c); }
+            var credentials = new SharePointOnlineCredentials(spSettings.Username, securePassword);
+            var authCookie = credentials.GetAuthenticationCookie(siteUri);
+            var cookieContainer = new CookieContainer();
+            cookieContainer.SetCookies(siteUri, authCookie);
+            return cookieContainer;
         }
 
         /// <summary>
