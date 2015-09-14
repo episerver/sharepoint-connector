@@ -131,6 +131,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
+                // Its ok to search for the parent folder by name, its not going to be changing ever during this 
+                // message.
                 cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, 
                     new ContentReference(item.rootCMSFolderEntryPointID)); 
             }
@@ -143,25 +145,76 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             cmsFolder.ParentLink = cref;
 
             // Save the folder
-            contentRepository.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
+            var savedRef = contentRepository.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
+
+            // Save the sharepoint data
+            var fd = new FolderData(savedRef.ID, item.GUID, item.Created, item.Modified);
+            fd.Save();
+        }
+
+        public void UpdateFolder(SPListItem item)
+        {
+            FolderData fd = new FolderData();
+            var fdata = fd.GetFolder(item.GUID);
+            if (fdata.RefId != -1)
+            {
+                var repo = _serviceLocator.GetInstance<IContentRepository>();
+                var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).
+                    CreateWritableClone() as ContentFolder;
+                cmsFolder.Name = item.Folder.Name;
+                var savedRef = repo.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
+
+                fdata.Modified = item.Modified;
+                fdata.Save();
+            }
         }
 
         public void DeleteFolder(SPListItem item)
         {
-            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var repo = _serviceLocator.GetInstance<IContentRepository>();
+
             // Set access level to 'Read' on the SharePoint's root folder and its children
-            ContentReference RootRef = new ContentReference(item.entryPointId);
+            ContentReference rootRef = new ContentReference(item.entryPointId);
+            _contentProviderHelper.SetAccessRight(rootRef, AccessLevel.FullAccess);
 
-            _contentProviderHelper.SetAccessRight(RootRef, AccessLevel.FullAccess);
-
-            var children = contentRepository.GetChildren<ContentFolder>(RootRef);
+            var children = repo.GetChildren<ContentFolder>(rootRef);
             foreach (var child in children)
             {
-                if( child.Name.Equals(item.Folder.Name) )
+                if ( child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase) )
                 {
-                    contentRepository.Delete(child.ContentLink,true,AccessLevel.Delete);
+                    // before we delete this folder, delete all the sub folders
+                    DeleteSubFolders(child);
+
+                    repo.Delete(child.ContentLink,true,AccessLevel.Delete);
+                    FolderData fd = new FolderData();
+                    FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Traverses to the bottom of the tree under this folder and deletes each item back to the ContentFolder specified.
+        /// </summary>
+        /// <param name="folder"></param>
+        internal void DeleteSubFolders(ContentFolder folder)
+        {
+            var repo = _serviceLocator.GetInstance<IContentRepository>();
+            var folders = repo.GetChildren<ContentFolder>(folder.ContentLink);
+            foreach (var f in folders)
+            {
+                DeleteSubFolders(f);
+
+                // delete any media in the folder
+                var medialist = repo.GetChildren<MediaData>(folder.ContentLink);
+                foreach (var m in medialist)
+                {
+                    repo.Delete(m.ContentLink, true);
+                }
+
+                repo.Delete(f.ContentLink, true, AccessLevel.Delete);
+                FolderData fd = new FolderData();
+                FolderData.Delete(fd.GetFolder(f.ContentLink.ID));
             }
         }
 
@@ -244,12 +297,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     }
                 }
             }
-        }
-
-        public void UpdateFolder(SPListItem item)
-        {
-            // When you implement these make sure you do the unit tests
-            throw new NotImplementedException();
         }
 
         public void DeleteDocument(SPListItem item)
