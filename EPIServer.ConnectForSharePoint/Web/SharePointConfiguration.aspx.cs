@@ -57,7 +57,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return (string)Session[SharePointUserPassword]; }
         }
 
-        public string QueueCount
+        [System.Web.Services.WebMethod()]
+        /// Used by jscript in aspx to get the current count asyc - 
+        /// the jscript needed a method, not a property.
+        public static string getCurrentQueCount()
+        {
+            return QueueCount;
+        }
+
+        public static string QueueCount
         {
             get
             {
@@ -128,7 +136,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         Connect.Enabled = false;
                         ActivateControls(false);
-                        Response.AddHeader("Refresh", "10");
                     }
                 }
             }
@@ -274,7 +281,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 QueueCountTB.Text = QueueCount;
                 Connect.Enabled = false;
                 ActivateControls(false);
-                Response.AddHeader("Refresh", "10");
             }
             catch (Exception ex)
             {
@@ -312,7 +318,6 @@ namespace EPiServer.ConnectForSharePoint.Web
             QueueCountTB.Text = QueueCount;
             Connect.Enabled = false;
             ActivateControls(false);
-            Response.AddHeader("Refresh", "10");
         }
 
         #endregion

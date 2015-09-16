@@ -8,7 +8,43 @@
 </asp:content>
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
-    <div class="epi-contentContainer epi-padding">
+    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+    <script type="text/javascript">
+        function updateQueCounts() {
+            PageMethods.getCurrentQueCount(onSucess, onError);
+        }
+        var lastValue = "0";
+        function onSucess(result) {
+            var label = document.getElementById('<%=QueueCountTB.ClientID%>');
+            var button = document.getElementById('<%=Save.ClientID%>');
+            label.innerHTML = result;
+
+            // we are done processing, queue is empty - get buttons into proper state
+            if (lastValue != "0" && result == "0") {
+                window.location.href = window.location.pathname + window.location.search;
+            }
+
+            // (save or refersh triggered by another user in another browser)
+            // items in the queue, but the buttons are enabled 
+            if( result != "0" && button.disabled == false) {
+                window.location.href = window.location.pathname + window.location.search;
+            }
+
+            // if there is nothing in the queue and the button is disabled
+            // odd case where just sometimes we are in the wrong state
+            if (result == "0" && button.disabled == true) {
+                window.location.href = window.location.pathname + window.location.search;
+            }
+
+            lastValue = result;
+        }
+        function onError(result) {
+        }
+        document.body.onload = updateQueCounts;
+        window.setInterval(updateQueCounts, 1000);
+    </script>
+
+        <div class="epi-contentContainer epi-padding">
         <div class="epi-contentArea">
             <h1 class="EP-prefix">
                 <%= Translate("/sharepoint/admin/displayname")%>
