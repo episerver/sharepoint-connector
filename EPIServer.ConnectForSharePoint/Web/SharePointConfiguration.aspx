@@ -70,11 +70,18 @@
                 <asp:Label AssociatedControlID="Password" runat="server"><%# Translate("/sharepoint/admin/password") %></asp:Label>
                 <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
             </div>
+
             <div class="epi-size15">
-                <asp:Label AssociatedControlID="OnlineBox" runat="server"><%# Translate("/sharepoint/admin/online") %></asp:Label>
-                <asp:CheckBox ID="OnlineBox" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>" />
+                <br />
+                <label><%# Translate("/sharepoint/admin/connectiontype") %></label>
+                <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" Text=<%# Translate("/sharepoint/admin/onpremises") %> runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
+                <br />
+                <label></label>
+                <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" Text=<%# Translate("/sharepoint/admin/online") %> runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
+                <br />
             </div>
             <div class="epi-size15">
+                <br />
                 <label></label>
                 <EPiServerUI:ToolButton runat="server" SkinID="ArrowRight" ID="Connect" OnClick="Connect_Click" 
                     Text="<%$ Resources: EPiServer, sharepoint.admin.connect %>" />
