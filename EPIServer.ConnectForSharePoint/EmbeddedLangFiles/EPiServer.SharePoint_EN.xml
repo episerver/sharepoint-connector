@@ -5,14 +5,16 @@
             <admin>
                 <displayname>Connect For SharePoint</displayname>
                 <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
+                <queuedescription>Queue Information.</queuedescription>
+                <remaingitems>Remaing items</remaingitems>
                 <selectviewdescription>Select SharePoint views to get media from.</selectviewdescription>
                 <serverurl>SharePoint Site URL</serverurl>
                 <username>Username</username>
                 <password>Password</password>
                 <online>SharePoint Online</online>
                 <save>Save</save>
-                <connect>Connect to SharePoint</connect>
-                <entrypoint>Connection Entry Point</entrypoint>
+                <connect>Test connection</connect>
+                <entrypoint>Folder: </entrypoint>
                 <expirationtime>Expiration Time</expirationtime>
                 <refreshcache>Refresh</refreshcache>
                 <entrypointrequired>Connection Entry Point is required.</entrypointrequired>

@@ -85,34 +85,34 @@
                 </p>
                 <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />
             </asp:Panel>                  
+
+            <br/>
+            <asp:Label AssociatedControlID="EntryPoint" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
+            <asp:TextBox ID="EntryPoint" runat="server" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
+            <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
+                ControlToValidate="EntryPoint"
+                ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
+                ForeColor="Red" 
+                validationgroup="inputValidationGroup">
+            </asp:RequiredFieldValidator>
+            <br/>
+
+                <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
+                    Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" 
+                    style="vertical-align:top; float: right"/>
             </fieldset> 
                 
             <fieldset>
+                <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
             <div class="epi-size15">
-                <asp:Label AssociatedControlID="EntryPoint" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
-                <asp:TextBox ID="EntryPoint" runat="server" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
-                <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
-                  ControlToValidate="EntryPoint"
-                  ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
-                  ForeColor="Red" 
-                  validationgroup="inputValidationGroup">
-                </asp:RequiredFieldValidator>
-            </div>
-            </fieldset>
-
-            <fieldset>
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="QueueCountTB" runat="server">Number of Items in Queue</asp:Label>
+                <asp:Label AssociatedControlID="QueueCountTB" runat="server">
+                    <%= Translate("/sharepoint/admin/remaingitems")%>
+                </asp:Label>
                 <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
+                <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" ReadOnly="False" OnClick="Refresh_Click"
+                    Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" style="vertical-align:top; float: right" />
             </div>
             </fieldset>
-
-            <div class="epi-buttonContainer">
-                <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
-                     Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" />
-                <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" ReadOnly="False" OnClick="Refresh_Click"
-                     Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" />
-            </div>
 
         </asp:Panel>
     </div>

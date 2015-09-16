@@ -121,15 +121,6 @@ namespace EPiServer.ConnectForSharePoint.Web {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator EntryPointRequired;
         
         /// <summary>
-        /// QueueCountTB control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label QueueCountTB;
-        
-        /// <summary>
         /// Save control.
         /// </summary>
         /// <remarks>
@@ -137,6 +128,15 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::EPiServer.UI.WebControls.ToolButton Save;
+        
+        /// <summary>
+        /// QueueCountTB control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label QueueCountTB;
         
         /// <summary>
         /// Refresh control.
