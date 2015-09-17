@@ -3,6 +3,8 @@
 
 <%@ Import Namespace="EPiServer" %>
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
+<%@ Register TagPrefix="EPiServerUI" Namespace="EPiServer.UI.WebControls.ContentDataSource" Assembly="EPiServer.UI" %>
+<%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint" Assembly="EPiServer.ConnectForSharePoint" %>
 
 <asp:content contentplaceholderid="HeaderContentRegion" runat="server">
 </asp:content>
@@ -94,6 +96,28 @@
             </asp:Panel>                  
 
             <br/>
+    <script type='text/javascript'>
+        function setval(newval) {
+            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
+        return false;
+        }
+    </script>              
+    <EPiServerUISharePoint:MyDataSource ID="contentDataSource" AccessLevel="NoAccess" runat="server" />
+    <div class="episcroll episerver-pagetree-selfcontained" style="max-height:250px;">
+       <EPiServerUI:PageTreeView ID="pageTreeView" DataSourceID="contentDataSource" CssClass="episerver-pagetreeview" runat="server" 
+            ExpandDepth="1" 
+            DataTextField="Name" 
+            ExpandOnSelect="false"
+            DataNavigateUrlField="ContentLink" EnableViewState="false">
+            <TreeNodeTemplate>
+                <a href="#" onclick="
+                    return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>
+                    );">
+                    <%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>
+                </a>
+            </TreeNodeTemplate>
+        </EPiServerUI:PageTreeView>
+    </div>
             <asp:Label AssociatedControlID="EntryPoint" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
             <asp:TextBox ID="EntryPoint" runat="server" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
             <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"

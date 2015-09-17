@@ -250,6 +250,7 @@
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
     <Compile Include="Models\SPUser.cs" />
+    <Compile Include="MyDataSource.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
