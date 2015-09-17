@@ -319,6 +319,7 @@
     <Compile Include="SPServices\REST\ListsViewsService.cs" />
     <Compile Include="SPServices\REST\RESTServiceBase.cs" />
     <Compile Include="SPServices\REST\ServicesHub.cs" />
+    <Compile Include="UpdateJob.cs" />
     <Compile Include="Web References\SPServices\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
