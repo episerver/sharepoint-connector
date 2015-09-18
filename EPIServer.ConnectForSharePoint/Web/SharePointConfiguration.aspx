@@ -3,6 +3,8 @@
 
 <%@ Import Namespace="EPiServer" %>
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
+<%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
+<%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Models" Assembly="EPiServer.ConnectForSharePoint" %>
 
 <asp:content contentplaceholderid="HeaderContentRegion" runat="server">
 </asp:content>
@@ -51,17 +53,50 @@
             </asp:Panel>                  
             </fieldset> 
                 
-            <fieldset>
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="EntryPoint" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
-                <asp:TextBox ID="EntryPoint" runat="server" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
-                <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
-                  ControlToValidate="EntryPoint"
-                  ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
-                  ForeColor="Red" 
-                  validationgroup="inputValidationGroup">
-                </asp:RequiredFieldValidator>
-            </div>
+            <fieldset >
+                <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
+                <div class="epi-size15">
+                    <script type='text/javascript'>
+                        function setval(newval, foldername) {
+                            document.getElementById('<%# EntryPointFolderName.ClientID %>').value = foldername;
+                            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
+                            return false;
+                        }
+                    </script>    
+                    <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
+                        AccessLevel="NoAccess" 
+                        runat="server" 
+                        IncludeRootItem="true" 
+                        ContentLink="<%# EPiServer.Web.SiteDefinition.Current.SiteAssetsRoot %>" />
+                    <div class="episcroll episerver-pagetree-selfcontained" style="max-height:250px;">
+                       <EPiServerUI:PageTreeView ID="pageTreeView" 
+                           DataSourceID="contentDataSource" 
+                           CssClass="episerver-pagetreeview" 
+                           runat="server" 
+                           ExpandDepth="1"
+                           DataTextField="Name" 
+                           ExpandOnSelect="false"
+                           DataNavigateUrlField="ContentLink" EnableViewState="false">
+                            <TreeNodeTemplate>
+                                <a href="#" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>, <%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
+                                    <%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>
+                                </a>
+                            </TreeNodeTemplate>
+                        </EPiServerUI:PageTreeView>
+                    </div> 
+                    <div>
+                        <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                        <asp:TextBox ID="EntryPointFolderName" ReadOnly="True" runat="server" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                    </div>
+                    <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
+                    <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
+                    <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
+                      ControlToValidate="EntryPoint"
+                      ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
+                      ForeColor="Red" 
+                      validationgroup="inputValidationGroup">
+                    </asp:RequiredFieldValidator>
+                </div>
             </fieldset>
 
             <fieldset>

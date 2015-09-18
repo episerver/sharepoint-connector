@@ -12,6 +12,8 @@
                 <online>SharePoint Online</online>
                 <save>Save</save>
                 <connect>Connect to SharePoint</connect>
+                <selectfolder>Select Folder:</selectfolder>
+                <selectedfolder>Selected Folder:</selectedfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
                 <expirationtime>Expiration Time</expirationtime>
                 <refreshcache>Refresh</refreshcache>

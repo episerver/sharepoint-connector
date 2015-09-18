@@ -199,7 +199,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
                     }
-                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any childred.
+                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any children.
                     {
                         var children = contentRepository.GetChildren<IContent>(contentLink);
                         if (children.Count<IContent>() > 0 )
@@ -263,6 +263,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Password = ConfiguredPassword;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
+                SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
                 SharePointSettings.Current.IsSharePointOnline = OnlineBox.Checked;
                 SharePointSettings.Current.Save();
 
