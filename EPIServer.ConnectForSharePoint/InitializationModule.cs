@@ -4,22 +4,13 @@ using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Core;
 using EPiServer.Framework;
-using EPiServer.Framework.Blobs;
 using EPiServer.Logging;
 using EPiServer.Packaging;
 using EPiServer.ServiceLocation;
-using EPiServer.Web.Hosting;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Reflection;
-using System.Threading;
-using System.Web.Configuration;
-using System.Web.Hosting;
 
 namespace EPiServer.ConnectForSharePoint
 {
@@ -45,12 +36,23 @@ namespace EPiServer.ConnectForSharePoint
         public void MovedContent(object sender, ContentEventArgs contentEventArgs)
         {
             ContentReference cf = contentEventArgs.ContentLink;
+            var repo = ServiceLocator.Current.GetInstance<IContentRepository>();
+            IContent f = repo.Get<IContent>(cf);
+            if (f != null && f is ContentFolder )
+            {
+                FolderData fd = new FolderData();
+                fd = fd.GetFolder(f.ContentLink.ID);
+                if (fd.RefId != -1) // folder ref not found in table, do nothing...
+                {
+                    // cleanup all the sub folders properly, ie user is deleting a top level
+                    // folder that we created * bad idea...
+                    SharePointProcessor processor = new SharePointProcessor();
+                    processor.DeleteSubFolders(f as ContentFolder);
 
-            // not that it doesn't matter if it doesnt exist, no error will be thrown
-            // not worthing checking if it exists first or if its a folder that would just be more calls
-            // on every item moved.
-            FolderData fd = new FolderData();
-            FolderData.Delete(fd.GetFolder(cf.ID));
+                    // now delete this folder from the table.
+                    FolderData.Delete(fd);
+                }
+            }
         }
 
         /// <inheritdoc /> 
@@ -139,7 +141,6 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="context"></param>
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
-            Thread.Sleep(5000);
             // Replace the MediaResolver with our own
             context.Container.Configure(ce =>
             {
