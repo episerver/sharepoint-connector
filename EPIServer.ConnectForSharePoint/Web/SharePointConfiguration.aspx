@@ -18,7 +18,7 @@
         var lastValue = "0";
         function onSucess(result) {
             var label = document.getElementById('<%=QueueCountTB.ClientID%>');
-            var button = document.getElementById('<%=Save.ClientID%>');
+            var button = document.getElementById('<%=Refresh.ClientID%>');
             label.innerHTML = result;
 
             // we are done processing, queue is empty - get buttons into proper state

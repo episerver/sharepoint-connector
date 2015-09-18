@@ -3,6 +3,7 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Core;
 using EPiServer.Framework;
@@ -35,13 +36,35 @@ namespace EPiServer.ConnectForSharePoint
 
         #region IInitializableModule implementation
 
+        /// <summary>
+        /// Event listener so that we can detect if the user deletes one of our sharepoint folders, 
+        /// this allows us to clean up the folder id to sharepoint quid table.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="contentEventArgs"></param>
+        public void MovedContent(object sender, ContentEventArgs contentEventArgs)
+        {
+            ContentReference cf = contentEventArgs.ContentLink;
+
+            // not that it doesn't matter if it doesnt exist, no error will be thrown
+            // not worthing checking if it exists first or if its a folder that would just be more calls
+            // on every item moved.
+            FolderData fd = new FolderData();
+            FolderData.Delete(fd.GetFolder(cf.ID));
+        }
+
         /// <inheritdoc /> 
         public override void Initialize(Framework.Initialization.InitializationEngine context)
         {
             _logger.Debug("ConnectForSharePoint AddOn Initialize");
 
             context.InitComplete += InitializationEngine_InitComplete;
-        }
+
+            // add an event listener so that we get a message if the user moves something to the trash
+            // it could be one of our folders so in that case we want to remove the entry from the 
+            // sharepoint quid to cms content folder mapping table
+            DataFactory.Instance.MovedContent += MovedContent;
+    }
 
         #endregion
 
