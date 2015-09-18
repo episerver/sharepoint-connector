@@ -5,11 +5,15 @@
             <admin>
                 <displayname>Connect For SharePoint</displayname>
                 <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
+                <queuedescription>Queue Information.</queuedescription>
+                <remaingitems>Remaing items</remaingitems>
                 <selectviewdescription>Select SharePoint views to get media from.</selectviewdescription>
                 <serverurl>SharePoint Site URL</serverurl>
                 <username>Username</username>
                 <password>Password</password>
-                <online>SharePoint Online</online>
+                <connectiontype>Connection type</connectiontype>
+                <online>Online</online>
+                <onpremises>On-premises</onpremises>
                 <save>Save</save>
                 <connect>Connect to SharePoint</connect>
                 <selectfolder>Select Folder:</selectfolder>
