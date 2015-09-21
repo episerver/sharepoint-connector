@@ -271,7 +271,33 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 };
 
                 // Add or update the folder if its not already there
-                AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
+                ContentReference cf = AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
+                if( cf != null )
+                {
+                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+                    var cmsListItems = repo.GetChildren<MediaData>(cf);
+                    var sharepointListItems = _helper.GetItems(selectedList, selectedView, parentFolder);
+
+                    // check for folders that the user may have added that are not supposed to be there.
+                    var cmsFolderItems = repo.GetChildren<ContentFolder>(cf);
+                    FolderData fd = new FolderData();
+                    foreach (var folder in cmsFolderItems)
+                    {
+                        Boolean delete = true;
+                        fd = fd.GetFolder(folder.ContentLink.ID);
+                        if(fd.RefId == -1)
+                        {
+                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                            {
+                                Item = new SPListItem()
+                                {
+                                    entryPointId = cf.ID, // id of the folder the item is in
+                                    Folder = new SPFolder() { Name = folder.Name }
+                                },
+                            });
+                        }
+                    }
+                }
 
                 // Process the sub items of this folder.
                 ProcessSubItems(parentFolder, selectedList, selectedView, FolderName);
