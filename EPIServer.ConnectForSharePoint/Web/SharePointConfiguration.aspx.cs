@@ -74,6 +74,20 @@ namespace EPiServer.ConnectForSharePoint.Web
                 return queue.Count.ToString();
             }
         }
+
+        /// <summary>
+        /// Return folder name given an id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [System.Web.Services.WebMethod]
+        public static string GetEntryPointFolderName(string id)
+        {
+            //var numVal = int.Parse(id);
+            var folderName = _contentRepository.Get<IContent>(new ContentReference(id));
+            return folderName.Name;
+        }
+
         /// <summary>
         /// HelpUrl of current SharePoint Connector Shell Module
         /// </summary>

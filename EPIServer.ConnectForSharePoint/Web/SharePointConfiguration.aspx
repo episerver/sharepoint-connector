@@ -99,12 +99,22 @@
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
                 <div class="epi-size15">
                     <script type='text/javascript'>
-                        function setval(newval, foldername) {
-                            document.getElementById('<%# EntryPointFolderName.ClientID %>').value = foldername;
+                        function setval(newval)
+                        {
+                            //set foldername text box to show selected folder
+                            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
+                            
+                            // set hidden text box to be selected folder id so everything continues to work behind the scenes
                             document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
                             return false;
                         }
-                    </script>    
+
+                        function onSuccess(result)
+                        {
+                            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
+                            epFolderName.value = result;
+                        }
+                    </script>
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -120,7 +130,7 @@
                            ExpandOnSelect="false"
                            DataNavigateUrlField="ContentLink" EnableViewState="false">
                             <TreeNodeTemplate>
-                                <a href="#" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>, <%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
+                                <a href="#" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
                                     <%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>
                                 </a>
                             </TreeNodeTemplate>
