@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Logging;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
-using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
+using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -317,7 +316,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             } else
                                 cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
 
-                            if( cf == null || cf.ParentLink == null )
+                            if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
                             {
                                 done = true;
                             }
