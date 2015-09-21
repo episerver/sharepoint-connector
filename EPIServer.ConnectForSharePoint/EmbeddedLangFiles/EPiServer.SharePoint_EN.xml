@@ -15,7 +15,7 @@
                 <online>Online</online>
                 <onpremises>On-premises</onpremises>
                 <save>Save</save>
-                <connect>Connect to SharePoint</connect>
+                <connect>Test connection</connect>
                 <selectfolder>Select Folder:</selectfolder>
                 <selectedfolder>Selected Folder:</selectedfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
