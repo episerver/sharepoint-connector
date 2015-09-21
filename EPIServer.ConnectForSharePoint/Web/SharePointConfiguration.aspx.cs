@@ -172,7 +172,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    Connect.Enabled = false;
+                    Connect.Enabled = true;
                     ShowMessage(errorMessage, true);
                     return;
                 }
