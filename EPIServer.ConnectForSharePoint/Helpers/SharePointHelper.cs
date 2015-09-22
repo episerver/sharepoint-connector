@@ -41,17 +41,20 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             get
             {
-                try
-                {
-                    ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
-                }
-                catch { }
-
                 if (_spServicesHub == null)
                 {
-                    _spServicesHub = new ServicesHub();
+                    try
+                    {
+                        ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
+                    }
+                    catch { }
 
-                    ServiceLocator.Current.Buildup(_spServicesHub);
+                    if (_spServicesHub == null)
+                    {
+                        _spServicesHub = new ServicesHub();
+
+                        ServiceLocator.Current.Buildup(_spServicesHub);
+                    }
                 }
                 return _spServicesHub;
             }
@@ -193,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         public IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder)
         {
-            return _spServicesHub.SPListsViewsService.GetItems(list, view, folder);
+            return SPServicesHub.SPListsViewsService.GetItems(list, view, folder);
         }
     }
 }

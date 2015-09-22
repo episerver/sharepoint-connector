@@ -321,11 +321,13 @@
     <Compile Include="SPServices\REST\ListsViewsService.cs" />
     <Compile Include="SPServices\REST\RESTServiceBase.cs" />
     <Compile Include="SPServices\REST\ServicesHub.cs" />
+    <Compile Include="UpdateJob.cs" />
     <Compile Include="Web References\SPServices\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.map</DependentUpon>
     </Compile>
+    <Compile Include="Models\SharepointDataSource.cs" />
     <Compile Include="Web\SharePointConfiguration.aspx.cs">
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

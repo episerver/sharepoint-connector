@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Logging;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
-using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
+using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -272,7 +271,33 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 };
 
                 // Add or update the folder if its not already there
-                AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
+                ContentReference cf = AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
+                if( cf != null )
+                {
+                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+                    var cmsListItems = repo.GetChildren<MediaData>(cf);
+                    var sharepointListItems = _helper.GetItems(selectedList, selectedView, parentFolder);
+
+                    // check for folders that the user may have added that are not supposed to be there.
+                    var cmsFolderItems = repo.GetChildren<ContentFolder>(cf);
+                    FolderData fd = new FolderData();
+                    foreach (var folder in cmsFolderItems)
+                    {
+                        Boolean delete = true;
+                        fd = fd.GetFolder(folder.ContentLink.ID);
+                        if(fd.RefId == -1)
+                        {
+                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                            {
+                                Item = new SPListItem()
+                                {
+                                    entryPointId = cf.ID, // id of the folder the item is in
+                                    Folder = new SPFolder() { Name = folder.Name }
+                                },
+                            });
+                        }
+                    }
+                }
 
                 // Process the sub items of this folder.
                 ProcessSubItems(parentFolder, selectedList, selectedView, FolderName);
@@ -284,21 +309,52 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var contentRef = _contentProviderHelper.FindRecursiveFolders(item.Folder.Name, entryPoint);
             if (contentRef == null)
             {
+                Boolean add = true;
+
                 // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
                 // we can assume the name changed and we just need to updated it
                 FolderData fd = new FolderData();
                 FolderData foundData = fd.GetFolder(item.GUID);
                 if (foundData.RefId != -1)
                 {
-                    // note that we dont have to check the mod date, we didnt find the folder by name, 
-                    // and its not cms BUT it is in our dynamic data store
-                    _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
-                    _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
+                    // well we found it but it doesnt mean its the correct one. If the user changed the dest folder
+                    // these items could have been marked for delete in previouse methods and are still in the queue
+                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+                    ContentFolder cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
+                    if (cf != null) // did the item actually exist?
                     {
-                        Item = item,
-                    });
+                        // walk up the parent list and see if its the current selected folder, if its not
+                        // there it means the item is in the delete queue and the user selected a different folder.
+                        // If it is under the current folder, it means the folder needs to be updated becuase it changed
+                        // in sharepoint
+                        Boolean done = false;
+                        do
+                        {
+                            if (cf.ParentLink.ID == entryPoint.ID)
+                            {
+                                _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                                _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
+                                {
+                                    Item = item,
+                                });
+                                add = false;
+                                done = true;
+                            } else
+                                cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
+
+                            if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
+                            {
+                                done = true;
+                            }
+                        } while (!done);
+                    }
+                    else
+                    {
+                        // remove the folder data, its invalid.
+                        FolderData.Delete(foundData);
+                    }
                 }
-                else
+                if( add )
                 {
                     // Add the view folder.
                     _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);
