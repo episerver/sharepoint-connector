@@ -16,6 +16,7 @@ using System.Net;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -84,8 +85,20 @@ namespace EPiServer.ConnectForSharePoint.Web
         public static string GetEntryPointFolderName(string id)
         {
             //var numVal = int.Parse(id);
-            var folderName = _contentRepository.Get<IContent>(new ContentReference(id));
-            return folderName.Name;
+            var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(id));
+            var fullPath = selectedFolderRef.Name;
+            var parent = selectedFolderRef.ParentLink;
+
+            // traverse up the tree to display path to selected folder
+            while (parent != null && parent != SiteDefinition.Current.GlobalAssetsRoot)
+            {
+                var parentRef = _contentRepository.Get<ContentFolder>(new ContentReference(parent.ID));
+
+                fullPath = parentRef.Name + "/" + fullPath;
+                parent = parentRef.ParentLink;
+            }
+
+            return fullPath;
         }
 
         /// <summary>
