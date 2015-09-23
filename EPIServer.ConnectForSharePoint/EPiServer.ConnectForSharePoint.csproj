@@ -219,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consts.cs" />
+    <Compile Include="Controllers\SharePointImageController.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
     <Compile Include="Models\SPUser.cs" />
+    <Compile Include="Models\ViewModels\ImageViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
@@ -307,7 +309,6 @@
     <Compile Include="SharePointContentMappingRepository.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
-    <Compile Include="SPContentMediaResolver.cs" />
     <Compile Include="SPContentReindex.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
@@ -414,6 +415,7 @@
     <Content Include="modules\_protected\Shell\EPiServer.Shell.UI.zip" />
     <Content Include="modules\_protected\CMS\web.config" />
     <Content Include="modules\_protected\CMS\EPiServer.Cms.Shell.UI.zip" />
+    <Content Include="Views\SharePointImage\Index.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

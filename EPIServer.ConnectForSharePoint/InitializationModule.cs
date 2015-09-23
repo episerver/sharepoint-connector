@@ -141,11 +141,6 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="context"></param>
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
-            // Replace the MediaResolver with our own
-            context.Container.Configure(ce =>
-            {
-                ce.For<ContentMediaResolver>().Use<SPContentMediaResolver>();
-            });
         }
     }
 }
