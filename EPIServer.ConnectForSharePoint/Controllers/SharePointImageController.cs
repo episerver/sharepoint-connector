@@ -27,7 +27,7 @@ namespace EPiServer.ConnectForSharePoint.Controller
                 Name = currentContent.Name,
             };
 
-            return PartialView(model);
+            return PartialView("~/Views/Shared/SharePoint/Image.cshtml", model);
         }
     }
 }
