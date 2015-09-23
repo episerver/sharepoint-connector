@@ -3,22 +3,14 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
-using EPiServer.ConnectForSharePoint.Providers;
+using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Core;
 using EPiServer.Framework;
-using EPiServer.Framework.Blobs;
 using EPiServer.Logging;
 using EPiServer.Packaging;
 using EPiServer.ServiceLocation;
-using EPiServer.Web.Hosting;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Reflection;
-using System.Threading;
-using System.Web.Configuration;
-using System.Web.Hosting;
 
 namespace EPiServer.ConnectForSharePoint
 {
@@ -35,13 +27,46 @@ namespace EPiServer.ConnectForSharePoint
 
         #region IInitializableModule implementation
 
+        /// <summary>
+        /// Event listener so that we can detect if the user deletes one of our sharepoint folders, 
+        /// this allows us to clean up the folder id to sharepoint quid table.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="contentEventArgs"></param>
+        public void MovedContent(object sender, ContentEventArgs contentEventArgs)
+        {
+            ContentReference cf = contentEventArgs.ContentLink;
+            var repo = ServiceLocator.Current.GetInstance<IContentRepository>();
+            IContent f = repo.Get<IContent>(cf);
+            if (f != null && f is ContentFolder )
+            {
+                FolderData fd = new FolderData();
+                fd = fd.GetFolder(f.ContentLink.ID);
+                if (fd.RefId != -1) // folder ref not found in table, do nothing...
+                {
+                    // cleanup all the sub folders properly, ie user is deleting a top level
+                    // folder that we created * bad idea...
+                    SharePointProcessor processor = new SharePointProcessor();
+                    processor.DeleteSubFolders(f as ContentFolder);
+
+                    // now delete this folder from the table.
+                    FolderData.Delete(fd);
+                }
+            }
+        }
+
         /// <inheritdoc /> 
         public override void Initialize(Framework.Initialization.InitializationEngine context)
         {
             _logger.Debug("ConnectForSharePoint AddOn Initialize");
 
             context.InitComplete += InitializationEngine_InitComplete;
-        }
+
+            // add an event listener so that we get a message if the user moves something to the trash
+            // it could be one of our folders so in that case we want to remove the entry from the 
+            // sharepoint quid to cms content folder mapping table
+            DataFactory.Instance.MovedContent += MovedContent;
+    }
 
         #endregion
 
@@ -121,12 +146,6 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="context"></param>
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
-            Thread.Sleep(5000);
-            // Replace the MediaResolver with our own
-            context.Container.Configure(ce =>
-            {
-                ce.For<ContentMediaResolver>().Use<SPContentMediaResolver>();
-            });
         }
     }
 }

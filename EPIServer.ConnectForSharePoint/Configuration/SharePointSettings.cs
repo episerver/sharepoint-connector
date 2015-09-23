@@ -43,6 +43,11 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public ContentReference EntryPoint { get; set; }
 
         /// <summary>
+        /// Gets or sets the mapping SharePoint's content root assets folder name
+        /// </summary>
+        public string EntryPointFolderName { get; set; }
+
+        /// <summary>
         /// Indicates if we are connecting to a SharePoint Online instance
         /// </summary>
         public bool IsSharePointOnline { get; set; }
@@ -83,6 +88,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             Password = string.Empty;
             ListIds = string.Empty;
             EntryPoint = ContentReference.EmptyReference;
+            EntryPointFolderName = string.Empty;
             ThumbnailOption = ThumbnailOptions.GenericThumbnailForAll;
         }
 

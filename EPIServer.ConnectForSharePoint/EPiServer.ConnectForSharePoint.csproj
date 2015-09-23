@@ -50,6 +50,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core">
@@ -154,6 +155,10 @@
       <HintPath>..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -214,6 +219,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consts.cs" />
+    <Compile Include="Controllers\SharePointGenericController.cs" />
+    <Compile Include="Controllers\SharePointImageController.cs" />
+    <Compile Include="Controllers\SharePointVideoController.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
@@ -252,6 +260,9 @@
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
     <Compile Include="Models\SPUser.cs" />
+    <Compile Include="Models\ViewModels\GenericViewModel.cs" />
+    <Compile Include="Models\ViewModels\ImageViewModel.cs" />
+    <Compile Include="Models\ViewModels\VideoViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
@@ -305,7 +316,6 @@
     <Compile Include="SharePointContentMappingRepository.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
-    <Compile Include="SPContentMediaResolver.cs" />
     <Compile Include="SPContentReindex.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
@@ -320,11 +330,13 @@
     <Compile Include="SPServices\REST\ListsViewsService.cs" />
     <Compile Include="SPServices\REST\RESTServiceBase.cs" />
     <Compile Include="SPServices\REST\ServicesHub.cs" />
+    <Compile Include="UpdateJob.cs" />
     <Compile Include="Web References\SPServices\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.map</DependentUpon>
     </Compile>
+    <Compile Include="Models\SharepointDataSource.cs" />
     <Compile Include="Web\SharePointConfiguration.aspx.cs">
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -410,6 +422,9 @@
     <Content Include="modules\_protected\Shell\EPiServer.Shell.UI.zip" />
     <Content Include="modules\_protected\CMS\web.config" />
     <Content Include="modules\_protected\CMS\EPiServer.Cms.Shell.UI.zip" />
+    <Content Include="Views\Shared\SharePoint\Image.cshtml" />
+    <Content Include="Views\Shared\SharePoint\Video.cshtml" />
+    <Content Include="Views\Shared\SharePoint\Generic.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -423,6 +438,7 @@
       <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -462,10 +478,15 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>IF exist "$(SolutionDir)Deployment\lib\" ( rmdir "$(SolutionDir)Deployment\lib" /s /q )
+    <PostBuildEvent>echo post build events
+IF exist "$(SolutionDir)Deployment\lib\" ( rmdir "$(SolutionDir)Deployment\lib" /s /q )
 mkdir "$(SolutionDir)Deployment\lib"
 xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+xcopy "$(TargetDir)"\Microsoft.SharePoint.Client.Runtime.dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+
+mkdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint"
+xcopy "$(TargetDir)..\Views\Shared\SharePoint"\*cshtml "$(SolutionDir)Deployment\content\Views\Shared\SharePoint\"  /I /F /R /Y
 
 IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" /s /q )
 mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"

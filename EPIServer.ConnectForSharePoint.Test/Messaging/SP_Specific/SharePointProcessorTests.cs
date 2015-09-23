@@ -182,7 +182,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             dds.Setup(dd => dd.Delete(It.IsAny<FolderData>())).Verifiable();
             FolderData folderData = new FolderData(ddsf.Object);
 
-            // Crazy but we need to return an ordered list of nothing...
+            // Return an ordered list of nothing...
             IList<FolderData> list = new List<FolderData>();
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
@@ -314,11 +314,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
+        [TestMethod]
         public void UpdateDocument_Calls_ContentTypeRepository_Load()
         {
             var processor = GetUnitUnderTest();
 
-            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
 
@@ -341,7 +341,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             processor.UpdateDocument(item);
 
             contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
-            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
         [TestMethod]
@@ -473,6 +472,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             // make sure our dynamic data store returns a ordered list with the folder data required.
             IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
             processor.UpdateFolder(item);
@@ -601,7 +601,59 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.Is<Boolean>(force => force == true),
                 It.Is<AccessLevel>(al => al == AccessLevel.Delete)), Times.Once, "Save needs to be called once");
         }
+
+        [TestMethod]
+        public void DeleteSubFolders_Calls_DeleteSubFolders_And_DeletesMedia()
+        {
+            var processor = GetUnitUnderTest();
+
+            var data = new List<ContentFolder>();
+            data.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new ContentFolder()
+            {
+                Name = "Test 2",
+                ContentLink = new ContentReference(2),
+            });
+            contentRepo.SetupSequence(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
+                .Returns(data)
+                .Returns(new List<ContentFolder>() { new ContentFolder() {
+                    Name = "Sub",
+                    ContentLink = new ContentReference(42)
+                }} );
+            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
+
+            var medialist = new List<MediaData>();
+            medialist.Add(new SharepointImageFile() { Name = "Test 1", ContentLink = new ContentReference(99) });
+            contentRepo.SetupSequence(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(medialist)
+                .Returns(new List<MediaData>());
+
+            Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
+            Mock<MyDataStore> dds = new Mock<MyDataStore>();
+            ddsf.Setup(fact => fact.CreateStore(It.IsAny<Type>())).Returns(dds.Object);
+            dds.Setup(dd => dd.Save(It.IsAny<FolderData>())).Verifiable();
+            FolderData folderData = new FolderData(ddsf.Object);
+
+            // We need to return an ordered list of nothing...
+            IList<FolderData> list = new List<FolderData>();
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
+
+            var item = new SPListItem()
+            {
+                Folder = new SPFolder() { Name = "My Folder Name" },
+                entryPointId = 42
+            };
+            processor.DeleteSubFolders(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
+
+            contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42),
+                            It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
+                            "DeleteSubFolders needs to call itself with one of the child folders (recursive delete broken)");
+            contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 99),
+                            It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
+                            "DeleteSubFolders needs to delete any content in the folder before deleting the folder.");
+        }
     }
+
     public abstract class MyDataStore : DynamicDataStore
     {
         private static StoreDefinition storeDefiniton;

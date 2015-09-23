@@ -14,8 +14,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Web.Services;
+using System.Web.UI;
 using System.Web.UI.WebControls;
+using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -57,7 +58,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return (string)Session[SharePointUserPassword]; }
         }
 
-        public string QueueCount
+        [System.Web.Services.WebMethod()]
+        /// Used by jscript in aspx to get the current count asyc - 
+        /// the jscript needed a method, not a property.
+        public static string getCurrentQueCount()
+        {
+            return QueueCount;
+        }
+
+        public static string QueueCount
         {
             get
             {
@@ -66,6 +75,32 @@ namespace EPiServer.ConnectForSharePoint.Web
                 return queue.Count.ToString();
             }
         }
+
+        /// <summary>
+        /// Return folder name given an id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [System.Web.Services.WebMethod]
+        public static string GetEntryPointFolderName(string id)
+        {
+            //var numVal = int.Parse(id);
+            var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(id));
+            var fullPath = selectedFolderRef.Name;
+            var parent = selectedFolderRef.ParentLink;
+
+            // traverse up the tree to display path to selected folder
+            while (parent != null && parent != SiteDefinition.Current.GlobalAssetsRoot)
+            {
+                var parentRef = _contentRepository.Get<ContentFolder>(new ContentReference(parent.ID));
+
+                fullPath = parentRef.Name + "/" + fullPath;
+                parent = parentRef.ParentLink;
+            }
+
+            return fullPath;
+        }
+
         /// <summary>
         /// HelpUrl of current SharePoint Connector Shell Module
         /// </summary>
@@ -128,7 +163,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         Connect.Enabled = false;
                         ActivateControls(false);
-                        Response.AddHeader("Refresh", "10");
                     }
                 }
             }
@@ -151,7 +185,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    ActivateControls(false);
+                    Connect.Enabled = true;
                     ShowMessage(errorMessage, true);
                     return;
                 }
@@ -199,7 +233,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
                     }
-                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any childred.
+                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any children.
                     {
                         var children = contentRepository.GetChildren<IContent>(contentLink);
                         if (children.Count<IContent>() > 0 )
@@ -263,7 +297,8 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Password = ConfiguredPassword;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
-                SharePointSettings.Current.IsSharePointOnline = OnlineBox.Checked;
+                SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
+                SharePointSettings.Current.IsSharePointOnline = RBOnline.Checked;
                 SharePointSettings.Current.Save();
 
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
@@ -274,7 +309,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 QueueCountTB.Text = QueueCount;
                 Connect.Enabled = false;
                 ActivateControls(false);
-                Response.AddHeader("Refresh", "10");
             }
             catch (Exception ex)
             {
@@ -312,7 +346,6 @@ namespace EPiServer.ConnectForSharePoint.Web
             QueueCountTB.Text = QueueCount;
             Connect.Enabled = false;
             ActivateControls(false);
-            Response.AddHeader("Refresh", "10");
         }
 
         #endregion
@@ -393,7 +426,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SiteUrl = ConfiguredUrl,
                 Username = ConfiguredUsername,
                 Password = ConfiguredPassword,
-                IsSharePointOnline = OnlineBox.Checked
+                IsSharePointOnline = RBOnline.Checked
             };
 
             var contextService = new EndpointContextService();
@@ -408,8 +441,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             if (string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredUsername) || string.IsNullOrEmpty(ConfiguredPassword))
             {
-                // Deactivate the view selector and button controls
-                ActivateControls(false);
                 // Show error message in case of posting back and no url/username/password specified
                 if (Page.IsPostBack)
                 {

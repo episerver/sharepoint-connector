@@ -13,6 +13,15 @@ namespace EPiServer.ConnectForSharePoint.Web {
     public partial class SharePointConfiguration {
         
         /// <summary>
+        /// ScriptManager1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.ScriptManager ScriptManager1;
+        
+        /// <summary>
         /// ConnectionNote control.
         /// </summary>
         /// <remarks>
@@ -58,13 +67,22 @@ namespace EPiServer.ConnectForSharePoint.Web {
         protected global::System.Web.UI.WebControls.TextBox Password;
         
         /// <summary>
-        /// OnlineBox control.
+        /// RBOnPremises control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox OnlineBox;
+        protected global::System.Web.UI.WebControls.RadioButton RBOnPremises;
+        
+        /// <summary>
+        /// RBOnline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBOnline;
         
         /// <summary>
         /// Connect control.
@@ -101,6 +119,15 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPoint;
+
+        /// <summary>
+        /// EntryPointFolderName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox EntryPointFolderName;
         
         /// <summary>
         /// EntryPointRequired control.
@@ -112,15 +139,6 @@ namespace EPiServer.ConnectForSharePoint.Web {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator EntryPointRequired;
         
         /// <summary>
-        /// QueueCountTB control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label QueueCountTB;
-        
-        /// <summary>
         /// Save control.
         /// </summary>
         /// <remarks>
@@ -128,6 +146,15 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::EPiServer.UI.WebControls.ToolButton Save;
+        
+        /// <summary>
+        /// QueueCountTB control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label QueueCountTB;
         
         /// <summary>
         /// Refresh control.

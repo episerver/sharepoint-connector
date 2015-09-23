@@ -47,8 +47,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var fileName = item.File.Name; //  @"C:\test.jpg";
 
             //Get a suitable MediaData type from extension
+            Type typetobuild = typeof(SharepointGenericMedia);
             var mediaType = mediaDataResolver.GetFirstMatching(Path.GetExtension(fileName));
-            var contentType = contentTypeRepository.Load(mediaType);
+            if (typeof(ImageData).IsAssignableFrom(mediaType))
+                typetobuild = typeof(SharepointImageFile);
+            else if (typeof(VideoData).IsAssignableFrom(mediaType))
+                typetobuild = typeof(SharepointVideoFile);
+
+            var contentType = contentTypeRepository.Load(typetobuild);
 
             // make sure the parent has the proper access so we can create objects in it
             ContentReference parentFolder;
@@ -156,7 +162,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             FolderData fd = new FolderData();
             var fdata = fd.GetFolder(item.GUID);
-            if (fdata != null)
+            if (fdata.RefId != -1)
             {
                 var repo = _serviceLocator.GetInstance<IContentRepository>();
                 var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).
@@ -197,7 +203,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         /// Traverses to the bottom of the tree under this folder and deletes each item back to the ContentFolder specified.
         /// </summary>
         /// <param name="folder"></param>
-        private void DeleteSubFolders(ContentFolder folder)
+        internal void DeleteSubFolders(ContentFolder folder)
         {
             var repo = _serviceLocator.GetInstance<IContentRepository>();
             var folders = repo.GetChildren<ContentFolder>(folder.ContentLink);
