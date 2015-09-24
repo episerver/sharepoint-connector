@@ -141,6 +141,7 @@
                     CancelControlID="btnClose" BackgroundCssClass="modalBackground">
                 </cc1:ModalPopupExtender>
                 <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" style = "display:none">
+                    Select Folder:
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -174,7 +175,7 @@
                   ForeColor="Red" 
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
-                    <asp:Button ID="btnClose" runat="server" Text="Close" />
+                    <asp:Button ID="btnClose" runat="server" Text="OK" />
                 </asp:Panel>
                 <!-- ModalPopupExtender -->
             <br/>
