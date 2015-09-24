@@ -351,6 +351,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </Content>
+    <Content Include="Views\Shared\SharePoint\Image.cshtml" />
     <Content Include="Web References\SPServices\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
@@ -419,7 +420,6 @@
     <Content Include="modules\_protected\Shell\EPiServer.Shell.UI.zip" />
     <Content Include="modules\_protected\CMS\web.config" />
     <Content Include="modules\_protected\CMS\EPiServer.Cms.Shell.UI.zip" />
-    <Content Include="Views\Shared\SharePoint\Image.cshtml" />
     <Content Include="Views\Shared\SharePoint\Video.cshtml" />
     <Content Include="Views\Shared\SharePoint\Generic.cshtml" />
     <None Include="web.Debug.config">
