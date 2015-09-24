@@ -475,15 +475,15 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>echo post build events
-IF exist "$(SolutionDir)Deployment\lib\" ( rmdir "$(SolutionDir)Deployment\lib" /s /q )
+    <PostBuildEvent>IF exist "$(SolutionDir)Deployment\lib\" ( rmdir "$(SolutionDir)Deployment\lib" /s /q )
 mkdir "$(SolutionDir)Deployment\lib"
 xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\Microsoft.SharePoint.Client.Runtime.dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 
+IF exist "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" ( rmdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" /s /q )
 mkdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint"
-xcopy "$(TargetDir)..\Views\Shared\SharePoint"\*cshtml "$(SolutionDir)Deployment\content\Views\Shared\SharePoint\"  /I /F /R /Y
+xcopy "$(ProjectDir)"\Views\Shared\SharePoint\*cshtml "$(SolutionDir)\Deployment\content\Views\Shared\SharePoint\"  /I /F /R /Y
 
 IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" /s /q )
 mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"
