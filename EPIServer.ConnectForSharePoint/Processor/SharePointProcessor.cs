@@ -47,8 +47,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var fileName = item.File.Name; //  @"C:\test.jpg";
 
             //Get a suitable MediaData type from extension
+            Type typetobuild = typeof(SharepointGenericMedia);
             var mediaType = mediaDataResolver.GetFirstMatching(Path.GetExtension(fileName));
-            var contentType = contentTypeRepository.Load(mediaType);
+            if (typeof(ImageData).IsAssignableFrom(mediaType))
+                typetobuild = typeof(SharepointImageFile);
+            else if (typeof(VideoData).IsAssignableFrom(mediaType))
+                typetobuild = typeof(SharepointVideoFile);
+
+            var contentType = contentTypeRepository.Load(typetobuild);
 
             // make sure the parent has the proper access so we can create objects in it
             ContentReference parentFolder;

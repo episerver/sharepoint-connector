@@ -50,6 +50,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AjaxControlToolkit, Version=15.1.3.0, Culture=neutral, PublicKeyToken=28f01b0e84b6d53e, processorArchitecture=MSIL">
@@ -222,6 +223,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consts.cs" />
+    <Compile Include="Controllers\SharePointGenericController.cs" />
+    <Compile Include="Controllers\SharePointImageController.cs" />
+    <Compile Include="Controllers\SharePointVideoController.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
@@ -257,6 +261,9 @@
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
     <Compile Include="Models\SPUser.cs" />
+    <Compile Include="Models\ViewModels\GenericViewModel.cs" />
+    <Compile Include="Models\ViewModels\ImageViewModel.cs" />
+    <Compile Include="Models\ViewModels\VideoViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
@@ -310,7 +317,6 @@
     <Compile Include="SharePointContentMappingRepository.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
-    <Compile Include="SPContentMediaResolver.cs" />
     <Compile Include="SPContentReindex.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
@@ -349,6 +355,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </Content>
+    <Content Include="Views\Shared\SharePoint\Image.cshtml" />
     <Content Include="Web References\SPServices\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
@@ -417,6 +424,8 @@
     <Content Include="modules\_protected\Shell\EPiServer.Shell.UI.zip" />
     <Content Include="modules\_protected\CMS\web.config" />
     <Content Include="modules\_protected\CMS\EPiServer.Cms.Shell.UI.zip" />
+    <Content Include="Views\Shared\SharePoint\Video.cshtml" />
+    <Content Include="Views\Shared\SharePoint\Generic.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -475,6 +484,10 @@ mkdir "$(SolutionDir)Deployment\lib"
 xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\Microsoft.SharePoint.Client.Runtime.dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" ( rmdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" /s /q )
+mkdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint"
+xcopy "$(ProjectDir)"\Views\Shared\SharePoint\*cshtml "$(SolutionDir)\Deployment\content\Views\Shared\SharePoint\"  /I /F /R /Y
 
 IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" /s /q )
 mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"

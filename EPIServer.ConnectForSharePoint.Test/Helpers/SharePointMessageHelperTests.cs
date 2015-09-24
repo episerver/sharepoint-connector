@@ -10,6 +10,9 @@ using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using System;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
+using EPiServer.Data.Dynamic;
+using EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific;
+using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
@@ -24,6 +27,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<IMessageEmitterFactory> _emitterFactory;
         private Mock<IMessageEmitter> _messageEmitter;
         private Mock<IServiceLocator> _serviceLocator;
+        private Mock<MyDataStore> dds;
 
         private SharePointMessageHelper GetUnitUnderTest()
         {
@@ -37,6 +41,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _emitterFactory = new Mock<IMessageEmitterFactory>();
             _emitterFactory.Setup(ef => ef.Create()).Returns(_messageEmitter.Object);
 
+            Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
+            dds = new Mock<MyDataStore>();
+            ddsf.Setup(fact => fact.CreateStore(It.IsAny<Type>())).Returns(dds.Object);
+            dds.Setup(dd => dd.Save(It.IsAny<FolderData>())).Verifiable();
+            FolderData folderData = new FolderData(ddsf.Object);
+
             _serviceLocator = new Mock<IServiceLocator>();
             return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
         }
@@ -44,6 +54,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         public void ProcessSubItems_Creates_Queue_Emits_Queue_Messages_For_Folders()
         {
             var messageHelper = GetUnitUnderTest();
+
+            // make sure our dynamic data store returns a ordered list with the folder data required.
+            IList<FolderData> ddslist = new List<FolderData>();
+            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
 
             var itemList = new List<SPListItem>();
             var folderItem = new SPFolder() { Name = "Test Folder" };
@@ -197,6 +212,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         public void QueueItemsForAdd_Emits_A_Message_To_Add_The_Root_Folder()
         {
             var messageHelper = GetUnitUnderTest();
+            // make sure our dynamic data store returns a ordered list with the folder data required.
+            IList<FolderData> ddslist = new List<FolderData>();
+            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
+
             var selectedListIds = new List<KeyValuePair<string, string>>();
 
             var viewKey = Guid.NewGuid().ToString();
@@ -227,6 +247,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         public void QueueItemsForAdd_Does_Not_Emit_A_Message_To_Add_If_The_Root_Exists()
         {
             var messageHelper = GetUnitUnderTest();
+
+            // make sure our dynamic data store returns a ordered list with the folder data required.
+            IList<FolderData> ddslist = new List<FolderData>();
+            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
+
             var selectedListIds = new List<KeyValuePair<string, string>>();
 
             var viewKey = Guid.NewGuid().ToString();
@@ -247,6 +273,20 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             ContentReference test = new ContentReference();
             _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(test);
+
+            var data = new List<MediaData>();
+            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
+            data.Add(new SharepointGenericMedia()
+            {
+                Name = "Filename.jpg",
+                ContentLink = new ContentReference(42),
+                SharePointTimeLastModified = new DateTime(2014, 1, 1)
+            });
+            Mock<IContentRepository> contentRepo = new Mock<IContentRepository>();
+            _serviceLocator.Setup(sl => sl.GetInstance<IContentRepository>()).Returns(contentRepo.Object);
+            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+                .Returns(data);
 
             messageHelper.QueueItemsForAdd(string.Empty, lists);
 
