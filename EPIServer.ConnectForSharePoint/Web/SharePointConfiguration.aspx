@@ -5,7 +5,6 @@
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Models" Assembly="EPiServer.ConnectForSharePoint" %>
-<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
 
 <asp:content contentplaceholderid="HeaderContentRegion" runat="server">
 </asp:content>
@@ -46,42 +45,7 @@
         document.body.onload = updateQueCounts;
         window.setInterval(updateQueCounts, 1000);
     </script>
-    <style type="text/css">
-    .modalBackground
-    {
-        background-color: Black;
-        filter: alpha(opacity=90);
-        opacity: 0.8;
-    }
-    .modalPopup
-    {
-        background-color: #FFFFFF;
-        border-width: 3px;
-        border-style: solid;
-        border-color: black;
-        padding-top: 10px;
-        padding-left: 10px;
-    }
-</style>
-    <script type='text/javascript'>
-                        function setval(newval)
-                        {
-                            //set foldername text box to show selected folder
-                            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
-                            
-                            // set hidden text box to be selected folder id so everything continues to work behind the scenes
-                            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
-                            return false;
-                        }
 
-                        function onSuccess(result)
-                        {
-                            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
-                            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
-                            epFolderName.value = result;
-                            epFolderName2.value = result;
-                        }
-                    </script>
     <div class="epi-contentContainer epi-padding">
         <div class="epi-contentArea">
             <h1 class="EP-prefix">
@@ -130,18 +94,27 @@
                 </p>
                 <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />
             </asp:Panel>                  
-            </fieldset>
+                
             <fieldset >
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
-                <!-- ModalPopupExtender -->
-                <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
-                <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
-                <asp:Button ID="btnShow" runat="server" Text="..." />
-                <cc1:ModalPopupExtender ID="mp1" runat="server" PopupControlID="Panel1" TargetControlID="btnShow"
-                    CancelControlID="btnClose" BackgroundCssClass="modalBackground">
-                </cc1:ModalPopupExtender>
-                <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" style = "display:none">
-                    Select Folder:
+                <div class="epi-size15">
+                    <script type='text/javascript'>
+                        function setval(newval)
+                        {
+                            //set foldername text box to show selected folder
+                            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
+                            
+                            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+                            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
+                            return false;
+                        }
+
+                        function onSuccess(result)
+                        {
+                            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
+                            epFolderName.value = result;
+                        }
+                    </script>
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -164,8 +137,8 @@
                         </EPiServerUI:PageTreeView>
                     </div> 
                     <div>
-                        <asp:Label AssociatedControlID="EntryPointFolderName2" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
-                        <asp:TextBox ID="EntryPointFolderName2" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                        <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                        <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
                     <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
@@ -175,9 +148,6 @@
                   ForeColor="Red" 
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
-                    <asp:Button ID="btnClose" runat="server" Text="OK" />
-                </asp:Panel>
-                <!-- ModalPopupExtender -->
             <br/>
 
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
