@@ -652,6 +652,33 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                             It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
                             "DeleteSubFolders needs to delete any content in the folder before deleting the folder.");
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
+        public void AddListItem_Calls_Add()
+        {
+            var processor = GetUnitUnderTest();
+            var item = new SPListItem();
+            processor.AddListItem(item);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
+        public void UpdateListItem_Calls_Add()
+        {
+            var processor = GetUnitUnderTest();
+            var item = new SPListItem();
+            processor.UpdateListItem(item);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
+        public void DeleteListItem_Calls_Delete()
+        {
+            var processor = GetUnitUnderTest();
+            var item = new SPListItem();
+            processor.DeleteListItem(item);
+        }
     }
 
     public abstract class MyDataStore : DynamicDataStore
