@@ -111,8 +111,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         {
             var messageHelper = GetUnitUnderTest();
 
-            var sharepointListItems = new List<SPListItem>();
             // The list from sharepoint will have a folder and two items in it.
+            var sharepointListItems = new List<SPListItem>();
             sharepointListItems.Add(new SPListItem() { Folder = new SPFolder() { Name = "SomeFolder" } });
             var item = new SPListItem() { Title = "Test Item One", entryPointId = 121,
                 File = new SPFile() { Name="test1"}, ParentFolderName = string.Empty,
@@ -124,12 +124,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             };
             sharepointListItems.Add(item);
             _helper.SetupSequence(sph => sph.GetItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>()))
+                .Returns(sharepointListItems)
                 .Returns(sharepointListItems);
 
             // Now make sure we return something not null indicating the folder was found and we need to check for items to delete
             _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>()))
                 .Returns(new ContentReference()); // if its not null that means we found it and we are going to delete any items that are duplicate
-
 
             // Now setup the cms list, it will have 3 items that are not folders, the goal is delete the correct item that 
             // was removed from sharepoint
@@ -153,7 +153,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             // Comparer the quid and make sure its the correct one.
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointContentDeleteMessage>(spm => spm.Item.GUID == new Guid("4F39D06F-B540-466C-BD97-E3DE220034B2"))), 
-                Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
+                Times.Once, "We didn't call emit or the item was not the one we expect");
         }
 
 

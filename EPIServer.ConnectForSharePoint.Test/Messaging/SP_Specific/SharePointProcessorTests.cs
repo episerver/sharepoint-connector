@@ -17,6 +17,7 @@ using EPiServer.Data.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using EPiServer.Data;
+using EPiServer.Logging;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -39,6 +40,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentRepository> contentRepo;
         private Mock<IContentTypeRepository> contentTypeRepo;
         private Mock<IFileStreamService> fileStreamService;
+        private Mock<ILogger> logger;
 
         private SharePointProcessor GetUnitUnderTest()
         {
@@ -46,6 +48,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo = new Mock<IContentRepository>();
             contentTypeRepo = new Mock<IContentTypeRepository>();
             fileStreamService = new Mock<IFileStreamService>();
+            logger = new Mock<ILogger>();
 
             // Initialize our service locator instance.
             serviceLocator = new Mock<IServiceLocator>();
@@ -54,6 +57,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<IContentTypeRepository>()).Returns(contentTypeRepo.Object);
             ContentMediaResolver cmr = new ContentMediaResolver();
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
+            serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);

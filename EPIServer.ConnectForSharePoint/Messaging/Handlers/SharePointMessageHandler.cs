@@ -55,7 +55,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 
         public void Handle(SharePointFolderAddMessage message)
         {
-            processor.AddFolder(message.Item);
+            try
+            {
+                processor.AddFolder(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddFolder", e);
+            }
         }
 
         /// <summary>
@@ -64,12 +71,26 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointFolderUpdateMessage message)
         {
-            processor.UpdateFolder(message.Item);
+            try
+            { 
+                processor.UpdateFolder(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error UpdateFolder", e);
+            }
         }
 
         public void Handle(SharePointFolderDeleteMessage message)
         {
-            processor.DeleteFolder(message.Item);
+            try
+            { 
+                processor.DeleteFolder(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error DeleteFolder", e);
+            }
         }
 
         /// <summary>
@@ -78,7 +99,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            processor.AddDocument(message.Item);
+            try
+            {
+                processor.AddDocument(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
 
         /// <summary>
@@ -87,7 +115,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentUpdateMessage message)
         {
-            processor.UpdateDocument(message.Item);
+            try
+            {
+                processor.UpdateDocument(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
 
         /// <summary>
@@ -96,22 +131,50 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentDeleteMessage message)
         {
-            processor.DeleteDocument(message.Item);
+            try
+            {
+                processor.DeleteDocument(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
 
         public void Handle(SharePointListItemAddMessage message)
         {
-            processor.AddListItem(message.Item);
+            try
+            {
+                processor.AddListItem(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
 
         public void Handle(SharePointListItemUpdateMessage message)
         {
-            processor.UpdateListItem(message.Item);
+            try
+            {
+                processor.UpdateListItem(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
 
         public void Handle(SharePointListItemDeleteMessage message)
         {
-            processor.DeleteListItem(message.Item);
+            try
+            {
+                processor.DeleteListItem(message.Item);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error AddDocument", e);
+            }
         }
     }
 }

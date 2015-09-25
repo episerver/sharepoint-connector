@@ -8,6 +8,7 @@ using EPiServer.DataAccess;
 using EPiServer.Framework.Blobs;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using EPiServer.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -20,6 +21,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
         IFileStreamService _fileStreamService;
+        private ILogger _logger;
 
         [ExcludeFromCodeCoverage] // Exclude this constructor
         public SharePointProcessor()
@@ -28,6 +30,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = new ContentProviderHelper();
             _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
+            _logger = LogManager.GetLogger();
         }
 
         internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, IFileStreamService fileStreamService)
@@ -36,6 +39,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = contentProviderHelper;
             _fileStreamService = fileStreamService;
+            _logger = _serviceLocator.GetInstance<ILogger>();
         }
 
         public void AddDocument(SPListItem item)
@@ -104,20 +108,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     blob.Write(data);
                     media.BinaryData = blob;
                 }
-                catch
+                catch(Exception e)
                 {
-                    // todo we should be using logging
-                    // failed to read data
+                    _logger.Error("Failed to create blog", e);
                 }
 
                 try
                 {
                     var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
                 }
-                catch
+                catch (Exception e)
                 {
-                    // todo we should be using logging
-                    // failed to save data in cms
+                    _logger.Error("Failed to save to cms", e);
                 }
             }
         }
