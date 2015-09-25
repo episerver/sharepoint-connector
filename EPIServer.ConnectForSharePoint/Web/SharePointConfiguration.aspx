@@ -5,13 +5,15 @@
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Models" Assembly="EPiServer.ConnectForSharePoint" %>
-<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
 
 <asp:content contentplaceholderid="HeaderContentRegion" runat="server">
 </asp:content>
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
         function updateQueCounts() {
             PageMethods.getCurrentQueCount(onSucess, onError);
@@ -46,43 +48,63 @@
         document.body.onload = updateQueCounts;
         window.setInterval(updateQueCounts, 1000);
     </script>
-    <style type="text/css">
-    .modalBackground
-    {
-        background-color: Black;
-        filter: alpha(opacity=90);
-        opacity: 0.8;
-    }
-    .modalPopup
-    {
-        background-color: #FFFFFF;
-        border-width: 3px;
-        border-style: solid;
-        border-color: black;
-        padding-top: 10px;
-        padding-left: 10px;
-    }
-</style>
     <script type='text/javascript'>
-                        function setval(newval)
-                        {
-                            //set foldername text box to show selected folder
-                            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
+        $(function () {
+            $("#treedialog").dialog({
+                autoOpen: false,
+                modal: true,
+                buttons: {
+                    Ok: function () {
+                        setval2(document.getElementById('<%# EntryPointCache.ClientID %>').value);
+                        $(this).dialog("close");
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+            $("#btnShow").click(function () {
+                $("#treedialog").dialog("open");
+            });
+        });
+        function setval(newval)
+        {
+            //set foldername text box to show selected folder
+            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
                             
-                            // set hidden text box to be selected folder id so everything continues to work behind the scenes
-                            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
-                            return false;
-                        }
+            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+            document.getElementById('<%# EntryPointCache.ClientID %>').value = newval;
+            return false;
+        }
+        function onSuccess(result)
+        {
+            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
+            epFolderName2.value = result;
+        }
+        function setval2(newval) {
+            //set foldername text box to show selected folder
+            window.PageMethods.GetEntryPointFolderName(newval, onSuccess2, onError);
+                            
+            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
+            return false;
 
-                        function onSuccess(result)
-                        {
-                            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
-                            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
-                            epFolderName.value = result;
-                            epFolderName2.value = result;
-                        }
-                    </script>
-    <div class="epi-contentContainer epi-padding">
+        }
+
+        function onSuccess(result)
+        {
+            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
+            epFolderName2.value = result;
+        }
+
+        function onSuccess2(result)
+        {
+            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
+            epFolderName.value = result;
+        }
+    </script>
+
+        <div class="epi-contentContainer epi-padding">
         <div class="epi-contentArea">
             <h1 class="EP-prefix">
                 <%= Translate("/sharepoint/admin/displayname")%>
@@ -134,14 +156,14 @@
             <fieldset >
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
                 <!-- ModalPopupExtender -->
+                
+	            
                 <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
                 <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
-                <asp:Button ID="btnShow" runat="server" Text="..." />
-                <cc1:ModalPopupExtender ID="mp1" runat="server" PopupControlID="Panel1" TargetControlID="btnShow"
-                    CancelControlID="btnClose" BackgroundCssClass="modalBackground">
-                </cc1:ModalPopupExtender>
-                <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" style = "display:none">
-                    Select Folder:
+                <input type="button" ID="btnShow" Value="..." />
+                <div id="treedialog" title="<%# Translate("/sharepoint/admin/selectfolder") %>">
+               <%-- <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" style = "display:none">
+                    Select Folder:--%>
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -169,14 +191,15 @@
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
                     <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
+                    <asp:TextBox ID="EntryPointCache" runat="server" style="display:none" MaxLength="10" />                
                 <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
                   ControlToValidate="EntryPoint"
                   ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
                   ForeColor="Red" 
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
-                    <asp:Button ID="btnClose" runat="server" Text="OK" />
-                </asp:Panel>
+                    </div>
+                <%--</asp:Panel>--%>
                 <!-- ModalPopupExtender -->
             <br/>
 
