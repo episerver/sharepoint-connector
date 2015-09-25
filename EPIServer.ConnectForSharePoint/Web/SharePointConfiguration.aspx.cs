@@ -383,8 +383,14 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else
                 {
-                    // Use the service to get the list.
-                    return SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.GenericList);
+                    // Concatinate the document and custom lists.
+                    var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                        .GetLists((int)ListBaseType.DocumentLibrary);
+                    var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                        .GetLists((int)ListBaseType.GenericList);
+                    var supportedLists = documentLists.Concat(customLists);
+
+                    return supportedLists;
                 }
             }
             catch (Exception e)
@@ -434,7 +440,12 @@ namespace EPiServer.ConnectForSharePoint.Web
             var svcLists = new ListsViewsService();
             svcLists.EndpointContextService = contextService;
 
-            return svcLists.GetLists((int)ListBaseType.GenericList);
+            // Concatinate the document and custom lists.
+            var documentLists = svcLists.GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = svcLists.GetLists((int)ListBaseType.GenericList);
+            var supportedLists = documentLists.Concat(customLists);
+
+            return supportedLists;
         }
 
         private bool PreAuthenticationCheck()
