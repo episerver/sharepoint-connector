@@ -283,7 +283,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     FolderData fd = new FolderData();
                     foreach (var folder in cmsFolderItems)
                     {
-                        Boolean delete = true;
                         fd = fd.GetFolder(folder.ContentLink.ID);
                         if(fd.RefId == -1)
                         {
