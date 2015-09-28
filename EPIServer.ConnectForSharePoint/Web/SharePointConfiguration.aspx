@@ -55,7 +55,7 @@
                 modal: true,
                 buttons: {
                     Ok: function () {
-                        setval2(document.getElementById('<%# EntryPointCache.ClientID %>').value);
+                        onOkClick(document.getElementById('<%# EntryPointCache.ClientID %>').value);
                         $(this).dialog("close");
                     },
                     Cancel: function () {
@@ -70,34 +70,32 @@
         function setval(newval)
         {
             //set foldername text box to show selected folder
-            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
+            window.PageMethods.GetEntryPointFolderName(newval, onNodePicked, onError);
                             
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
             document.getElementById('<%# EntryPointCache.ClientID %>').value = newval;
             return false;
         }
-        function onSuccess(result)
+
+        // called when user clicks a node in the tree
+        function onNodePicked(result)
         {
-            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
-            epFolderName2.value = result;
+            var epFolderName = document.getElementById('<%= SelectedFolderName.ClientID %>');
+            epFolderName.value = result;
         }
-        function setval2(newval) {
+
+        // called when user clicks Ok in select folder dlg
+        function onOkClick(newval) {
             //set foldername text box to show selected folder
-            window.PageMethods.GetEntryPointFolderName(newval, onSuccess2, onError);
+            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
                             
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
             document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
             return false;
-
         }
 
+        // updates the entry point folder text box on the main config screen
         function onSuccess(result)
-        {
-            var epFolderName2 = document.getElementById('<%= EntryPointFolderName2.ClientID %>');
-            epFolderName2.value = result;
-        }
-
-        function onSuccess2(result)
         {
             var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
             epFolderName.value = result;
@@ -155,15 +153,11 @@
             </fieldset>
             <fieldset >
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
-                <!-- ModalPopupExtender -->
-                
-	            
+                <!-- Modal Tree Dlg -->
                 <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
                 <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                 <input type="button" ID="btnShow" Value="..." />
                 <div id="treedialog" title="<%# Translate("/sharepoint/admin/selectfolder") %>">
-               <%-- <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" style = "display:none">
-                    Select Folder:--%>
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -186,8 +180,8 @@
                         </EPiServerUI:PageTreeView>
                     </div> 
                     <div>
-                        <asp:Label AssociatedControlID="EntryPointFolderName2" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
-                        <asp:TextBox ID="EntryPointFolderName2" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                        <asp:Label AssociatedControlID="SelectedFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                        <asp:TextBox ID="SelectedFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
                     <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
@@ -199,8 +193,7 @@
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
                     </div>
-                <%--</asp:Panel>--%>
-                <!-- ModalPopupExtender -->
+                <!-- Modal Tree Dlg -->
             <br/>
 
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
