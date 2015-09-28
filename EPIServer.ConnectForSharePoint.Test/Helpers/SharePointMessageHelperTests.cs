@@ -144,7 +144,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             SharePointGUID = "4F39D06F-B540-466C-BD97-E3DE220034B2"});
             items.Add(new SharepointGenericMedia() { Name = "test3", ContentLink = new ContentReference(42),
                 SharePointGUID = "4F39D06F-B540-466C-BD97-E3DE220034B3" });
-            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
+            contentRepo.Setup(cr => cr.GetChildren<IContentData>(It.IsAny<ContentReference>()))
                 .Returns(items);
 
             // none of the args actually matter because the mocks return test data

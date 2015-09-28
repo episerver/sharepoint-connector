@@ -478,7 +478,41 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
         public void DeleteListItem(SPListItem item)
         {
-            throw new NotImplementedException();
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+
+            // make sure the parent has the proper access so we can delete objects in it
+            ContentReference parentFolder;
+            if (item.entryPointId != -1)
+            {
+                parentFolder = new ContentReference(item.entryPointId);
+            }
+            else
+            {
+                // Only search from the entry point down
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+            }
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
+            if (cref != null)
+            {
+                //Get a new empty media object
+                var media = contentRepository.Get<BlockData>(cref).CreateWritableClone() as BlockData;
+                if (media != null)
+                {
+                    try
+                    {
+                        contentRepository.Delete(cref, true, AccessLevel.Delete);
+                    }
+                    catch
+                    {
+                        // todo we should be using logging
+                        // failed to save data in cms
+                    }
+                }
+            }
         }
     }
 }

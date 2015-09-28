@@ -62,7 +62,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // 3) check to see if the quid is in the sharepoint item list for this folder.
                     // 4) if not post the delete item message.
                     IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-                    var cmsListItems = repo.GetChildren<MediaData>(contentRef);
+                    var cmsListItems = repo.GetChildren<IContentData>(contentRef);
                     var sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
                     foreach (var item in cmsListItems)
                     {
@@ -84,16 +84,29 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             }
                             if (!found)
                             {
-                                // todo : Add code here to detect if its a list item or a document. Currently assumes a document
-                                // that implements ExtraMediaData, we might need to do something else?
-                                _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
+                                // if its a list item, delete it
+                                if (mediaItem is SharePointBlockData)
                                 {
-                                    Item = new SPListItem()
+                                    _emitterFactory.Create().Emit(new SharePointListItemDeleteMessage()
                                     {
-                                        entryPointId = contentRef.ID, // id of the folder the item is in
-                                        GUID = new Guid(mediaItem.SharePointGUID),
-                                    },
-                                });
+                                        Item = new SPListItem()
+                                        {
+                                            entryPointId = contentRef.ID, // id of the folder the item is in
+                                            GUID = new Guid(mediaItem.SharePointGUID),
+                                        },
+                                    });
+                                }
+                                else // assume its media data
+                                {
+                                    _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
+                                    {
+                                        Item = new SPListItem()
+                                        {
+                                            entryPointId = contentRef.ID, // id of the folder the item is in
+                                            GUID = new Guid(mediaItem.SharePointGUID),
+                                        },
+                                    });
+                                }
                             }
                         }
                     }
