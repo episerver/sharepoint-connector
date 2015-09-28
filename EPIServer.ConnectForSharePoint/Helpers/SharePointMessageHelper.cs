@@ -152,9 +152,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     itemref = _contentProviderHelper.FindMediaInFolder(spItem.GUID, parentFolderRef);
                 }
 
-                // if there is no parent folder, or the content doesnt exist send a Add message
-                if (spItem.File != null)
-                {
+                if (spItem.File != null) // is it a document?
+                {   
+                    // if there is no parent folder, or the content doesnt exist send a Add message
                     if (parentFolderRef == null || itemref == null)
                     {
                         _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
@@ -172,8 +172,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         });
                     }
                 }
-                else
-                {   // its a list item
+                else // it is a list item
+                {   
+                    // if there is no parent folder, or the content doesnt exist send a Add message
                     if (parentFolderRef == null || itemref == null)
                     {
                         _logger.Information("Adding SharePointListItemAddMessage to the queue " + spItem.Title);

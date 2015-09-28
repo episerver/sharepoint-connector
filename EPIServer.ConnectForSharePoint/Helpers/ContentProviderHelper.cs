@@ -345,7 +345,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <returns></returns>
         public ContentReference FindMediaInFolder(Guid SPItemGuid, ContentReference folderRef)
         {
-            var medialist = _contentRepository.GetChildren<MediaData>(folderRef);
+            var medialist = _contentRepository.GetChildren<IContent>(folderRef);
             foreach (var item in medialist)
             {
                 if (item is ExtraMediaData)
