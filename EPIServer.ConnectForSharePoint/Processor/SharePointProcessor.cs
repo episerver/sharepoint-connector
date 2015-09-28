@@ -12,6 +12,7 @@ using EPiServer.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using EPiServer;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -362,7 +363,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
             var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
-            var blobFactory = _serviceLocator.GetInstance<BlobFactory>();
             var fileName = item.DisplayName; //  @"C:\test.jpg";
 
             //Get a suitable MediaData type from extension
@@ -392,7 +392,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                 // Set attibutes of the media
                 var content = media as IContent;
-                content.Name = fileName;
+                if (content != null )
+                    content.Name = fileName;
+
                 media.Created = item.Created;
                 if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
@@ -405,7 +407,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                 try
                 {
-                    var file1ID = contentRepository.Save((IContent)media, SaveAction.Publish, AccessLevel.FullAccess);
+                    var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);
                 }
                 catch (Exception e)
                 {
@@ -419,7 +421,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
             var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
-            var blobFactory = _serviceLocator.GetInstance<BlobFactory>();
             var fileName = item.DisplayName; //  @"C:\test.jpg";
 
             //Get a suitable MediaData type from extension
@@ -456,7 +457,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                         // Set attibutes of the media
                         var content = media as IContent;
-                        content.Name = fileName;
+                        if( content != null )
+                            content.Name = fileName;
+
                         media.Created = item.Created;
 
                         mediaEX.SharePointGUID = item.GUID.ToString();
@@ -465,7 +468,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                         mediaEX.SharePointRelativeUrl = item.FileUrl;
                         try
                         {
-                            var file1ID = contentRepository.Save((IContent)media, SaveAction.Publish, AccessLevel.FullAccess);
+                            var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);
                         }
                         catch (Exception e)
                         {
@@ -506,10 +509,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     {
                         contentRepository.Delete(cref, true, AccessLevel.Delete);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        // todo we should be using logging
-                        // failed to save data in cms
+                        _logger.Error("Failed to delete block data from cms", e);
                     }
                 }
             }

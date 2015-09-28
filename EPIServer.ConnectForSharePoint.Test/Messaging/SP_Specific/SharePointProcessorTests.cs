@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using EPiServer.Data;
 using EPiServer.Logging;
+using EPiServer;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -401,7 +402,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
             contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(new ContentReference(42));
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
             contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
                 new SharepointGenericMedia()
                 {
@@ -658,30 +660,79 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
-        public void AddListItem_Calls_Add()
+        public void AddListItem_Calls_RepoAdd()
         {
             var processor = GetUnitUnderTest();
-            var item = new SPListItem();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            contentRepo.Setup(cr => cr.GetDefault<SharePointBlockData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new SharePointBlockData());
+
             processor.AddListItem(item);
+
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
         public void UpdateListItem_Calls_Add()
         {
             var processor = GetUnitUnderTest();
-            var item = new SPListItem();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            contentRepo.Setup(cr => cr.Get<SharePointBlockData>(It.IsAny<ContentReference>()))
+                .Returns(new SharePointBlockData() {
+                    SharePointTimeLastModified = DateTime.Now
+                });
+
             processor.UpdateListItem(item);
+
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException), "Exception not thrown, test your method")]
         public void DeleteListItem_Calls_Delete()
         {
             var processor = GetUnitUnderTest();
-            var item = new SPListItem();
+
+            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            contentRepo.Setup(cr => cr.Get<BlockData>(It.IsAny<ContentReference>()))
+                .Returns(new SharePointBlockData()
+                {
+                    SharePointTimeLastModified = DateTime.Now
+                });
+
             processor.DeleteListItem(item);
+
+            contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), 
+                It.IsAny<AccessLevel>()), Times.Once, "Delete needs to be called once");
         }
     }
 
