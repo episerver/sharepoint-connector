@@ -59,6 +59,7 @@
                         $(this).dialog("close");
                     },
                     Cancel: function () {
+                        document.getElementById('<%# EntryPointCache.ClientID %>').value = null;
                         $(this).dialog("close");
                     }
                 }

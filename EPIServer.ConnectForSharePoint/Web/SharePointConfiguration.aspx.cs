@@ -216,7 +216,11 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected void Save_Click(object sender, EventArgs e)
         {
             // update entry point with the latest cache value that we want to save from the tree dlg selection
-            EntryPoint = EntryPointCache;
+            if (!string.IsNullOrEmpty(EntryPointCache.Text))
+            {
+                EntryPoint = EntryPointCache;
+            }
+
             MessagePanel.Visible = false;
 
             #region Validate data
@@ -265,6 +269,9 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             if (strErrors.Length > 0)
             {
+                // reset text box values to previous valid settings
+                EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
+                EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
                 ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
                 return;
             }
