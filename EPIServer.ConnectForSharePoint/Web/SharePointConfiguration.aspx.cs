@@ -164,6 +164,20 @@ namespace EPiServer.ConnectForSharePoint.Web
                         Connect.Enabled = false;
                         ActivateControls(false);
                     }
+
+                    // check to see if current entry point has been deleted, if so pop up error message alerting the user
+                    if (null != SharePointSettings.Current.EntryPoint)
+                    {
+                        var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(SharePointSettings.Current.EntryPoint.ID));
+
+                        if (selectedFolderRef.IsDeleted)
+                        {
+                            EntryPointFolderName.Text = string.Empty;
+
+                            var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
+                            ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
+                        }
+                    }
                 }
             }
         }

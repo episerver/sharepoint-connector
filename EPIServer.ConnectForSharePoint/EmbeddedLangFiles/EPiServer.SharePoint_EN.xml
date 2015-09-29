@@ -38,6 +38,7 @@
                     <entrypointmustnothavechildren>Connection Entry Point cannot have any children.</entrypointmustnothavechildren>
                     <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
                     <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
+                    <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
                 </message>
             </admin>
             <plugin>
