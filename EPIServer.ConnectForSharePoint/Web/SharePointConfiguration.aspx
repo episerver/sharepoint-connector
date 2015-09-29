@@ -83,7 +83,7 @@
             var epFolderName = document.getElementById('<%= SelectedFolderName.ClientID %>');
             epFolderName.value = result;
         }
-
+                            
         // called when user clicks Ok in select folder dlg
         function onOkClick(newval) {
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
@@ -103,7 +103,7 @@
         }
     </script>
 
-        <div class="epi-contentContainer epi-padding">
+    <div class="epi-contentContainer epi-padding">
         <div class="epi-contentArea">
             <h1 class="EP-prefix">
                 <%= Translate("/sharepoint/admin/displayname")%>
@@ -151,7 +151,7 @@
                 </p>
                 <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />
             </asp:Panel>                  
-            </fieldset>
+                
             <fieldset >
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
                 <!-- Modal Tree Dlg -->
