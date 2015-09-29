@@ -86,11 +86,12 @@
 
         // called when user clicks Ok in select folder dlg
         function onOkClick(newval) {
+            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
+
             //set foldername text box to show selected folder
             window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
                             
-            // set hidden text box to be selected folder id so everything continues to work behind the scenes
-            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
             return false;
         }
 
@@ -185,7 +186,7 @@
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
                     <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
-                    <asp:TextBox ID="EntryPointCache" runat="server" style="display:none" MaxLength="10" />                
+                   
                 <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
                   ControlToValidate="EntryPoint"
                   ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
@@ -194,6 +195,7 @@
                 </asp:RequiredFieldValidator>
                     </div>
                 <!-- Modal Tree Dlg -->
+                 <asp:TextBox ID="EntryPointCache" runat="server" style="display:none" MaxLength="10" />
             <br/>
 
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"

@@ -201,6 +201,8 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void Save_Click(object sender, EventArgs e)
         {
+            // update entry point with the latest cache value that we want to save from the tree dlg selection
+            EntryPoint = EntryPointCache;
             MessagePanel.Visible = false;
 
             #region Validate data
