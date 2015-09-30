@@ -370,6 +370,20 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             return _fileStreamService.GetListItemXmlData(url);
         }
 
+        public XhtmlString getListItemData(SPListItem item)
+        {
+            var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
+
+            // Need to remove the "/File" part in the Url
+            var pos = restUrl.LastIndexOf('/');
+            if (pos >= 0)
+                restUrl = restUrl.Substring(0, pos);
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.Load(_fileStreamService.GetListItemXmlData(restUrl));
+
+            return new XhtmlString(xDoc.InnerXml); 
+        }
+
         public void AddListItem(SPListItem item)
         {
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
@@ -400,17 +414,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
-
-                var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
-
-                // Need to remove the "/File" part in the Url
-                var pos = restUrl.LastIndexOf('/');
-                if (pos >= 0)
-                    restUrl = restUrl.Substring(0, pos);
-                XmlDocument xDoc = new XmlDocument();
-                xDoc.Load(getXMLData(restUrl));
-
-                media.Body = new XhtmlString(xDoc.InnerXml); // Todo: Parse the InnerXml to get only the required info
+                media.Body = getListItemData(item); // get the xml data from the list item
 
                 // Set attibutes of the media
                 var content = media as IContent;
@@ -475,7 +479,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     // Only update if the last modified dates dont match
                     if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
                     {
-                        media.Body = new XhtmlString("<h1>body</h1>"); // Todo, get the real data.
+                        media.Body = getListItemData(item); // get the xml data from the list item
 
                         // Set attibutes of the media
                         var content = media as IContent;
