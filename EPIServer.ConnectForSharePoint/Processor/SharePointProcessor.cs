@@ -388,7 +388,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
-                media.Body = new XhtmlString("<h1>body</h1>"); // Todo, get the real data.
+                media.Body = new XhtmlString(@"<?xml version='1.0'?>
+        <!-- This is a sample XML document -->
+        <Items>
+            <name>asdfasdf</name>
+            <description>fffss</description>
+        </Items>");
 
                 // Set attibutes of the media
                 var content = media as IContent;
