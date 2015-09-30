@@ -14,109 +14,114 @@ namespace EPiServer.ConnectForSharePoint.Models.ViewModels
 
         public List<Entry> Entrys
         {
-            get
-            {
-                var list = new List<Entry>();
-
-                using (XmlReader reader = XmlReader.Create(new StringReader(XmlData)))
+                get
                 {
-                    bool inProperties = false;
-                    bool inHyperLink = false;
-                    string name = "";
-                    string value = "";
-                    string type = "";
-                    string description = "";
-                    string url = "";
-                    string lastElementName = "";
-
-                    Entry vt = new Entry();
-
-                    // Parse the file and display each of the nodes.
-                    while (reader.Read())
+                    var list = new List<Entry>();
+                try
+                {
+                    using (XmlReader reader = XmlReader.Create(new StringReader(XmlData)))
                     {
-                        switch (reader.NodeType)
+                        bool inProperties = false;
+                        bool inHyperLink = false;
+                        string name = "";
+                        string value = "";
+                        string type = "";
+                        string description = "";
+                        string url = "";
+                        string lastElementName = "";
+
+                        Entry vt = new Entry();
+
+                        // Parse the file and display each of the nodes.
+                        while (reader.Read())
                         {
-                            case XmlNodeType.Element:
+                            switch (reader.NodeType)
+                            {
+                                case XmlNodeType.Element:
 
-                                if (inProperties && inHyperLink != true)
-                                {
-                                    name = reader.Name;
-                                    type = reader.GetAttribute("m:type");
-                                    if (string.Equals(type, "SP.FieldUrlValue", StringComparison.OrdinalIgnoreCase))
-                                        inHyperLink = true;
-                                }
-
-                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
-                                    inProperties = true;
-
-                                lastElementName = reader.Name;
-                                break;
-                            case XmlNodeType.Text:
-                                if (inProperties)
-                                {
-                                    if (!inHyperLink)
-                                        value = reader.Value;
-                                    else
+                                    if (inProperties && inHyperLink != true)
                                     {
-                                        if (string.Equals(lastElementName, "d:Description", StringComparison.OrdinalIgnoreCase))
-                                            description = reader.Value;
-
-                                        if (string.Equals(lastElementName, "d:Url", StringComparison.OrdinalIgnoreCase))
-                                            url = reader.Value;
+                                        name = reader.Name;
+                                        type = reader.GetAttribute("m:type");
+                                        if (string.Equals(type, "SP.FieldUrlValue", StringComparison.OrdinalIgnoreCase))
+                                            inHyperLink = true;
                                     }
-                                }
-                                break;
 
-                            case XmlNodeType.XmlDeclaration:
-                            case XmlNodeType.ProcessingInstruction:
-                                Console.WriteLine(reader.Name + " " + reader.Value);
-                                break;
-                            case XmlNodeType.Comment:
-                                Console.WriteLine(reader.Value);
-                                break;
+                                    if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
+                                        inProperties = true;
 
-                            case XmlNodeType.EndElement:
-                                if (inProperties)
-                                {
-                                    if (!inHyperLink)
+                                    lastElementName = reader.Name;
+                                    break;
+                                case XmlNodeType.Text:
+                                    if (inProperties)
                                     {
-                                        if (!string.IsNullOrEmpty(name))
+                                        if (!inHyperLink)
+                                            value = reader.Value;
+                                        else
                                         {
-                                            list.Add(new Entry()
-                                            {
-                                                Name = name,
-                                                Type = type,
-                                                Value = value,
-                                                Description = description,
-                                                Url = url
-                                            });
-                                            name = type = value = description = url = "";
+                                            if (string.Equals(lastElementName, "d:Description", StringComparison.OrdinalIgnoreCase))
+                                                description = reader.Value;
+
+                                            if (string.Equals(lastElementName, "d:Url", StringComparison.OrdinalIgnoreCase))
+                                                url = reader.Value;
                                         }
                                     }
-                                    else // in hyperlink
+                                    break;
+
+                                case XmlNodeType.XmlDeclaration:
+                                case XmlNodeType.ProcessingInstruction:
+                                    Console.WriteLine(reader.Name + " " + reader.Value);
+                                    break;
+                                case XmlNodeType.Comment:
+                                    Console.WriteLine(reader.Value);
+                                    break;
+
+                                case XmlNodeType.EndElement:
+                                    if (inProperties)
                                     {
-                                        if (string.Equals(name, reader.Name, StringComparison.OrdinalIgnoreCase))
+                                        if (!inHyperLink)
                                         {
-                                            inHyperLink = false;
-                                            list.Add(new Entry()
+                                            if (!string.IsNullOrEmpty(name))
                                             {
-                                                Name = name,
-                                                Type = type,
-                                                Value = value,
-                                                Description = description,
-                                                Url = url
-                                            });
-                                            name = type = value = description = url = "";
+                                                list.Add(new Entry()
+                                                {
+                                                    Name = name,
+                                                    Type = type,
+                                                    Value = value,
+                                                    Description = description,
+                                                    Url = url
+                                                });
+                                                name = type = value = description = url = "";
+                                            }
+                                        }
+                                        else // in hyperlink
+                                        {
+                                            if (string.Equals(name, reader.Name, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                inHyperLink = false;
+                                                list.Add(new Entry()
+                                                {
+                                                    Name = name,
+                                                    Type = type,
+                                                    Value = value,
+                                                    Description = description,
+                                                    Url = url
+                                                });
+                                                name = type = value = description = url = "";
+                                            }
                                         }
                                     }
-                                }
 
-                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
-                                    inProperties = false;
+                                    if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
+                                        inProperties = false;
 
-                                break;
+                                    break;
+                            }
                         }
                     }
+                } catch
+                {
+
                 }
                 return list;
             }

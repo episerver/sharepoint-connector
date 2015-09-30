@@ -13,6 +13,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using EPiServer;
+using System.Xml;
+using System.Net;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -84,13 +86,13 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if( media is ExtraMediaData ) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
                     var mediaEX = media as ExtraMediaData;
                     mediaEX.SharePointGUID = item.GUID.ToString();
                     mediaEX.SharePointMajorVersion = item.File.MajorVersion;
                     mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-//                                       mediaEX.ParentListID = item.File.ListItem.
+                    //                                       mediaEX.ParentListID = item.File.ListItem.
                     mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                     mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
                     mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
@@ -102,14 +104,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     // Note: do not remove the getFileStream method, its public and available to 
                     // plugin authors so that they can get the data associated with a particular
                     // file in sharepoint
-                    var data = getFileStream(item); 
+                    var data = getFileStream(item);
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
 
                     // Can't test this part of the code path...
                     blob.Write(data);
                     media.BinaryData = blob;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     _logger.Error("Failed to create blog", e);
                 }
@@ -142,8 +144,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 // Its ok to search for the parent folder by name, its not going to be changing ever during this 
                 // message.
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, 
-                    new ContentReference(item.rootCMSFolderEntryPointID)); 
+                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName,
+                    new ContentReference(item.rootCMSFolderEntryPointID));
             }
 
             _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);
@@ -189,12 +191,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var children = repo.GetChildren<ContentFolder>(rootRef);
             foreach (var child in children)
             {
-                if ( child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase) )
+                if (child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     // before we delete this folder, delete all the sub folders
                     DeleteSubFolders(child);
 
-                    repo.Delete(child.ContentLink,true,AccessLevel.Delete);
+                    repo.Delete(child.ContentLink, true, AccessLevel.Delete);
                     FolderData fd = new FolderData();
                     FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
                     break;
@@ -312,7 +314,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
- 
+
             // make sure the parent has the proper access so we can delete objects in it
             ContentReference parentFolder;
             if (item.entryPointId != -1)
@@ -332,7 +334,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
-                if (media != null )
+                if (media != null)
                 {
                     try
                     {
@@ -356,6 +358,16 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
             return _fileStreamService.GetFileSteam(relativeUrl);
+        }
+
+        /// <summary>
+        /// Gets the XML data associated with a specific SPListItem
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public Stream getXMLData(string url)
+        {
+            return _fileStreamService.GetListItemXmlData(url);
         }
 
         public void AddListItem(SPListItem item)
@@ -388,16 +400,21 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
-                media.Body = new XhtmlString(@"<?xml version='1.0'?>
-        <!-- This is a sample XML document -->
-        <Items>
-            <name>asdfasdf</name>
-            <description>fffss</description>
-        </Items>");
+
+                var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
+
+                // Need to remove the "/File" part in the Url
+                var pos = restUrl.LastIndexOf('/');
+                if (pos >= 0)
+                    restUrl = restUrl.Substring(0, pos);
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.Load(getXMLData(restUrl));
+
+                media.Body = new XhtmlString(xDoc.InnerXml); // Todo: Parse the InnerXml to get only the required info
 
                 // Set attibutes of the media
                 var content = media as IContent;
-                if (content != null )
+                if (content != null)
                     content.Name = fileName;
 
                 media.Created = item.Created;
@@ -462,7 +479,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                         // Set attibutes of the media
                         var content = media as IContent;
-                        if( content != null )
+                        if (content != null)
                             content.Name = fileName;
 
                         media.Created = item.Created;

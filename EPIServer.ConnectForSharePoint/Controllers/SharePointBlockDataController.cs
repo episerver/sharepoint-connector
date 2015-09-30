@@ -4,12 +4,7 @@ using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.Web.Mvc;
 using EPiServer.Web.Routing;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Web.Mvc;
-using System.Web.UI.WebControls;
-using System.Xml;
 
 namespace EPiServer.ConnectForSharePoint.Controllers
 {
