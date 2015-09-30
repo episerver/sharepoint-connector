@@ -25,5 +25,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         Stream GetFileSteam(string relativeUrl);
 
         string GetFileRelativeUrl(SPListItem listItem);
+
+        Stream GetListItemXmlData(string url);
     }
 }

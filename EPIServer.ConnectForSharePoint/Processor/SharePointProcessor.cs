@@ -8,9 +8,13 @@ using EPiServer.DataAccess;
 using EPiServer.Framework.Blobs;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using EPiServer.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using EPiServer;
+using System.Xml;
+using System.Net;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -20,6 +24,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
         IFileStreamService _fileStreamService;
+        private ILogger _logger;
 
         [ExcludeFromCodeCoverage] // Exclude this constructor
         public SharePointProcessor()
@@ -28,6 +33,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = new ContentProviderHelper();
             _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
+            _logger = LogManager.GetLogger();
         }
 
         internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, IFileStreamService fileStreamService)
@@ -36,6 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = contentProviderHelper;
             _fileStreamService = fileStreamService;
+            _logger = _serviceLocator.GetInstance<ILogger>();
         }
 
         public void AddDocument(SPListItem item)
@@ -79,13 +86,13 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if( media is ExtraMediaData ) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
                     var mediaEX = media as ExtraMediaData;
                     mediaEX.SharePointGUID = item.GUID.ToString();
                     mediaEX.SharePointMajorVersion = item.File.MajorVersion;
                     mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-//                                       mediaEX.ParentListID = item.File.ListItem.
+                    //                                       mediaEX.ParentListID = item.File.ListItem.
                     mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                     mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
                     mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
@@ -97,27 +104,25 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     // Note: do not remove the getFileStream method, its public and available to 
                     // plugin authors so that they can get the data associated with a particular
                     // file in sharepoint
-                    var data = getFileStream(item); 
+                    var data = getFileStream(item);
                     var blob = blobFactory.CreateBlob(media.BinaryDataContainer, Path.GetExtension(fileName));
 
                     // Can't test this part of the code path...
                     blob.Write(data);
                     media.BinaryData = blob;
                 }
-                catch
+                catch (Exception e)
                 {
-                    // todo we should be using logging
-                    // failed to read data
+                    _logger.Error("Failed to create blog", e);
                 }
 
                 try
                 {
                     var file1ID = contentRepository.Save(media, SaveAction.Publish, AccessLevel.FullAccess);
                 }
-                catch
+                catch (Exception e)
                 {
-                    // todo we should be using logging
-                    // failed to save data in cms
+                    _logger.Error("Failed to save to cms", e);
                 }
             }
         }
@@ -139,8 +144,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 // Its ok to search for the parent folder by name, its not going to be changing ever during this 
                 // message.
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, 
-                    new ContentReference(item.rootCMSFolderEntryPointID)); 
+                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName,
+                    new ContentReference(item.rootCMSFolderEntryPointID));
             }
 
             _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);
@@ -186,12 +191,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var children = repo.GetChildren<ContentFolder>(rootRef);
             foreach (var child in children)
             {
-                if ( child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase) )
+                if (child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     // before we delete this folder, delete all the sub folders
                     DeleteSubFolders(child);
 
-                    repo.Delete(child.ContentLink,true,AccessLevel.Delete);
+                    repo.Delete(child.ContentLink, true, AccessLevel.Delete);
                     FolderData fd = new FolderData();
                     FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
                     break;
@@ -309,7 +314,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
- 
+
             // make sure the parent has the proper access so we can delete objects in it
             ContentReference parentFolder;
             if (item.entryPointId != -1)
@@ -329,7 +334,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
-                if (media != null )
+                if (media != null)
                 {
                     try
                     {
@@ -353,6 +358,185 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var relativeUrl = _fileStreamService.GetFileRelativeUrl(item);
             return _fileStreamService.GetFileSteam(relativeUrl);
+        }
+
+        /// <summary>
+        /// Gets the XML data associated with a specific SPListItem
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public Stream getXMLData(string url)
+        {
+            return _fileStreamService.GetListItemXmlData(url);
+        }
+
+        public void AddListItem(SPListItem item)
+        {
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+            var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
+            var fileName = item.DisplayName; //  @"C:\test.jpg";
+
+            //Get a suitable MediaData type from extension
+            Type typetobuild = typeof(SharePointBlockData);
+            var contentType = contentTypeRepository.Load(typetobuild);
+
+            // make sure the parent has the proper access so we can create objects in it
+            ContentReference parentFolder;
+            if (item.entryPointId != -1)
+            {
+                parentFolder = new ContentReference(item.entryPointId);
+            }
+            else
+            {
+                // Only search from the entry point down
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+            }
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
+            if (cref == null)
+            {
+                //Get a new empty media object
+                var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
+
+                var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
+
+                // Need to remove the "/File" part in the Url
+                var pos = restUrl.LastIndexOf('/');
+                if (pos >= 0)
+                    restUrl = restUrl.Substring(0, pos);
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.Load(getXMLData(restUrl));
+
+                media.Body = new XhtmlString(xDoc.InnerXml); // Todo: Parse the InnerXml to get only the required info
+
+                // Set attibutes of the media
+                var content = media as IContent;
+                if (content != null)
+                    content.Name = fileName;
+
+                media.Created = item.Created;
+                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                {
+                    var mediaEX = media as ExtraMediaData;
+                    mediaEX.SharePointGUID = item.GUID.ToString();
+                    mediaEX.SharePointTimeCreated = item.Created;
+                    mediaEX.SharePointTimeLastModified = item.Modified;
+                    mediaEX.SharePointRelativeUrl = item.FileUrl;
+                }
+
+                try
+                {
+                    var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Failed to save to cms", e);
+                }
+            }
+        }
+
+        public void UpdateListItem(SPListItem item)
+        {
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+            var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
+            var fileName = item.DisplayName; //  @"C:\test.jpg";
+
+            //Get a suitable MediaData type from extension
+            Type typetobuild = typeof(SharePointBlockData);
+            var contentType = contentTypeRepository.Load(typetobuild);
+
+            // make sure the parent has the proper access so we can create objects in it
+            ContentReference parentFolder;
+            if (item.entryPointId != -1)
+            {
+                parentFolder = new ContentReference(item.entryPointId);
+            }
+            else
+            {
+                // Only search from the entry point down
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+            }
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
+            if (cref != null)
+            {
+                //Get the media object
+                var media = contentRepository.Get<SharePointBlockData>(cref).CreateWritableClone() as SharePointBlockData;
+                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                {
+                    var mediaEX = media as ExtraMediaData;
+
+                    // Only update if the last modified dates dont match
+                    if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
+                    {
+                        media.Body = new XhtmlString("<h1>body</h1>"); // Todo, get the real data.
+
+                        // Set attibutes of the media
+                        var content = media as IContent;
+                        if (content != null)
+                            content.Name = fileName;
+
+                        media.Created = item.Created;
+
+                        mediaEX.SharePointGUID = item.GUID.ToString();
+                        mediaEX.SharePointTimeCreated = item.Created;
+                        mediaEX.SharePointTimeLastModified = item.Modified;
+                        mediaEX.SharePointRelativeUrl = item.FileUrl;
+                        try
+                        {
+                            var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error("Failed to save to cms", e);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void DeleteListItem(SPListItem item)
+        {
+            var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
+            var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
+
+            // make sure the parent has the proper access so we can delete objects in it
+            ContentReference parentFolder;
+            if (item.entryPointId != -1)
+            {
+                parentFolder = new ContentReference(item.entryPointId);
+            }
+            else
+            {
+                // Only search from the entry point down
+                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+            }
+            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+
+            // Now check the folder to see if the item already exists. 
+            ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
+            if (cref != null)
+            {
+                //Get a new empty media object
+                var media = contentRepository.Get<BlockData>(cref).CreateWritableClone() as BlockData;
+                if (media != null)
+                {
+                    try
+                    {
+                        contentRepository.Delete(cref, true, AccessLevel.Delete);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error("Failed to delete block data from cms", e);
+                    }
+                }
+            }
         }
     }
 }

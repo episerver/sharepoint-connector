@@ -69,6 +69,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
             throw new NotImplementedException();
         }
 
+        public void AddListItem(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DeleteDocument(SPListItem item)
         {
             throw new NotImplementedException();
@@ -79,12 +84,22 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
             throw new NotImplementedException();
         }
 
+        public void DeleteListItem(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
         public void UpdateDocument(SPListItem item)
         {
             throw new NotImplementedException();
         }
 
         public void UpdateFolder(SPListItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateListItem(SPListItem item)
         {
             throw new NotImplementedException();
         }

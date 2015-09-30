@@ -42,6 +42,173 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
+        /// Processes folders by updating the name if it has changed, adding and removing items 
+        /// </summary>
+        /// <param name="spItem"></param>
+        /// <param name="selectedList"></param>
+        /// <param name="selectedView"></param>
+        private void ProcessFolder(SPListItem spItem, SPList selectedList, SPListView selectedView)
+        {
+            if (spItem.Folder != null)
+            {
+                // Add the folder if its not already there
+                var contentRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
+                if (contentRef != null)
+                {
+                    // The folder was previously created so we can assume that we have been here before and this is a refresh.
+                    // We must now check for media items that no longer exist in share point and must be deleted from cms.
+                    // 1) get all the children items from that cms folder (contentRef)
+                    // 2) iterate through each media item and get the quid from our extra media data instance.
+                    // 3) check to see if the quid is in the sharepoint item list for this folder.
+                    // 4) if not post the delete item message.
+                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+                    var cmsListItems = repo.GetChildren<IContentData>(contentRef);
+                    var sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
+                    foreach (var item in cmsListItems)
+                    {
+                        // If its content
+                        if (item is ExtraMediaData)
+                        {
+                            var mediaItem = item as ExtraMediaData;
+                            Boolean found = false;
+
+                            // now iterate through the sharepoint list and check to see if its there. 
+                            // If its not, it needs to be deleted.
+                            foreach (var spItem2 in sharepointListItems)
+                            {
+                                if (spItem2.GUID == new Guid(mediaItem.SharePointGUID))
+                                {
+                                    found = true; // the item is in both lists, we wont delete it. 
+                                    break;
+                                }
+                            }
+                            if (!found)
+                            {
+                                // if its a list item, delete it
+                                if (mediaItem is SharePointBlockData)
+                                {
+                                    _emitterFactory.Create().Emit(new SharePointListItemDeleteMessage()
+                                    {
+                                        Item = new SPListItem()
+                                        {
+                                            entryPointId = contentRef.ID, // id of the folder the item is in
+                                            GUID = new Guid(mediaItem.SharePointGUID),
+                                        },
+                                    });
+                                }
+                                else // assume its media data
+                                {
+                                    _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
+                                    {
+                                        Item = new SPListItem()
+                                        {
+                                            entryPointId = contentRef.ID, // id of the folder the item is in
+                                            GUID = new Guid(mediaItem.SharePointGUID),
+                                        },
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    // Now we must do the same thing for removed folders
+                    var cmsFolderItems = repo.GetChildren<ContentFolder>(contentRef);
+                    FolderData fd = new FolderData();
+                    foreach (var item in cmsFolderItems)
+                    {
+                        Boolean delete = true;
+
+                        // now iterate through the sharepoint list and check to see if its there. 
+                        // If its not, it needs to be deleted.
+                        foreach (var spItem2 in sharepointListItems)
+                        {
+                            fd = fd.GetFolder(item.ContentLink.ID);
+
+                            if (spItem2.GUID == fd.FolderGuid)
+                            {
+                                delete = false; // the item is in both lists, we wont delete it. 
+                                break;
+                            }
+                        }
+                        if (delete == true)
+                        {
+                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                            {
+                                Item = new SPListItem()
+                                {
+                                    entryPointId = contentRef.ID, // id of the folder the item is in
+                                    GUID = fd.FolderGuid,
+                                    Folder = new SPFolder() { Name = item.Name }
+                                },
+                            });
+                        }
+                    }
+                }
+
+                ProcessSubItems(spItem.Folder, selectedList, selectedView);
+            }
+        }
+
+        /// <summary>
+        /// Adds or updates SPListItems that are not folders 
+        /// </summary>
+        /// <param name="spItem"></param>
+        private void ProcessItem(SPListItem spItem)
+        {
+            if (spItem.Folder == null)
+            {
+                ContentReference itemref = null;
+                var parentFolderRef = _contentProviderHelper.FindRecursiveFolders(spItem.ParentFolderName, _settingsHelper.GetEntryPoint());
+                if (parentFolderRef != null)
+                {
+                    // Determine if we are adding or updating and send the appropriate message.
+                    itemref = _contentProviderHelper.FindMediaInFolder(spItem.GUID, parentFolderRef);
+                }
+
+                if (spItem.File != null) // is it a document?
+                {   
+                    // if there is no parent folder, or the content doesnt exist send a Add message
+                    if (parentFolderRef == null || itemref == null)
+                    {
+                        _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointContentAddMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
+                    else
+                    {
+                        _logger.Information("Adding SharePointContentUpdateMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointContentUpdateMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
+                }
+                else // it is a list item
+                {   
+                    // if there is no parent folder, or the content doesnt exist send a Add message
+                    if (parentFolderRef == null || itemref == null)
+                    {
+                        _logger.Information("Adding SharePointListItemAddMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointListItemAddMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
+                    else
+                    {
+                        _logger.Information("Adding SharePointListItemUpdateMessage to the queue " + spItem.Title);
+                        _emitterFactory.Create().Emit(new SharePointListItemUpdateMessage()
+                        {
+                            Item = spItem,
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Adds all the subfolders and subitems for the given parent folder, additionally deletes any removed items in a folder.
         /// </summary>
         /// <param name="parentFolder">The parent folder to use as selection criterea items and as a source for the cms folder name</param>
@@ -62,117 +229,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 else
                     spItem.ParentFolderName = ParentFolderName;
 
-                if (spItem.Folder != null)
-                {
-                    // Add the folder if its not already there
-                    var contentRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
-                    if (contentRef != null)
-                    {
-                        // The folder was previously created so we can assume that we have been here before and this is a refresh.
-                        // We must now check for media items that no longer exist in share point and must be deleted from cms.
-                        // 1) get all the children items from that cms folder (contentRef)
-                        // 2) iterate through each media item and get the quid from our extra media data instance.
-                        // 3) check to see if the quid is in the sharepoint item list for this folder.
-                        // 4) if not post the delete item message.
-                        IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-                        var cmsListItems = repo.GetChildren<MediaData>(contentRef);
-                        var sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
-                        foreach (var item in cmsListItems)
-                        {
-                            // If its content
-                            if (item is ExtraMediaData)
-                            {
-                                var mediaItem = item as ExtraMediaData;
-                                Boolean delete = true;
+                // Process the folder object, if its a folder item
+                ProcessFolder(spItem, selectedList, selectedView);
 
-                                // now iterate through the sharepoint list and check to see if its there. 
-                                // If its not, it needs to be deleted.
-                                foreach (var spItem2 in sharepointListItems)
-                                {
-                                    if (spItem2.GUID == new Guid(mediaItem.SharePointGUID))
-                                    {
-                                        delete = false; // the item is in both lists, we wont delete it. 
-                                        break;
-                                    }
-                                }
-                                if (delete == true)
-                                {
-                                    _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
-                                    {
-                                        Item = new SPListItem()
-                                        {
-                                            entryPointId = contentRef.ID, // id of the folder the item is in
-                                            GUID = new Guid(mediaItem.SharePointGUID),
-                                        },
-                                    });
-                                }
-                            }
-                        }
-
-                        // Now we must do the same thing for removed folders
-                        var cmsFolderItems = repo.GetChildren<ContentFolder>(contentRef);
-                        FolderData fd = new FolderData();
-                        foreach (var item in cmsFolderItems)
-                        {
-                            Boolean delete = true;
-
-                            // now iterate through the sharepoint list and check to see if its there. 
-                            // If its not, it needs to be deleted.
-                            foreach (var spItem2 in sharepointListItems)
-                            {
-                                fd = fd.GetFolder(item.ContentLink.ID);
-
-                                if (spItem2.GUID == fd.FolderGuid)
-                                {
-                                    delete = false; // the item is in both lists, we wont delete it. 
-                                    break;
-                                }
-                            }
-                            if (delete == true)
-                            {
-                                _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
-                                {
-                                    Item = new SPListItem()
-                                    {
-                                        entryPointId = contentRef.ID, // id of the folder the item is in
-                                        GUID = fd.FolderGuid,
-                                        Folder = new SPFolder() { Name = item.Name}
-                                    },
-                                });
-                            }
-                        }
-                    }
-
-                    ProcessSubItems(spItem.Folder, selectedList, selectedView);
-                }
-                else if (spItem.File != null)
-                {
-                    ContentReference itemref = null; 
-                    var parentFolderRef = _contentProviderHelper.FindRecursiveFolders(spItem.ParentFolderName, _settingsHelper.GetEntryPoint());
-                    if( parentFolderRef != null )
-                    {
-                        // Determine if we are adding or updating and send the appropriate message.
-                        itemref = _contentProviderHelper.FindMediaInFolder(spItem.GUID, parentFolderRef);
-                    }
-
-                    // if there is no parent folder, or the content doesnt exist send a Add message
-                    if (parentFolderRef == null || itemref == null)
-                    {
-                        _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
-                        _emitterFactory.Create().Emit(new SharePointContentAddMessage()
-                        {
-                            Item = spItem,
-                        });
-                    }
-                    else
-                    {
-                        _logger.Information("Adding SharePointContentUpdateMessage to the queue " + spItem.Title);
-                        _emitterFactory.Create().Emit(new SharePointContentUpdateMessage()
-                        {
-                            Item = spItem,
-                        });
-                    }
-                }
+                // Process the item if its not a folder item
+                ProcessItem(spItem);
             }
         }
 
