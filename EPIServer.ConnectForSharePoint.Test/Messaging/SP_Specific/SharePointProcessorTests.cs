@@ -670,8 +670,20 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg" },
+                FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
                 entryPointId = 42
             };
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            String xmlString = "<root></root>";
+            myStreamWriter.Write(xmlString);
+            myStreamWriter.Flush();
+            mstream.Position = 0;
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
+                mstream
+                );
 
             contentRepo.Setup(cr => cr.GetDefault<SharePointBlockData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
                 .Returns(new SharePointBlockData());
@@ -694,6 +706,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg" },
+                FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
                 entryPointId = 42
             };
 
@@ -701,6 +714,17 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 .Returns(new SharePointBlockData() {
                     SharePointTimeLastModified = DateTime.Now
                 });
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            String xmlString = "<root></root>";
+            myStreamWriter.Write(xmlString);
+            myStreamWriter.Flush();
+            mstream.Position = 0;
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
+                mstream
+                );
 
             processor.UpdateListItem(item);
 
