@@ -47,13 +47,13 @@ namespace DemoSharepointProcessor
             // Do some custom processing
 
             // The splistitem does not contain the the xml data associated with the list item.
-            // The following line is an example of how to get the data associated with the SPListItem
+            // The following lines are an example of how to get the data associated with the SPListItem
             // and parse the data int a list of fields
             var data = defaultProcessor.getListItemData(item);
             var fields = defaultProcessor.getFields(data.ToString());
 
             // Optionally call the default processor
-            defaultProcessor.AddFolder(item);
+            defaultProcessor.AddListItem(item);
         }
 
         public void DeleteDocument(SPListItem item)
