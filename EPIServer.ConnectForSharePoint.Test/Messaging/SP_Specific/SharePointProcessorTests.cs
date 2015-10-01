@@ -17,6 +17,8 @@ using EPiServer.Data.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using EPiServer.Data;
+using EPiServer.Logging;
+using EPiServer;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -39,6 +41,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentRepository> contentRepo;
         private Mock<IContentTypeRepository> contentTypeRepo;
         private Mock<IFileStreamService> fileStreamService;
+        private Mock<ILogger> logger;
 
         private SharePointProcessor GetUnitUnderTest()
         {
@@ -46,6 +49,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo = new Mock<IContentRepository>();
             contentTypeRepo = new Mock<IContentTypeRepository>();
             fileStreamService = new Mock<IFileStreamService>();
+            logger = new Mock<ILogger>();
 
             // Initialize our service locator instance.
             serviceLocator = new Mock<IServiceLocator>();
@@ -54,6 +58,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<IContentTypeRepository>()).Returns(contentTypeRepo.Object);
             ContentMediaResolver cmr = new ContentMediaResolver();
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
+            serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);
@@ -397,7 +402,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
             contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(new ContentReference(42));
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
             contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
                 new SharepointGenericMedia()
                 {
@@ -651,6 +657,106 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 99),
                             It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
                             "DeleteSubFolders needs to delete any content in the folder before deleting the folder.");
+        }
+
+        [TestMethod]
+        public void AddListItem_Calls_RepoAdd()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
+                entryPointId = 42
+            };
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            String xmlString = "<root></root>";
+            myStreamWriter.Write(xmlString);
+            myStreamWriter.Flush();
+            mstream.Position = 0;
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
+                mstream
+                );
+
+            contentRepo.Setup(cr => cr.GetDefault<SharePointBlockData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
+                .Returns(new SharePointBlockData());
+
+            processor.AddListItem(item);
+
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+        }
+
+        [TestMethod]
+        public void UpdateListItem_Calls_Add()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
+                entryPointId = 42
+            };
+
+            contentRepo.Setup(cr => cr.Get<SharePointBlockData>(It.IsAny<ContentReference>()))
+                .Returns(new SharePointBlockData() {
+                    SharePointTimeLastModified = DateTime.Now
+                });
+
+            MemoryStream mstream = new MemoryStream();
+            StreamWriter myStreamWriter = new StreamWriter(mstream);
+            String xmlString = "<root></root>";
+            myStreamWriter.Write(xmlString);
+            myStreamWriter.Flush();
+            mstream.Position = 0;
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
+            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
+                mstream
+                );
+
+            processor.UpdateListItem(item);
+
+            contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
+        }
+
+        [TestMethod]
+        public void DeleteListItem_Calls_Delete()
+        {
+            var processor = GetUnitUnderTest();
+
+            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
+            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
+                .Returns(new ContentReference(42));
+
+            var item = new SPListItem()
+            {
+                File = new SPFile() { Name = "Filename.jpg" },
+                entryPointId = 42
+            };
+
+            contentRepo.Setup(cr => cr.Get<BlockData>(It.IsAny<ContentReference>()))
+                .Returns(new SharePointBlockData()
+                {
+                    SharePointTimeLastModified = DateTime.Now
+                });
+
+            processor.DeleteListItem(item);
+
+            contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), 
+                It.IsAny<AccessLevel>()), Times.Once, "Delete needs to be called once");
         }
     }
 

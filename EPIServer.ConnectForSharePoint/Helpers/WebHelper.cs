@@ -20,12 +20,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="requestType">Request method type.</param>
         /// <param name="headerNameValues">Addition headers for the request.</param>
         /// <returns>WebRequest object</returns>
-        public static WebRequest CreateRequest(string requestUrl, string requestType, NameValueCollection headerNameValues)
+        public static WebRequest CreateRequest(string requestUrl, string requestType, NameValueCollection headerNameValues, string acceptType = "application/json;odata=verbose")
         {
             var request = (HttpWebRequest)HttpWebRequest.Create(requestUrl);
             request.Method = string.IsNullOrEmpty(requestType) ? "GET" : requestType;
             request.ContentType = "application/json;odata=verbose";
-            request.Accept = "application/json;odata=verbose";
+            request.Accept = acceptType;
             request.UserAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)";
 
             if (headerNameValues != null && headerNameValues.Count > 0)

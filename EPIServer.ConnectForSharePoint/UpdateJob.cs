@@ -13,10 +13,16 @@ namespace EPiServer.ConnectForSharePoint
     {
         public static string Execute()
         {
-            var lists = SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+            // Concatinate the document and custom lists.
+            var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                .GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                .GetLists((int)ListBaseType.GenericList);
+            var supportedLists = documentLists.Concat(customLists);
+
             var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
-            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, supportedLists);
             return "Started";
         }
     }

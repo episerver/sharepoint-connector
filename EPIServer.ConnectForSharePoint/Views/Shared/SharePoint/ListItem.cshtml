@@ -1,0 +1,22 @@
+﻿@using EPiServer.ConnectForSharePoint.Models.ViewModels
+@model EPiServer.ConnectForSharePoint.Models.ViewModels.ListItemViewModel
+
+<p>@Model.Name</p>
+<hr>
+<table>
+    @foreach (var item in Model.Fields)
+    {
+        <tr>
+            <td>
+                @item.Name
+            </td>
+            <td>
+                @item.Value
+            </td>
+            <td>
+                <a href="@item.Url">@item.Description</a>
+            </td>
+        </tr>
+    }
+</table>
+<hr>

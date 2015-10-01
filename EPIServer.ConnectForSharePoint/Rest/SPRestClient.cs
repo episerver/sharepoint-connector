@@ -81,7 +81,13 @@ namespace EPiServer.ConnectForSharePoint.Rest
         private WebRequest CreateRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers)
         {
             var requestUrl = WebHelper.CombineUrl(_spSettings.SiteUrl, requestInfo.EncodedUrl);
-            var webRequest = (HttpWebRequest)WebHelper.CreateRequest(requestUrl, requestInfo.RequestMethod, headers);
+            string acceptType = "application/json;odata=verbose";
+            if (requestInfo.EncodedUrl.StartsWith(_spSettings.SiteUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                acceptType = "application/atom+xml";
+            }
+
+            var webRequest = (HttpWebRequest)WebHelper.CreateRequest(requestUrl, requestInfo.RequestMethod, headers, acceptType);
 
             // NOTE: the CookieContainer MUST be set before GetRequestStream() call
             // so that any POST request can work successfully
