@@ -15,6 +15,8 @@ using System.IO;
 using EPiServer;
 using System.Xml;
 using System.Net;
+using EPiServer.ConnectForSharePoint.Models.ViewModels;
+using System.Collections.Generic;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -350,6 +352,120 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         }
 
         /// <summary>
+        /// Parses the sharepoint xml for a list item, and returs a list of ListItemField
+        /// </summary>
+        /// <param name="XmlData"></param>
+        /// <returns></returns>
+        public List<ListItemField> getFields(string XmlData)
+        {
+            var list = new List<ListItemField>();
+            try
+            {
+                using (XmlReader reader = XmlReader.Create(new StringReader(XmlData)))
+                {
+                    bool inProperties = false;
+                    bool inHyperLink = false;
+                    string name = "";
+                    string value = "";
+                    string type = "";
+                    string description = "";
+                    string url = "";
+                    string lastElementName = "";
+
+                    // Parse the file and display each of the nodes.
+                    while (reader.Read())
+                    {
+                        switch (reader.NodeType)
+                        {
+                            case XmlNodeType.Element:
+
+                                if (inProperties && inHyperLink != true)
+                                {
+                                    name = reader.Name;
+                                    type = reader.GetAttribute("m:type");
+                                    if (string.Equals(type, "SP.FieldUrlValue", StringComparison.OrdinalIgnoreCase))
+                                        inHyperLink = true;
+                                }
+
+                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
+                                    inProperties = true;
+
+                                lastElementName = reader.Name;
+                                break;
+                            case XmlNodeType.Text:
+                                if (inProperties)
+                                {
+                                    if (!inHyperLink)
+                                        value = reader.Value;
+                                    else
+                                    {
+                                        if (string.Equals(lastElementName, "d:Description", StringComparison.OrdinalIgnoreCase))
+                                            description = reader.Value;
+
+                                        if (string.Equals(lastElementName, "d:Url", StringComparison.OrdinalIgnoreCase))
+                                            url = reader.Value;
+                                    }
+                                }
+                                break;
+
+                            case XmlNodeType.XmlDeclaration:
+                            case XmlNodeType.ProcessingInstruction:
+                                Console.WriteLine(reader.Name + " " + reader.Value);
+                                break;
+                            case XmlNodeType.Comment:
+                                Console.WriteLine(reader.Value);
+                                break;
+
+                            case XmlNodeType.EndElement:
+                                if (inProperties)
+                                {
+                                    if (!inHyperLink)
+                                    {
+                                        if (!string.IsNullOrEmpty(name))
+                                        {
+                                            list.Add(new ListItemField()
+                                            {
+                                                Name = name.Substring(2), // remove the d:                                                    Type = type,
+                                                Value = value,
+                                                Description = description,
+                                                Url = url
+                                            });
+                                            name = type = value = description = url = "";
+                                        }
+                                    }
+                                    else // in hyperlink
+                                    {
+                                        if (string.Equals(name, reader.Name, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            inHyperLink = false;
+                                            list.Add(new ListItemField()
+                                            {
+                                                Name = name.Substring(2), // remove the d:
+                                                Type = type,
+                                                Value = value,
+                                                Description = description,
+                                                Url = url
+                                            });
+                                            name = type = value = description = url = "";
+                                        }
+                                    }
+                                }
+
+                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
+                                    inProperties = false;
+
+                                break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return list;
+        }
+
+        /// <summary>
         /// Gets the stream data assocatied with a specific SPListItem
         /// </summary>
         /// <param name="item"></param>
@@ -361,15 +477,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         }
 
         /// <summary>
-        /// Gets the XML data associated with a specific SPListItem
+        /// Gets the xml data associated with the specific list item.
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public Stream getXMLData(string url)
-        {
-            return _fileStreamService.GetListItemXmlData(url);
-        }
-
         public XhtmlString getListItemData(SPListItem item)
         {
             var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File

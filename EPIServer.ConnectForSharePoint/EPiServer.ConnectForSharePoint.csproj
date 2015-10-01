@@ -268,6 +268,7 @@
     <Compile Include="Models\SPUser.cs" />
     <Compile Include="Models\ViewModels\GenericViewModel.cs" />
     <Compile Include="Models\ViewModels\ImageViewModel.cs" />
+    <Compile Include="Models\ViewModels\ListItemField.cs" />
     <Compile Include="Models\ViewModels\ListItemViewModel.cs" />
     <Compile Include="Models\ViewModels\VideoViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
