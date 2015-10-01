@@ -42,6 +42,20 @@ namespace DemoSharepointProcessor
             defaultProcessor.AddFolder(item);
         }
 
+        public void AddListItem(SPListItem item)
+        {
+            // Do some custom processing
+
+            // The splistitem does not contain the the xml data associated with the list item.
+            // The following line is an example of how to get the data associated with the SPListItem
+            // and parse the data int a list of fields
+            var data = defaultProcessor.getListItemData(item);
+            var fields = defaultProcessor.getFields(data.ToString());
+
+            // Optionally call the default processor
+            defaultProcessor.AddFolder(item);
+        }
+
         public void DeleteDocument(SPListItem item)
         {
             // Do some custom processing
@@ -58,6 +72,14 @@ namespace DemoSharepointProcessor
             defaultProcessor.DeleteFolder(item);
         }
 
+        public void DeleteListItem(SPListItem item)
+        {
+            // Do some custom processing
+
+            // Optionally call the default processor
+            defaultProcessor.DeleteListItem(item);
+        }
+
         public void UpdateDocument(SPListItem item)
         {
             // Do some custom processing
@@ -72,6 +94,14 @@ namespace DemoSharepointProcessor
 
             // Optionally call the default processor
             defaultProcessor.UpdateFolder(item);
+        }
+
+        public void UpdateListItem(SPListItem item)
+        {
+            // Do some custom processing
+
+            // Optionally call the default processor
+            defaultProcessor.UpdateListItem(item);
         }
     }
 }
