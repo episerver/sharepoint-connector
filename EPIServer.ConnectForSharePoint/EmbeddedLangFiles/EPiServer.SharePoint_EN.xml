@@ -3,6 +3,8 @@
     <language name="English" id="en">
         <sharepoint>
             <admin>
+                <ok>Ok</ok>
+                <cancel>Cancel</cancel>
                 <displayname>Connect For SharePoint</displayname>
                 <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
                 <queuedescription>Queue Information.</queuedescription>
