@@ -224,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consts.cs" />
+    <Compile Include="Controllers\SharePointBlockDataController.cs" />
     <Compile Include="Controllers\SharePointGenericController.cs" />
     <Compile Include="Controllers\SharePointImageController.cs" />
     <Compile Include="Controllers\SharePointVideoController.cs" />
@@ -250,10 +251,14 @@
     <Compile Include="Messaging\Messages\SharePointContentMessage.cs" />
     <Compile Include="Messaging\Messages\SharePointFolderDeleteMessage.cs" />
     <Compile Include="Messaging\Messages\SharePointFolderUpdateMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemAddMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemUpdateMessage.cs" />
     <Compile Include="Messaging\SharePointMessageEmitterFactory.cs" />
     <Compile Include="Messaging\SharePointProcessorFactory.cs" />
     <Compile Include="Models\ContextWebInformation.cs" />
     <Compile Include="Models\FileTypes\ExtraMediaData.cs" />
+    <Compile Include="Models\FileTypes\SharePointBlockData.cs" />
     <Compile Include="Models\FileTypes\SharepointGenericMedia.cs" />
     <Compile Include="Models\FileTypes\SharepointImageFile.cs" />
     <Compile Include="Models\FileTypes\SharepointVideoFile.cs" />
@@ -264,9 +269,12 @@
     <Compile Include="Models\SPUser.cs" />
     <Compile Include="Models\ViewModels\GenericViewModel.cs" />
     <Compile Include="Models\ViewModels\ImageViewModel.cs" />
+    <Compile Include="Models\ViewModels\ListItemField.cs" />
+    <Compile Include="Models\ViewModels\ListItemViewModel.cs" />
     <Compile Include="Models\ViewModels\VideoViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
+    <Compile Include="Processor\SharePointProcessorData.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
     <Compile Include="Rest\Models\JsonUser.cs" />
     <Compile Include="Rest\Models\JsonFile.cs" />
@@ -427,6 +435,7 @@
     <Content Include="modules\_protected\Shell\Shell.zip" />
     <Content Include="modules\_protected\CMS\web.config" />
     <Content Include="modules\_protected\CMS\CMS.zip" />
+    <Content Include="Views\Shared\SharePoint\ListItem.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
