@@ -321,9 +321,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var messageHelper = new SharePointMessageHelper();
                 // if the entry point is different we need to queue all the current folders for delete
                 if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                    messageHelper.QueueFoldersForDelete(lists);
+                    messageHelper.queueRootFoldersForDelete(lists);
                 else // else we only delete folders that have been deselected
-                    messageHelper.QueueFoldersForDelete(lists, selectedListViewIds);
+                    messageHelper.queueRootFoldersForDelete(lists, selectedListViewIds);
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
@@ -338,7 +338,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
-                messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+                messageHelper.beginProcessing(SharePointSettings.Current.ListIds, lists);
 
                 QueueCountTB.Text = QueueCount;
                 Connect.Enabled = false;
@@ -373,7 +373,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             var lists = GetMediaLists(true, out errorMessage);
             var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
-            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+            messageHelper.beginProcessing(SharePointSettings.Current.ListIds, lists);
 
             ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
 
