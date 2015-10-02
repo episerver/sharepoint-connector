@@ -112,15 +112,6 @@ namespace EPiServer.ConnectForSharePoint.Web {
         protected global::System.Web.UI.WebControls.CheckBoxList SharePointListCheckBox;
         
         /// <summary>
-        /// EntryPoint control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox EntryPoint;
-
-        /// <summary>
         /// EntryPointFolderName control.
         /// </summary>
         /// <remarks>
@@ -128,18 +119,26 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPointFolderName;
-        
+
         /// <summary>
-        /// EntryPointRequired control.
+        /// 
+        /// </summary>
+        protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected global::System.Web.UI.WebControls.TextBox EntryPoint;
+
+        /// <summary>
+        /// btnShow control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator EntryPointRequired;
-
-        protected global::System.Web.UI.WebControls.Panel Panel1;
-
+        protected global::System.Web.UI.WebControls.Button btnShow;
+        
         /// <summary>
         /// Save control.
         /// </summary>

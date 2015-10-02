@@ -164,6 +164,31 @@ namespace EPiServer.ConnectForSharePoint.Web
                         Connect.Enabled = false;
                         ActivateControls(false);
                     }
+
+                    // check to see if current entry point has been deleted, if so pop up error message alerting the user
+                    if (null != SharePointSettings.Current.EntryPoint)
+                    {
+                        try
+                        {
+                            var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(SharePointSettings.Current.EntryPoint.ID));
+
+                            if (selectedFolderRef.IsDeleted)
+                            {
+                                EntryPointFolderName.Text = string.Empty;
+
+                                var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
+                                ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
+                            }
+                        }
+                        catch
+                        {
+                            EntryPointFolderName.Text = string.Empty;
+
+                            var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
+                            ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
+                        }
+
+                    }
                 }
             }
         }
@@ -201,6 +226,12 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void Save_Click(object sender, EventArgs e)
         {
+            // update entry point with the latest cache value that we want to save from the tree dlg selection
+            if (!string.IsNullOrEmpty(EntryPointCache.Text))
+            {
+                EntryPoint = EntryPointCache;
+            }
+
             MessagePanel.Visible = false;
 
             #region Validate data
@@ -249,6 +280,9 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             if (strErrors.Length > 0)
             {
+                // reset text box values to previous valid settings
+                EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
+                EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
                 ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
                 return;
             }
@@ -287,9 +321,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var messageHelper = new SharePointMessageHelper();
                 // if the entry point is different we need to queue all the current folders for delete
                 if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                    messageHelper.QueueFoldersForDelete(lists);
+                    messageHelper.queueRootFoldersForDelete(lists);
                 else // else we only delete folders that have been deselected
-                    messageHelper.QueueFoldersForDelete(lists, selectedListViewIds);
+                    messageHelper.queueRootFoldersForDelete(lists, selectedListViewIds);
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
@@ -304,7 +338,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
-                messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+                messageHelper.beginProcessing(SharePointSettings.Current.ListIds, lists);
 
                 QueueCountTB.Text = QueueCount;
                 Connect.Enabled = false;
@@ -339,7 +373,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             var lists = GetMediaLists(true, out errorMessage);
             var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
-            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, lists);
+            messageHelper.beginProcessing(SharePointSettings.Current.ListIds, lists);
 
             ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
 
@@ -383,8 +417,14 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else
                 {
-                    // Use the service to get the list.
-                    return SharePointHelper.SPServicesHub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+                    // Concatinate the document and custom lists.
+                    var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                        .GetLists((int)ListBaseType.DocumentLibrary);
+                    var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                        .GetLists((int)ListBaseType.GenericList);
+                    var supportedLists = documentLists.Concat(customLists);
+
+                    return supportedLists;
                 }
             }
             catch (Exception e)
@@ -434,7 +474,12 @@ namespace EPiServer.ConnectForSharePoint.Web
             var svcLists = new ListsViewsService();
             svcLists.EndpointContextService = contextService;
 
-            return svcLists.GetLists((int)ListBaseType.DocumentLibrary);
+            // Concatinate the document and custom lists.
+            var documentLists = svcLists.GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = svcLists.GetLists((int)ListBaseType.GenericList);
+            var supportedLists = documentLists.Concat(customLists);
+
+            return supportedLists;
         }
 
         private bool PreAuthenticationCheck()
@@ -566,5 +611,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         }
 
         #endregion
+
     }
 }

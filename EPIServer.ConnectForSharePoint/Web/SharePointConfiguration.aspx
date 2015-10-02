@@ -11,6 +11,9 @@
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
         function updateQueCounts() {
             PageMethods.getCurrentQueCount(onSucess, onError);
@@ -44,6 +47,57 @@
         }
         document.body.onload = updateQueCounts;
         window.setInterval(updateQueCounts, 1000);
+    </script>
+    <script type='text/javascript'>
+        $(function () {
+            $("#treedialog").dialog({
+                autoOpen: false,
+                modal: true,
+            });
+            $("#btnShow").click(function () {
+                $("#treedialog").dialog("open");
+                $(".ui-dialog-titlebar").hide();
+            });
+
+        });
+        function setval(newval)
+        {
+            //set foldername text box to show selected folder
+            window.PageMethods.GetEntryPointFolderName(newval, onNodePicked, onError);
+                            
+            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+            document.getElementById('<%# EntryPointCache.ClientID %>').value = newval;
+            return false;
+        }
+
+        // called when user clicks a node in the tree
+        function onNodePicked(result)
+        {
+            var epFolderName = document.getElementById('<%= SelectedFolderName.ClientID %>');
+            epFolderName.value = result;
+        }
+                            
+        // called when user clicks Ok in select folder dlg
+        function onOkClick() {
+            // set hidden text box to be selected folder id so everything continues to work behind the scenes
+            document.getElementById('<%# EntryPoint.ClientID %>').value = document.getElementById('<%# EntryPointCache.ClientID %>').value;
+
+            //set foldername text box to show selected folder
+            window.PageMethods.GetEntryPointFolderName(document.getElementById('<%# EntryPointCache.ClientID %>').value, onSuccess, onError);
+            $("#treedialog").dialog("close");
+        }
+
+        // updates the entry point folder text box on the main config screen
+        function onSuccess(result)
+        {
+            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
+            epFolderName.value = result;
+        }
+
+        function onCloseClick() {
+            document.getElementById('<%# EntryPointCache.ClientID %>').value = null;
+            $("#treedialog").dialog("close");
+        }
     </script>
 
     <div class="epi-contentContainer epi-padding">
@@ -97,24 +151,11 @@
                 
             <fieldset >
                 <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
-                <div class="epi-size15">
-                    <script type='text/javascript'>
-                        function setval(newval)
-                        {
-                            //set foldername text box to show selected folder
-                            window.PageMethods.GetEntryPointFolderName(newval, onSuccess, onError);
-                            
-                            // set hidden text box to be selected folder id so everything continues to work behind the scenes
-                            document.getElementById('<%# EntryPoint.ClientID %>').value = newval;
-                            return false;
-                        }
-
-                        function onSuccess(result)
-                        {
-                            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
-                            epFolderName.value = result;
-                        }
-                    </script>
+                <!-- Modal Tree Dlg -->
+                <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                <input type="button" ID="btnShow" Value="..." />
+                <div id="treedialog" >
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -137,24 +178,33 @@
                         </EPiServerUI:PageTreeView>
                     </div> 
                     <div>
-                        <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
-                        <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                        <asp:Label AssociatedControlID="SelectedFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                        <asp:TextBox ID="SelectedFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                    </div>
+                    <br />
+                    <div align="right">
+                        <EPiServerUI:ToolButton runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.ok %>" OnClientClick="return onOkClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools" />
+                        <EPiServerUI:ToolButton runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.cancel %>" OnClientClick="onCloseClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools"/>
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
                     <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
+                   
                 <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
                   ControlToValidate="EntryPoint"
                   ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
                   ForeColor="Red" 
                   validationgroup="inputValidationGroup">
                 </asp:RequiredFieldValidator>
+                    </div>
+                <!-- Modal Tree Dlg -->
+                 <asp:TextBox ID="EntryPointCache" runat="server" style="display:none" MaxLength="10" />
             <br/>
 
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
                     Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" 
                     style="vertical-align:top; float: right"/>
             </fieldset>
-
+            </fieldset>
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
             <div class="epi-size15">

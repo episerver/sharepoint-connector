@@ -141,6 +141,46 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return OpenDirectFile(relativeUrl);
         }
 
+
+        public Stream GetListItemXmlData(string url)
+        {
+            // get stream from SharePoint site
+            return OpenDirectListItemXmlData(url);
+        }
+
+        /// <summary>
+        /// Open and read binary data directly from SharePoint site
+        /// </summary>
+        /// <param name="url">The complete rest url to fetch an item from a custom list</param>
+        /// <returns></returns>
+        private MemoryStream OpenDirectListItemXmlData(string url)
+        {
+            try
+            {
+                var reqInfo = new RestJsonRequest(url, "GET", null);
+                var headers = new NameValueCollection();
+                ////headers.Add("binaryStringResponseBody", "true");
+
+                var memoryStream = new MemoryStream();
+
+                // Get binary data from SharePoint
+                using (var stream = GetResponseStream(reqInfo, null, headers))
+                {
+                    stream.CopyTo(memoryStream); // we do this to support seeking
+                    stream.Flush();
+                }
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                return memoryStream;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
+                return null;
+            }
+        }
+
         /// <summary>
         /// Open and read binary data directly from SharePoint site
         /// </summary>

@@ -3,6 +3,8 @@
     <language name="English" id="en">
         <sharepoint>
             <admin>
+                <ok>Ok</ok>
+                <cancel>Cancel</cancel>
                 <displayname>Connect For SharePoint</displayname>
                 <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
                 <queuedescription>Queue Information.</queuedescription>
@@ -38,6 +40,7 @@
                     <entrypointmustnothavechildren>Connection Entry Point cannot have any children.</entrypointmustnothavechildren>
                     <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
                     <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
+                    <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
                 </message>
             </admin>
             <plugin>

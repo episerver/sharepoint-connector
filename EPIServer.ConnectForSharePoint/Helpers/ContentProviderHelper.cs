@@ -108,8 +108,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             // Create SharePoint Media Provider and add to ProviderMap
             InitializeSharePointMediaProvider();
 
-            var supportedLists = SharePointHelper.SPServicesHub.SPListsViewsService
+            // Concatinate the document and custom lists.
+            var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
                 .GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
+                .GetLists((int)ListBaseType.GenericList);
+            var supportedLists = documentLists.Concat(customLists);
 
             var helper = new SharePointHelper();
             var selectedLists = helper.GetSelectedListViewIds(supportedLists);
@@ -341,7 +345,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <returns></returns>
         public ContentReference FindMediaInFolder(Guid SPItemGuid, ContentReference folderRef)
         {
-            var medialist = _contentRepository.GetChildren<MediaData>(folderRef);
+            var medialist = _contentRepository.GetChildren<IContent>(folderRef);
             foreach (var item in medialist)
             {
                 if (item is ExtraMediaData)
