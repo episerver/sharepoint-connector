@@ -173,6 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                         if (selectedFolderRef.IsDeleted)
                         {
                             EntryPointFolderName.Text = string.Empty;
+                            SelectedFolderName.Text = string.Empty;
 
                             var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
                             ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
