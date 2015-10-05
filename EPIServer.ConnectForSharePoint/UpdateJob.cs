@@ -20,9 +20,9 @@ namespace EPiServer.ConnectForSharePoint
                 .GetLists((int)ListBaseType.GenericList);
             var supportedLists = documentLists.Concat(customLists);
 
-            var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
-            messageHelper.QueueItemsForAdd(SharePointSettings.Current.ListIds, supportedLists);
+            var messageHelper = new SharePointMessageHelper();
+            messageHelper.beginProcessing(SharePointSettings.Current.ListIds, supportedLists);
             return "Started";
         }
     }

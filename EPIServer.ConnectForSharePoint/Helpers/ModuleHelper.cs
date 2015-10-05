@@ -4,6 +4,7 @@ using EPiServer.DataAbstraction;
 using EPiServer.Shell;
 using EPiServer.Shell.Modules;
 using EPiServer.Web.Hosting;
+using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -57,14 +58,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         public static string ToPhysicalVPP(string virtualpath)
         {
             var ret = string.Empty;
-            var vpp = VirtualPathHandler.GetProvider("ProtectedAddons") as VirtualPathNonUnifiedProvider;
-            if (vpp == null)
-            {
-                return ret;
-            }
-
-            // now we have vpp.LocalPath point to C:\EPiServer\VPP\MyEPiServerSite\Modules\
-            ret = string.Format(vpp.LocalPath + @"\{0}", virtualpath).Replace('/', '\\');
+            var config = EPiServer.Framework.Configuration.EPiServerFrameworkSection.Instance;
+            var protectedModule = config.VirtualPathProviders["ProtectedModules"];
+            var localPath = HttpRuntime.AppDomainAppPath + protectedModule.ElementInformation.Properties["physicalPath"].Value.ToString();
+            // now we have LocalPath point to C:\EPiServer\VPP\MyEPiServerSite\Modules\
+            ret = string.Format(localPath + @"\{0}", virtualpath).Replace('/', '\\');
+                        
             return ret;
         }
 

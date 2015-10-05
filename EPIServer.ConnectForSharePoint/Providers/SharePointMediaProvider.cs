@@ -58,7 +58,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 ServiceLocator.Current.GetInstance<TemplateResolver>(),
                 ServiceLocator.Current.GetInstance<UrlSegmentHandler>(),
                 ServiceLocator.Current.GetInstance<ILanguageBranchRepository>(),
-                ServiceLocator.Current.GetInstance<IFolderIDGenerator>(),
                 ServiceLocator.Current.GetInstance<IContentCopyHandler>(),
                 ServiceLocator.Current.GetInstance<IValidationService>(),
                 ServiceLocator.Current.GetInstance<IContentEvents>(),
@@ -76,7 +75,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
             TemplateResolver templateResolver,
             UrlSegmentHandler urlSegmentHandler,
             ILanguageBranchRepository languageBranchRepository,
-            IFolderIDGenerator folderIDGenerator,
             IContentCopyHandler contentCopyHandler,
             IValidationService validationService,
             IContentEvents contentEvents,
@@ -91,7 +89,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 templateResolver,
                 urlSegmentHandler,
                 languageBranchRepository,
-                folderIDGenerator,
                 contentCopyHandler,
                 validationService)
         {
