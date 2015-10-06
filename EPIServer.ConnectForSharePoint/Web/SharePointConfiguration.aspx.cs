@@ -175,6 +175,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                             if (selectedFolderRef.IsDeleted)
                             {
                                 EntryPointFolderName.Text = string.Empty;
+                                SelectedFolderName.Text = string.Empty;
 
                                 var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
                                 ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
@@ -183,6 +184,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                         catch
                         {
                             EntryPointFolderName.Text = string.Empty;
+                            SelectedFolderName.Text = string.Empty;
 
                             var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
                             ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
@@ -469,10 +471,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                 IsSharePointOnline = RBOnline.Checked
             };
 
-            var contextService = new EndpointContextService();
-            contextService.EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies);
-            var svcLists = new ListsViewsService();
-            svcLists.EndpointContextService = contextService;
+            var contextService = new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
+            };
+            var svcLists = new ListsViewsService {EndpointContextService = contextService};
 
             // Concatinate the document and custom lists.
             var documentLists = svcLists.GetLists((int)ListBaseType.DocumentLibrary);

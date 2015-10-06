@@ -123,6 +123,11 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// <summary>
         /// 
         /// </summary>
+        protected global::System.Web.UI.WebControls.TextBox SelectedFolderName;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
 
         /// <summary>
