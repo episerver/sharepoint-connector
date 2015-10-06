@@ -244,8 +244,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     processSubItems(spItem.Folder, selectedList, selectedView);
 
                 // Process the item if its not a folder item
+                spItem.selectedView = selectedView;
                 manageItem(spItem);
-
             }
         }
 
@@ -373,8 +373,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     manageFolder(viewListItem, selectedList, selectedView, sharepointListItems);
 
                     // Process the item if its not a folder item
-                    foreach( var spItem in sharepointListItems )
+                    foreach (var spItem in sharepointListItems)
+                    {
+                        spItem.selectedView = selectedView;
                         manageItem(spItem);
+                    }
                 }
 
                 // Process the sub items of this folder.

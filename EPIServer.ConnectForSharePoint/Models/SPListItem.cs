@@ -75,5 +75,10 @@ namespace EPiServer.ConnectForSharePoint.Models
         /// the root cms folder entry id, typicall used as a search point for objects.
         /// </summary>
         public int rootCMSFolderEntryPointID { get; set; }
+
+        /// <summary>
+        /// The view that this object was initially read with
+        /// </summary>
+        public SPListView selectedView;
     }
 }

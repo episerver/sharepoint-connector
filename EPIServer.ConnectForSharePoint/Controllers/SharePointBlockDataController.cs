@@ -23,7 +23,7 @@ namespace EPiServer.ConnectForSharePoint.Controllers
             var model = new ListItemViewModel
             {
                 Name = content.Name,
-                XmlData = currentContent.Body.ToString()
+                JsonData = currentContent.Body.ToString()
             };
             return PartialView("~/Views/Shared/SharePoint/ListItem.cshtml", model);
         }
