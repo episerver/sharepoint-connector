@@ -19,7 +19,6 @@
                 <save>Save</save>
                 <connect>Test connection</connect>
                 <selectfolder>Select Folder:</selectfolder>
-                <selectedfolder>Selected Folder:</selectedfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
                 <expirationtime>Expiration Time</expirationtime>
                 <refreshcache>Refresh</refreshcache>

@@ -147,12 +147,11 @@
                     <%= Translate("/sharepoint/admin/selectviewdescription")%>
                 </p>
                 <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />
+                <br />
             </asp:Panel>                  
                 
-            <fieldset >
-                <legend><%# Translate("/sharepoint/admin/selectfolder") %></legend>
                 <!-- Modal Tree Dlg -->
-                <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
+                <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectfolder") %>&nbsp;</asp:Label>
                 <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                 <input type="button" ID="btnShow" Value="..." />
                 <div id="treedialog" >
@@ -203,7 +202,6 @@
                 <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
                     Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" 
                     style="vertical-align:top; float: right"/>
-            </fieldset>
             </fieldset>
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
