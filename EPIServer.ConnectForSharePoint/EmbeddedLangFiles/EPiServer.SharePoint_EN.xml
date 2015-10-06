@@ -8,7 +8,7 @@
                 <displayname>Connect For SharePoint</displayname>
                 <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
                 <queuedescription>Queue Information.</queuedescription>
-                <remaingitems>Remaing items</remaingitems>
+                <remainingitems>Remaining items</remainingitems>
                 <selectviewdescription>Select SharePoint views to get media from.</selectviewdescription>
                 <serverurl>SharePoint Site URL</serverurl>
                 <username>Username</username>

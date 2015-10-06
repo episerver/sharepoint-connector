@@ -209,7 +209,7 @@
                 <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
             <div class="epi-size15">
                 <asp:Label AssociatedControlID="QueueCountTB" runat="server">
-                    <%= Translate("/sharepoint/admin/remaingitems")%>
+                    <%= Translate("/sharepoint/admin/remainingitems")%>
                 </asp:Label>
                 <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
                 <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" ReadOnly="False" OnClick="Refresh_Click"
