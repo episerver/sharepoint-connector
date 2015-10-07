@@ -196,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 if (child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     // before we delete this folder, delete all the sub folders
-                    DeleteSubFolders(child);
+                    DeleteSubFolders(repo, child);
 
                     repo.Delete(child.ContentLink, true, AccessLevel.Delete);
                     FolderData fd = new FolderData();
@@ -210,15 +210,16 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         /// Traverses to the bottom of the tree under this folder and deletes each item back to the ContentFolder specified.
         /// </summary>
         /// <param name="folder"></param>
-        internal void DeleteSubFolders(ContentFolder folder)
+        /// <param name="repo">Pass this in so we aren't opening up a connection to the db every time, especially when we recurse through the tree.</param>
+        internal void DeleteSubFolders(IContentRepository repo, ContentFolder folder)
         {
-            var repo = _serviceLocator.GetInstance<IContentRepository>();
             var folders = repo.GetChildren<ContentFolder>(folder.ContentLink);
             foreach (var f in folders)
             {
-                DeleteSubFolders(f);
+                // recurse over each child before deleting parent folder
+                DeleteSubFolders(repo, f);
 
-                // delete any media in the folder
+                // delete any media in the current folder
                 var medialist = repo.GetChildren<MediaData>(folder.ContentLink);
                 foreach (var m in medialist)
                 {
@@ -226,7 +227,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 }
 
                 repo.Delete(f.ContentLink, true, AccessLevel.Delete);
-                FolderData fd = new FolderData();
+                var fd = new FolderData();
                 FolderData.Delete(fd.GetFolder(f.ContentLink.ID));
             }
         }

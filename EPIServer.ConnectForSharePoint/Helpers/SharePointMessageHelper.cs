@@ -320,18 +320,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists) // For each view selected
             {
-                // The idListAndView is an object that contains two quids, one for the list and one for the view.
+                // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(item.Key);
 
-                // Get the selected list using the first quid
+                // Get the selected list using the first guid
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
 
-                // Get the selected view to from the second quid
+                // Get the selected view to from the second guid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
                 var FolderName = selectedList.Title + " - " + selectedView.Title;
                 var parentFolder = selectedList.RootFolder;
 
-                // Dummy splistitem used for message to processor
+                // Dummy SPListItem used for message to processor
                 SPListItem viewListItem = new SPListItem()
                 {
                     GUID = new Guid(idListAndView[0]),
@@ -343,7 +343,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     }
                 };
 
-                // Add or update the folder if its not already there
+                // Add or update the folder if it's not already there
                 ContentReference cf = AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
                 if( cf != null )
                 {
@@ -382,30 +382,38 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="entryPoint">The current entry point that is saved in the settings.</param>
+        /// <returns></returns>
         private ContentReference AddOrUpdateFolder(SPListItem item, ContentReference entryPoint)
         {
             var contentRef = _contentProviderHelper.FindRecursiveFolders(item.Folder.Name, entryPoint);
             if (contentRef == null)
             {
-                Boolean add = true;
+                var add = true;
 
                 // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
-                // we can assume the name changed and we just need to updated it
-                FolderData fd = new FolderData();
-                FolderData foundData = fd.GetFolder(item.GUID);
+                // we can assume the name changed and we just need to update it
+                var fd = new FolderData();
+                var foundData = fd.GetFolder(item.GUID);
+
                 if (foundData.RefId != -1)
                 {
-                    // well we found it but it doesnt mean its the correct one. If the user changed the dest folder
-                    // these items could have been marked for delete in previouse methods and are still in the queue
-                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-                    ContentFolder cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
+                    // we found it, but it doesn't mean it's the correct one. If the user changed the dest folder
+                    // these items could have been marked for delete in previous methods and are still in the queue
+                    var repo = _serviceLocator.GetInstance<IContentRepository>();
+                    var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
+
                     if (cf != null) // did the item actually exist?
                     {
-                        // walk up the parent list and see if its the current selected folder, if its not
+                        // walk up the parent list and see if it's the current selected folder, if it's not
                         // there it means the item is in the delete queue and the user selected a different folder.
                         // If it is under the current folder, it means the folder needs to be updated becuase it changed
-                        // in sharepoint
-                        Boolean done = false;
+                        // in sharepoint.
+                        var done = false;
                         do
                         {
                             if (cf.ParentLink.ID == entryPoint.ID)
@@ -417,8 +425,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                 });
                                 add = false;
                                 done = true;
-                            } else
+                            }
+                            else
+                            {
                                 cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
+                            }
 
                             if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
                             {
@@ -428,11 +439,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     }
                     else
                     {
-                        // remove the folder data, its invalid.
+                        // Remove the folder data, it's invalid.
                         FolderData.Delete(foundData);
                     }
                 }
-                if( add )
+
+                if (add)
                 {
                     // Add the view folder.
                     _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);

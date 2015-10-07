@@ -649,7 +649,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 Folder = new SPFolder() { Name = "My Folder Name" },
                 entryPointId = 42
             };
-            processor.DeleteSubFolders(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
+            processor.DeleteSubFolders(serviceLocator.Object.GetInstance<IContentRepository>(), new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
 
             contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42),
                             It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
