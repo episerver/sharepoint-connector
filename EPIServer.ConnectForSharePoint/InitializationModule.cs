@@ -35,23 +35,24 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="contentEventArgs"></param>
         public void MovedContent(object sender, ContentEventArgs contentEventArgs)
         {
-            ContentReference cf = contentEventArgs.ContentLink;
+            var cf = contentEventArgs.ContentLink;
             var repo = ServiceLocator.Current.GetInstance<IContentRepository>();
-            IContent f = repo.Get<IContent>(cf);
-            if (f != null && f is ContentFolder )
-            {
-                FolderData fd = new FolderData();
-                fd = fd.GetFolder(f.ContentLink.ID);
-                if (fd.RefId != -1) // folder ref not found in table, do nothing...
-                {
-                    // cleanup all the sub folders properly, ie user is deleting a top level
-                    // folder that we created * bad idea...
-                    SharePointProcessor processor = new SharePointProcessor();
-                    processor.DeleteSubFolders(f as ContentFolder);
+            var f = repo.Get<IContent>(cf);
 
-                    // now delete this folder from the table.
-                    FolderData.Delete(fd);
-                }
+            // We need to check that the folder is marked for delete, as this is Moved Event includes moving a folder,
+            // as well as moving it to the trash
+            if (f is ContentFolder && f.IsDeleted)
+            {
+                var fd = new FolderData();
+                fd = fd.GetFolder(f.ContentLink.ID);
+
+                // The folder passed in may not be one we created, it could be a root folder that a user made.  
+                // If so, we still want to check to see if it has any children and delete them before deleting the current folder.
+                var processor = new SharePointProcessor();
+                processor.DeleteSubFolders(repo, f as ContentFolder);
+
+                // Now delete this folder from the table.
+                FolderData.Delete(fd);
             }
         }
 
