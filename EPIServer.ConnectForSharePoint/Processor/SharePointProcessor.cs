@@ -476,12 +476,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     content.Name = fileName;
 
                 media.Created = item.Created;
-                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
-                {
-                    var mediaEX = media as ISharePointItem;
-                    mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointTimeLastModified = item.Modified;
-                }
+                media.SharePointGUID = item.GUID.ToString();
+                media.SharePointTimeLastModified = item.Modified;
 
                 try
                 {
