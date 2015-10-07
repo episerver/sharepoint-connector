@@ -18,6 +18,7 @@
                 <onpremises>On-premises</onpremises>
                 <save>Save</save>
                 <connect>Test connection</connect>
+                <selectedfolder>Selected Folder:</selectedfolder>
                 <selectfolder>Select Folder:</selectfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
                 <expirationtime>Expiration Time</expirationtime>
