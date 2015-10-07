@@ -49,9 +49,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             foreach (var item in cmsListItems)
             {
                 // If its content
-                if (item is ExtraMediaData)
+                if (item is ISharePointItem)
                 {
-                    var mediaItem = item as ExtraMediaData;
+                    var mediaItem = item as ISharePointItem;
                     Boolean found = false;
 
                     // now iterate through the sharepoint list and check to see if its there. 
@@ -67,7 +67,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     if (!found)
                     {
                         // if its a list item, delete it
-                        if (mediaItem is SharePointBlockData)
+                        if (mediaItem.Type == SharePointItemType.ListItem )
                         {
                             _emitterFactory.Create().Emit(new SharePointListItemDeleteMessage()
                             {
@@ -78,7 +78,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                 },
                             });
                         }
-                        else // assume its media data
+                        else if(mediaItem.Type == SharePointItemType.LibraryItem )
                         {
                             _emitterFactory.Create().Emit(new SharePointContentDeleteMessage()
                             {

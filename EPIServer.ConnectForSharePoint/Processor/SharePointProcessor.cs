@@ -90,16 +90,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
                     mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointMajorVersion = item.File.MajorVersion;
-                    mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-                    //                                       mediaEX.ParentListID = item.File.ListItem.
-                    mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                     mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
-                    mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
                 }
 
                 try
@@ -265,9 +260,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
 
-                if (media is ExtraMediaData)
+                if (media is ISharePointItem)
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
 
                     // Only update if the last modified dates dont match
                     if (item.File.TimeLastModified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
@@ -276,11 +271,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                         media.Name = fileName;
                         media.Created = item.File.TimeCreated;
                         mediaEX.SharePointGUID = item.GUID.ToString();
-                        mediaEX.SharePointMajorVersion = item.File.MajorVersion;
-                        mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-                        mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                         mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
-                        mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
                         try
                         {
                             // Get the data and add it to the item
@@ -362,6 +353,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var list = new List<ListItemField>();
             JObject obj = JObject.Parse(jsondata);
+            if (obj["d"]["results"].HasValues == false)
+                return list;
+
             var data = obj["d"]["results"][0].Value<JObject>();
             List<string> keys = data.Properties().Select(p => p.Name).ToList();
             foreach (var prop in data.Properties())
@@ -374,22 +368,25 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                 try
                 {
-                    var data2 = obj["d"]["results"][0][prop.Name].Value<JObject>();
-                    foreach (var prop2 in data2.Properties())
+                    if (obj["d"]["results"].HasValues == true )
                     {
-                        string property2 = prop2.Name;
-                        string propvalue2 = prop2.Value.ToString();
+                        var data2 = obj["d"]["results"][0][prop.Name].Value<JObject>();
+                        foreach (var prop2 in data2.Properties())
+                        {
+                            string property2 = prop2.Name;
+                            string propvalue2 = prop2.Value.ToString();
 
-                        if (string.Equals(property2, "Url", StringComparison.OrdinalIgnoreCase)) {
-                            url = propvalue2;
-                        }
-                        if (string.Equals(property2, "Description", StringComparison.OrdinalIgnoreCase)) {
-                            description = propvalue2;
-                            propvalue = description;
-                        }
-                        if (string.Equals(property2, "__deferred", StringComparison.OrdinalIgnoreCase))
-                        { // Dont add these things they are urls to objects in sharepoint for the folder, file etc.
-                            addToList = false; 
+                            if (string.Equals(property2, "Url", StringComparison.OrdinalIgnoreCase)) {
+                                url = propvalue2;
+                            }
+                            if (string.Equals(property2, "Description", StringComparison.OrdinalIgnoreCase)) {
+                                description = propvalue2;
+                                propvalue = description;
+                            }
+                            if (string.Equals(property2, "__deferred", StringComparison.OrdinalIgnoreCase))
+                            { // Dont add these things they are urls to objects in sharepoint for the folder, file etc.
+                                addToList = false;
+                            }
                         }
                     }
                 } catch
@@ -479,13 +476,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     content.Name = fileName;
 
                 media.Created = item.Created;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
                     mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointTimeCreated = item.Created;
                     mediaEX.SharePointTimeLastModified = item.Modified;
-                    mediaEX.SharePointRelativeUrl = item.FileUrl;
                 }
 
                 try
@@ -529,9 +524,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get the media object
                 var media = contentRepository.Get<SharePointBlockData>(cref).CreateWritableClone() as SharePointBlockData;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
 
                     // Only update if the last modified dates dont match
                     if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
@@ -546,9 +541,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                         media.Created = item.Created;
 
                         mediaEX.SharePointGUID = item.GUID.ToString();
-                        mediaEX.SharePointTimeCreated = item.Created;
                         mediaEX.SharePointTimeLastModified = item.Modified;
-                        mediaEX.SharePointRelativeUrl = item.FileUrl;
                         try
                         {
                             var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);

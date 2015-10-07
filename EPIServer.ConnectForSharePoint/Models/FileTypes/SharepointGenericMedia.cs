@@ -9,25 +9,16 @@ using System.Web;
 namespace EPiServer.ConnectForSharePoint.Models.FileTypes
 {
     [ContentType(GUID = "BF0967F4-27BE-4EE4-BA40-EBAE307264B2")]
-    public class SharepointGenericMedia : MediaData, ExtraMediaData
+    public class SharepointGenericMedia : MediaData, ISharePointItem
     {
         [Editable(false, AllowInitialValue = true)]
         public virtual string SharePointGUID { get; set; }
         [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual string SharePointParentListID { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        public virtual DateTime SharePointTimeCreated { get; set; }
-        [Editable(false, AllowInitialValue = true)]
         public virtual DateTime SharePointTimeLastModified { get; set; }
         [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual int SharePointMajorVersion { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual int SharePointMinorVersion { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual string SharePointRelativeUrl { get; set; }
+        public SharePointItemType Type
+        {
+            get { return SharePointItemType.LibraryItem; }
+        }
     }
 }
