@@ -257,7 +257,7 @@
     <Compile Include="Messaging\SharePointMessageEmitterFactory.cs" />
     <Compile Include="Messaging\SharePointProcessorFactory.cs" />
     <Compile Include="Models\ContextWebInformation.cs" />
-    <Compile Include="Models\FileTypes\ExtraMediaData.cs" />
+    <Compile Include="Models\FileTypes\ISharePointItem.cs" />
     <Compile Include="Models\FileTypes\SharePointBlockData.cs" />
     <Compile Include="Models\FileTypes\SharepointGenericMedia.cs" />
     <Compile Include="Models\FileTypes\SharepointImageFile.cs" />

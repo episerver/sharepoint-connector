@@ -17,6 +17,8 @@ using System.Xml;
 using System.Net;
 using EPiServer.ConnectForSharePoint.Models.ViewModels;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -88,16 +90,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Set attibutes of the media
                 media.Name = fileName;
                 media.Created = item.File.TimeCreated;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
                     mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointMajorVersion = item.File.MajorVersion;
-                    mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-                    //                                       mediaEX.ParentListID = item.File.ListItem.
-                    mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                     mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
-                    mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
                 }
 
                 try
@@ -264,9 +261,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(cref).CreateWritableClone() as MediaData;
 
-                if (media is ExtraMediaData)
+                if (media is ISharePointItem)
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
 
                     // Only update if the last modified dates dont match
                     if (item.File.TimeLastModified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
@@ -275,11 +272,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                         media.Name = fileName;
                         media.Created = item.File.TimeCreated;
                         mediaEX.SharePointGUID = item.GUID.ToString();
-                        mediaEX.SharePointMajorVersion = item.File.MajorVersion;
-                        mediaEX.SharePointMinorVersion = item.File.MinorVersion;
-                        mediaEX.SharePointTimeCreated = item.File.TimeCreated;
                         mediaEX.SharePointTimeLastModified = item.File.TimeLastModified;
-                        mediaEX.SharePointRelativeUrl = item.File.ServerRelativeUrl;
                         try
                         {
                             // Get the data and add it to the item
@@ -353,115 +346,68 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         }
 
         /// <summary>
-        /// Parses the sharepoint xml for a list item, and returs a list of ListItemField
+        /// Parses the sharepoint json data for a listitem, and returns a list of ListItemField
         /// </summary>
-        /// <param name="XmlData"></param>
+        /// <param name="jsondata"></param>
         /// <returns></returns>
-        public List<ListItemField> getFields(string XmlData)
+        public List<ListItemField> getFields(string jsondata)
         {
             var list = new List<ListItemField>();
-            try
+            JObject obj = JObject.Parse(jsondata);
+            if (obj["d"]["results"].HasValues == false)
+                return list;
+
+            var data = obj["d"]["results"][0].Value<JObject>();
+            List<string> keys = data.Properties().Select(p => p.Name).ToList();
+            foreach (var prop in data.Properties())
             {
-                using (XmlReader reader = XmlReader.Create(new StringReader(XmlData)))
+                string property = prop.Name;
+                string propvalue = prop.Value.ToString();
+                string url = "";
+                string description = "";
+                bool addToList = true;
+
+                try
                 {
-                    bool inProperties = false;
-                    bool inHyperLink = false;
-                    string name = "";
-                    string value = "";
-                    string type = "";
-                    string description = "";
-                    string url = "";
-                    string lastElementName = "";
-
-                    // Parse the file and display each of the nodes.
-                    while (reader.Read())
+                    if (obj["d"]["results"].HasValues == true )
                     {
-                        switch (reader.NodeType)
+                        var data2 = obj["d"]["results"][0][prop.Name].Value<JObject>();
+                        foreach (var prop2 in data2.Properties())
                         {
-                            case XmlNodeType.Element:
+                            string property2 = prop2.Name;
+                            string propvalue2 = prop2.Value.ToString();
 
-                                if (inProperties && inHyperLink != true)
-                                {
-                                    name = reader.Name;
-                                    type = reader.GetAttribute("m:type");
-                                    if (string.Equals(type, "SP.FieldUrlValue", StringComparison.OrdinalIgnoreCase))
-                                        inHyperLink = true;
-                                }
-
-                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
-                                    inProperties = true;
-
-                                lastElementName = reader.Name;
-                                break;
-                            case XmlNodeType.Text:
-                                if (inProperties)
-                                {
-                                    if (!inHyperLink)
-                                        value = reader.Value;
-                                    else
-                                    {
-                                        if (string.Equals(lastElementName, "d:Description", StringComparison.OrdinalIgnoreCase))
-                                            description = reader.Value;
-
-                                        if (string.Equals(lastElementName, "d:Url", StringComparison.OrdinalIgnoreCase))
-                                            url = reader.Value;
-                                    }
-                                }
-                                break;
-
-                            case XmlNodeType.XmlDeclaration:
-                            case XmlNodeType.ProcessingInstruction:
-                                Console.WriteLine(reader.Name + " " + reader.Value);
-                                break;
-                            case XmlNodeType.Comment:
-                                Console.WriteLine(reader.Value);
-                                break;
-
-                            case XmlNodeType.EndElement:
-                                if (inProperties)
-                                {
-                                    if (!inHyperLink)
-                                    {
-                                        if (!string.IsNullOrEmpty(name))
-                                        {
-                                            list.Add(new ListItemField()
-                                            {
-                                                Name = name.Substring(2), // remove the d:                                                    Type = type,
-                                                Value = value,
-                                                Description = description,
-                                                Url = url
-                                            });
-                                            name = type = value = description = url = "";
-                                        }
-                                    }
-                                    else // in hyperlink
-                                    {
-                                        if (string.Equals(name, reader.Name, StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            inHyperLink = false;
-                                            list.Add(new ListItemField()
-                                            {
-                                                Name = name.Substring(2), // remove the d:
-                                                Type = type,
-                                                Value = value,
-                                                Description = description,
-                                                Url = url
-                                            });
-                                            name = type = value = description = url = "";
-                                        }
-                                    }
-                                }
-
-                                if (string.Equals(reader.Name, "m:properties", StringComparison.OrdinalIgnoreCase))
-                                    inProperties = false;
-
-                                break;
+                            if (string.Equals(property2, "Url", StringComparison.OrdinalIgnoreCase)) {
+                                url = propvalue2;
+                            }
+                            if (string.Equals(property2, "Description", StringComparison.OrdinalIgnoreCase)) {
+                                description = propvalue2;
+                                propvalue = description;
+                            }
+                            if (string.Equals(property2, "__deferred", StringComparison.OrdinalIgnoreCase))
+                            { // Dont add these things they are urls to objects in sharepoint for the folder, file etc.
+                                addToList = false;
+                            }
                         }
                     }
+                } catch
+                {
+
                 }
-            }
-            catch
-            {
+                
+                // More nodes we dont want to add, these actually come back by default with the view
+                if (string.Equals(property, "FileSystemObjectType", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(property, "__metadata", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(property, "IDDD", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(property, "ID", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(property, "created", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(property, "modified", StringComparison.OrdinalIgnoreCase))
+                {
+                    addToList = false;
+                }
+
+                if ( addToList )
+                    list.Add(new ListItemField() { Name = property, Value = propvalue, Url = url, Description = description });
             }
             return list;
         }
@@ -478,11 +424,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         }
 
         /// <summary>
-        /// Gets the xml data associated with the specific list item.
+        /// Gets the json encoded data associated with the specific list item.
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public XhtmlString getListItemData(SPListItem item)
+        public string getListItemData(SPListItem item)
         {
             var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
 
@@ -490,10 +436,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var pos = restUrl.LastIndexOf('/');
             if (pos >= 0)
                 restUrl = restUrl.Substring(0, pos);
-            XmlDocument xDoc = new XmlDocument();
-            xDoc.Load(_fileStreamService.GetListItemXmlData(restUrl));
-
-            return new XhtmlString(xDoc.InnerXml); 
+            return _fileStreamService.GetListItemJsonData(item);
         }
 
         public void AddListItem(SPListItem item)
@@ -526,7 +469,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
-                media.Body = getListItemData(item); // get the xml data from the list item
+                media.Body = new XhtmlString(getListItemData(item)); // get the xml data from the list item
 
                 // Set attibutes of the media
                 var content = media as IContent;
@@ -534,13 +477,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     content.Name = fileName;
 
                 media.Created = item.Created;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
                     mediaEX.SharePointGUID = item.GUID.ToString();
-                    mediaEX.SharePointTimeCreated = item.Created;
                     mediaEX.SharePointTimeLastModified = item.Modified;
-                    mediaEX.SharePointRelativeUrl = item.FileUrl;
                 }
 
                 try
@@ -584,14 +525,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get the media object
                 var media = contentRepository.Get<SharePointBlockData>(cref).CreateWritableClone() as SharePointBlockData;
-                if (media is ExtraMediaData) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
+                if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
-                    var mediaEX = media as ExtraMediaData;
+                    var mediaEX = media as ISharePointItem;
 
                     // Only update if the last modified dates dont match
                     if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
                     {
-                        media.Body = getListItemData(item); // get the xml data from the list item
+                        media.Body = new XhtmlString(getListItemData(item)); // get the xml data from the list item
 
                         // Set attibutes of the media
                         var content = media as IContent;
@@ -601,9 +542,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                         media.Created = item.Created;
 
                         mediaEX.SharePointGUID = item.GUID.ToString();
-                        mediaEX.SharePointTimeCreated = item.Created;
                         mediaEX.SharePointTimeLastModified = item.Modified;
-                        mediaEX.SharePointRelativeUrl = item.FileUrl;
                         try
                         {
                             var file1ID = contentRepository.Save(media as IContent, SaveAction.Publish, AccessLevel.FullAccess);

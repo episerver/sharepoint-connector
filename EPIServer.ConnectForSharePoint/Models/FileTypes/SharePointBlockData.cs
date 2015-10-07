@@ -9,7 +9,7 @@ using EPiServer.DataAbstraction;
 namespace EPiServer.ConnectForSharePoint.Models.FileTypes
 {
     [ContentType(DisplayName = "SharePointBlockData", Description = "")]
-    public class SharePointBlockData : BlockData, ExtraMediaData
+    public class SharePointBlockData : BlockData, ISharePointItem
     {
         public virtual DateTime Created { get; set; }
 
@@ -18,20 +18,11 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         [Editable(false, AllowInitialValue = true)]
         public virtual string SharePointGUID { get; set; }
         [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual string SharePointParentListID { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        public virtual DateTime SharePointTimeCreated { get; set; }
-        [Editable(false, AllowInitialValue = true)]
         public virtual DateTime SharePointTimeLastModified { get; set; }
         [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual int SharePointMajorVersion { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual int SharePointMinorVersion { get; set; }
-        [Editable(false, AllowInitialValue = true)]
-        [System.ComponentModel.DataAnnotations.ScaffoldColumn(false)]
-        public virtual string SharePointRelativeUrl { get; set; }
+        public SharePointItemType Type
+        {
+            get { return SharePointItemType.ListItem; }
+        }
     }
 }

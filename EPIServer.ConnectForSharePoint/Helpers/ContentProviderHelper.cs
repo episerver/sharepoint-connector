@@ -348,9 +348,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var medialist = _contentRepository.GetChildren<IContent>(folderRef);
             foreach (var item in medialist)
             {
-                if (item is ExtraMediaData)
+                if (item is ISharePointItem)
                 {
-                    var mediaEX = item as ExtraMediaData;
+                    var mediaEX = item as ISharePointItem;
                     if (SPItemGuid.ToString().Equals(mediaEX.SharePointGUID))
                         return item.ContentLink;
                 }

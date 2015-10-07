@@ -372,7 +372,9 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected void Refresh_Click(object sender, EventArgs e)
         {
             string errorMessage;
-            var lists = GetMediaLists(true, out errorMessage);
+
+            // dont test the connection, that would get the data from the control which could have been changed
+            var lists = GetMediaLists(false, out errorMessage);
             var messageHelper = new SharePointMessageHelper();
             // Put all the add folder messages on the queue
             messageHelper.beginProcessing(SharePointSettings.Current.ListIds, lists);

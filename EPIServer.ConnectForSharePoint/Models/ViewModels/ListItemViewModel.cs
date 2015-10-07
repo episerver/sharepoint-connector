@@ -9,14 +9,14 @@ namespace EPiServer.ConnectForSharePoint.Models.ViewModels
     public class ListItemViewModel
     {
         public string Name { get; set; }
-        public string XmlData { get; set; }
+        public string JsonData { get; set; }
 
         public List<ListItemField> Fields
         {
             get
             {
                 var pro = new SharePointProcessor();
-                return pro.getFields(XmlData);
+                return pro.getFields(JsonData);
             }
         }
     }
