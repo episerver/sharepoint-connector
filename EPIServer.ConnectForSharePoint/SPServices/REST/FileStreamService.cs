@@ -180,6 +180,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             var bodyBuilder = new StringBuilder("{ 'query' : {'__metadata': { 'type': 'SP.CamlQuery' }, ");
 
             var fixedString = view.ListViewXml.Replace("<ViewFields>", "<ViewFields Properties=\"true\">");
+            fixedString = fixedString.Replace("<View ", "<View Scope=\"RecursiveAll\"" );           // search sub folders too.
 
             // We should probably be using xmldocument in this method....
             string withQueryString;
