@@ -48,6 +48,11 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string EntryPointFolderName { get; set; }
 
         /// <summary>
+        /// Gets or sets the previous SharePoint's content root assets folder name for error display purposes
+        /// </summary>
+        public string PreviousEntryPointFolderName { get; set; }
+
+        /// <summary>
         /// Indicates if we are connecting to a SharePoint Online instance
         /// </summary>
         public bool IsSharePointOnline { get; set; }
