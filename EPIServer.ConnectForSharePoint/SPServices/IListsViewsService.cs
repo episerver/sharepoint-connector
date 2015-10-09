@@ -1,4 +1,5 @@
 ﻿using EPiServer.ConnectForSharePoint.Models;
+using System;
 using System.Collections.Generic;
 
 namespace EPiServer.ConnectForSharePoint.SPServices
@@ -44,5 +45,12 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         /// <param name="list">The list to get item from.</param>
         /// <param name="listItemId">The list item identifier.</param>
         SPListItem GetListItem(SPList list, string listItemId);
+
+        /// <summary>
+        /// Gets the field schema for a particular list.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns>Dictionary key is the internal name</returns>
+        Dictionary<string, SPFieldItem> GetFieldItemDictionary(Guid ListID);
     }
 }

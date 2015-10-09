@@ -4,6 +4,7 @@ using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.Web.Mvc;
 using EPiServer.Web.Routing;
+using System;
 using System.Web.Mvc;
 
 namespace EPiServer.ConnectForSharePoint.Controllers
@@ -23,7 +24,8 @@ namespace EPiServer.ConnectForSharePoint.Controllers
             var model = new ListItemViewModel
             {
                 Name = content.Name,
-                JsonData = currentContent.Body.ToString()
+                JsonData = currentContent.Body.ToString(),
+                ListID = Guid.Parse(currentContent.ListID)
             };
             return PartialView("~/Views/Shared/SharePoint/ListItem.cshtml", model);
         }

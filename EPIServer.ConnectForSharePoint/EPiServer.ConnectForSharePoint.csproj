@@ -236,6 +236,7 @@
     <Compile Include="Helpers\SharePointMessageHelper.cs" />
     <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
+    <Compile Include="Mappers\SPFieldItemMapper.cs" />
     <Compile Include="Mappers\SPFileMapper.cs" />
     <Compile Include="Mappers\SPFolderMapper.cs" />
     <Compile Include="Mappers\SPListItemMapper.cs" />
@@ -263,6 +264,7 @@
     <Compile Include="Models\FileTypes\SharepointImageFile.cs" />
     <Compile Include="Models\FileTypes\SharepointVideoFile.cs" />
     <Compile Include="Models\FolderData.cs" />
+    <Compile Include="Models\SPFieldItem.cs" />
     <Compile Include="Models\SPFile.cs" />
     <Compile Include="Models\SPFolder.cs" />
     <Compile Include="Models\SPListItem.cs" />
@@ -275,6 +277,8 @@
     <Compile Include="Processor\ISharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessorData.cs" />
+    <Compile Include="Rest\Models\JsonFieldItem.cs" />
+    <Compile Include="Rest\Models\JsonFieldItemCollection.cs" />
     <Compile Include="Rest\Models\JsonFolderProperties.cs" />
     <Compile Include="Rest\Models\JsonUser.cs" />
     <Compile Include="Rest\Models\JsonFile.cs" />

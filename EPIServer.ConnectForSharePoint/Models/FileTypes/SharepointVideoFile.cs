@@ -19,6 +19,7 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         {
             get { return SharePointItemType.LibraryItem; }
         }
-
+        [Editable(false, AllowInitialValue = true)]
+        public virtual string ListID { get; set; }
     }
 }

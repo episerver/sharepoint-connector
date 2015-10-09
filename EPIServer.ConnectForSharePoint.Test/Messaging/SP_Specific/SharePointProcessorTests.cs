@@ -41,6 +41,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentRepository> contentRepo;
         private Mock<IContentTypeRepository> contentTypeRepo;
         private Mock<IFileStreamService> fileStreamService;
+        private Mock<IListsViewsService> listViewService;
+
         private Mock<ILogger> logger;
 
         private SharePointProcessor GetUnitUnderTest()
@@ -49,6 +51,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo = new Mock<IContentRepository>();
             contentTypeRepo = new Mock<IContentTypeRepository>();
             fileStreamService = new Mock<IFileStreamService>();
+            listViewService = new Mock<IListsViewsService>();
+
             logger = new Mock<ILogger>();
 
             // Initialize our service locator instance.
@@ -61,7 +65,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
             contentHelper = new Mock<IContentProviderHelper>();
-            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object);
+            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object, listViewService.Object);
         }
 
         [TestMethod]
@@ -671,19 +675,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             {
                 File = new SPFile() { Name = "Filename.jpg" },
                 FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
-                entryPointId = 42
+                entryPointId = 42,
+                ParentList = new SPList()
+                {
+                    Id = Guid.Empty
+                }
             };
-
-            MemoryStream mstream = new MemoryStream();
-            StreamWriter myStreamWriter = new StreamWriter(mstream);
-            String xmlString = "<root></root>";
-            myStreamWriter.Write(xmlString);
-            myStreamWriter.Flush();
-            mstream.Position = 0;
-            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
-                mstream
-                );
 
             contentRepo.Setup(cr => cr.GetDefault<SharePointBlockData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
                 .Returns(new SharePointBlockData());
@@ -714,17 +711,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 .Returns(new SharePointBlockData() {
                     SharePointTimeLastModified = DateTime.Now
                 });
-
-            MemoryStream mstream = new MemoryStream();
-            StreamWriter myStreamWriter = new StreamWriter(mstream);
-            String xmlString = "<root></root>";
-            myStreamWriter.Write(xmlString);
-            myStreamWriter.Flush();
-            mstream.Position = 0;
-            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetListItemXmlData(It.IsAny<string>())).Returns(
-                mstream
-                );
 
             processor.UpdateListItem(item);
 

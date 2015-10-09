@@ -179,8 +179,8 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_GETITEMS_PATH_FORMAT, list.Id), "POST", null);
             var bodyBuilder = new StringBuilder("{ 'query' : {'__metadata': { 'type': 'SP.CamlQuery' }, ");
 
-            var fixedString = view.ListViewXml.Replace("<ViewFields>", "<ViewFields Properties=\"true\">");
-            fixedString = fixedString.Replace("<View ", "<View Scope=\"RecursiveAll\"" );           // search sub folders too.
+            var fixedString = view.ListViewXml.Replace("<ViewFields>", "<ViewFields Properties=\"true\">  <FieldRef Name=\"*\" /> <FieldRef Name=\"MetaInfo\" />");
+            fixedString = fixedString.Replace("<View ", "<View Scope=\"RecursiveAll\" " );           // search sub folders too.
 
             // We should probably be using xmldocument in this method....
             string withQueryString;
@@ -206,48 +206,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             bodyBuilder.Append(" } }");
 
             String str = SendRequest(restRequest, bodyBuilder.ToString(), null, true);
+
             // remove this Id because it causes Json parsing issues... not sure why sharepoint is returning two id values
-            var str2 = str.Replace("\"FileSystemObjectType\":0,\"Id\"", "\"FileSystemObjectType\":0,\"IDDD\"");
-            return str2;
-        }
-
-        public Stream GetListItemXmlData(string url)
-        {
-            // get stream from SharePoint site
-            return OpenDirectListItemXmlData(url);
-        }
-
-        /// <summary>
-        /// Open and read binary data directly from SharePoint site
-        /// </summary>
-        /// <param name="url">The complete rest url to fetch an item from a custom list</param>
-        /// <returns></returns>
-        private MemoryStream OpenDirectListItemXmlData(string url)
-        {
-            try
-            {
-                var reqInfo = new RestJsonRequest(url, "GET", null);
-                var headers = new NameValueCollection();
-                ////headers.Add("binaryStringResponseBody", "true");
-
-                var memoryStream = new MemoryStream();
-
-                // Get binary data from SharePoint
-                using (var stream = GetResponseStream(reqInfo, null, headers))
-                {
-                    stream.CopyTo(memoryStream); // we do this to support seeking
-                    stream.Flush();
-                }
-
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                return memoryStream;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
-                return null;
-            }
+            return str.Replace("\"FileSystemObjectType\":0,\"Id\"", "\"FileSystemObjectType\":0,\"IDDD\"");
         }
 
         /// <summary>

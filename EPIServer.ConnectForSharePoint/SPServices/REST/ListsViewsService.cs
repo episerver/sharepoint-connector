@@ -18,21 +18,28 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private IMapper<JsonView.D, SPListView> _viewMapper;
         private IMapper<JsonFolder.D, SPFolder> _folderMapper;
         private IMapper<JsonFile.D, SPFile> _fileMapper;
+        private IMapper<JsonFieldItem.D, SPFieldItem> _fieldMapper;
+        private Dictionary<string, Dictionary<string, SPFieldItem>> fieldItemDictionaryCache =
+            new Dictionary<string, Dictionary<string, SPFieldItem>>();
 
-        public ListsViewsService() : this(new SPListMapper(), new SPViewMapper(), new SPFolderMapper(), new SPFileMapper(), new SPListItemMapper()){ }
+
+        public ListsViewsService() : this(new SPListMapper(), new SPViewMapper(), new SPFolderMapper(), 
+            new SPFileMapper(), new SPListItemMapper(), new SPFieldItemMapper() ){ }
 
         public ListsViewsService(
             IMapper<JsonList.D, SPList> listMapper,
             IMapper<JsonView.D, SPListView> viewMapper,            
             IMapper<JsonFolder.D, SPFolder> folderMapper,
             IMapper<JsonFile.D, SPFile> fileMapper,
-            IMapper<JsonListItem.D, SPListItem> itemMapper)
+            IMapper<JsonListItem.D, SPListItem> itemMapper,
+            IMapper<JsonFieldItem.D, SPFieldItem> fieldMapper )
         {
             _listMapper = listMapper;
             _viewMapper = viewMapper;
             _folderMapper = folderMapper;
             _fileMapper = fileMapper;
             _itemMapper = itemMapper;
+            _fieldMapper = fieldMapper;
         }
 
         public IEnumerable<SPList> GetLists(int baseType)
@@ -155,6 +162,63 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         #region buiding SPList, SPListView, SPListItem methods
 
+        public Dictionary<string, SPFieldItem> GetFieldItemDictionary(Guid ListID)
+        {
+            Dictionary<string, SPFieldItem> dic;
+            if( !fieldItemDictionaryCache.TryGetValue(ListID.ToString(), out dic) )
+            {
+                // todo : save this in mem so we only make the reqest once
+                string requeststring = "/_api/web/lists(guid'{0}')/fields";
+                var restRequest = new RestJsonRequest(string.Format(requeststring, ListID), "GET", null);
+                var fields = BuildListFieldItems(SendRequest(restRequest, null, null, true));
+
+                dic = new Dictionary<string, SPFieldItem>();
+                foreach (var field in fields)
+                {
+                    dic.Add(field.InternalName, field);
+                }
+
+                fieldItemDictionaryCache.Add(ListID.ToString(), dic);
+            }
+                
+            return dic;
+        }
+
+        private IEnumerable<SPFieldItem> BuildListFieldItems(string responseString)
+        {
+            if (string.IsNullOrEmpty(responseString))
+            {
+                return Enumerable.Empty<SPFieldItem>();
+            }
+
+            var jsonResult = Deserialize<JsonFieldItemCollection>(responseString);
+
+            return BuildListFieldItems(jsonResult);
+        }
+
+        private IEnumerable<SPFieldItem> BuildListFieldItems(JsonFieldItemCollection jsonResult)
+        {
+            if (jsonResult == null)
+            {
+                yield return default(SPFieldItem);
+            }
+
+            foreach (var jsonItem in jsonResult.d.results)
+            {
+                yield return BuildListFieldItem(jsonItem);
+            }
+        }
+
+        private SPFieldItem BuildListFieldItem(JsonFieldItem.D jsonResult)
+        {
+            var fieldItem = _fieldMapper.Map(jsonResult);
+
+            if (fieldItem != null)
+            {
+            }
+
+            return fieldItem;
+        }
         private IEnumerable<SPListItem> BuildListItems(string responseString, SPList parentList)
         {
             if (string.IsNullOrEmpty(responseString))

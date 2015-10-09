@@ -28,6 +28,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IContentSecurityRepository _contentSecurityRepository;
         IContentProviderHelper _contentProviderHelper;
         IFileStreamService _fileStreamService;
+        IListsViewsService _listViewsService;
+
         private ILogger _logger;
 
         [ExcludeFromCodeCoverage] // Exclude this constructor
@@ -37,15 +39,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = new ContentProviderHelper();
             _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
+            _listViewsService = SharePointHelper.SPServicesHub.SPListsViewsService;
             _logger = LogManager.GetLogger();
         }
 
-        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, IFileStreamService fileStreamService)
+        internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, 
+            IFileStreamService fileStreamService, IListsViewsService listViewsService)
         {
             _serviceLocator = serviceLocator;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
             _contentProviderHelper = contentProviderHelper;
             _fileStreamService = fileStreamService;
+            _listViewsService = listViewsService;
             _logger = _serviceLocator.GetInstance<ILogger>();
         }
 
@@ -350,12 +355,15 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         /// </summary>
         /// <param name="jsondata"></param>
         /// <returns></returns>
-        public List<ListItemField> getFields(string jsondata)
+        public List<ListItemField> getFields(Guid ListID, string jsondata)
         {
             var list = new List<ListItemField>();
             JObject obj = JObject.Parse(jsondata);
             if (obj["d"]["results"].HasValues == false)
                 return list;
+
+            // get the dictionary
+            var columnDictionary = _listViewsService.GetFieldItemDictionary(ListID);
 
             var data = obj["d"]["results"][0].Value<JObject>();
             List<string> keys = data.Properties().Select(p => p.Name).ToList();
@@ -366,6 +374,27 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 string url = "";
                 string description = "";
                 bool addToList = true;
+
+                // get the DisplayName aka title from the property dictionary for this list
+                SPFieldItem field;
+                if (columnDictionary.TryGetValue(property, out field))
+                {
+                    property = field.Title;
+                }
+                else
+                {
+                    // well this is wierd, sometimes the value we get from the sharepoint webservice
+                    // has data in a different format like OData__"property" - hack
+                    //
+                    foreach( var entry in columnDictionary)
+                    {
+                        if( property.Contains(entry.Key) )
+                        {
+                            property = entry.Value.Title;
+                            break;
+                        }
+                    }
+                }
 
                 try
                 {
@@ -431,11 +460,6 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public string getListItemData(SPListItem item)
         {
             var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
-
-            // Need to remove the "/File" part in the Url
-            var pos = restUrl.LastIndexOf('/');
-            if (pos >= 0)
-                restUrl = restUrl.Substring(0, pos);
             return _fileStreamService.GetListItemJsonData(item);
         }
 
@@ -479,6 +503,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 media.Created = item.Created;
                 media.SharePointGUID = item.GUID.ToString();
                 media.SharePointTimeLastModified = item.Modified;
+                media.ListID = item.ParentList.Id.ToString();
 
                 try
                 {

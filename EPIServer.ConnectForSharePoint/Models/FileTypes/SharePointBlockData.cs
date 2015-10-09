@@ -24,5 +24,7 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         {
             get { return SharePointItemType.ListItem; }
         }
+        [Editable(false, AllowInitialValue = true)]
+        public virtual string ListID { get; set; }
     }
 }

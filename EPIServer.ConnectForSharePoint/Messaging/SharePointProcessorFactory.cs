@@ -35,12 +35,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             return new SharePointProcessor();
         }
 
-        internal ISharePointProcessor GetSharePointProcessor(IContentProviderHelper contentHelper, IFileStreamService fileStreamService)
+        internal ISharePointProcessor GetSharePointProcessor(IContentProviderHelper contentHelper, IFileStreamService fileStreamService, IListsViewsService listViewService)
         {
             var processor = _serviceLocator.GetInstance<ISharePointProcessor>();
             if (processor == null)
             {
-                return new SharePointProcessor(_serviceLocator, contentHelper, fileStreamService);
+                return new SharePointProcessor(_serviceLocator, contentHelper, fileStreamService, listViewService);
             }
             else
             {
