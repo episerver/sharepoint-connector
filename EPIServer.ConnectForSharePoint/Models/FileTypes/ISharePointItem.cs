@@ -8,7 +8,7 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         ListItem
     }
 
-    interface ISharePointItem
+    public interface ISharePointItem
     {
         /// <summary>
         /// Sharepoint item Guid for this object.
