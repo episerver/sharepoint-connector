@@ -165,32 +165,15 @@ namespace EPiServer.ConnectForSharePoint.Web
                         ActivateControls(false);
                     }
 
-                    // check to see if current entry point has been deleted, if so pop up error message alerting the user
-                    if (null != SharePointSettings.Current.EntryPoint)
+                    // check to see if current entry point folder has been deleted, if not return as normal
+                    if (ContentReference.EmptyReference != SharePointSettings.Current.EntryPoint)
                     {
-                        try
-                        {
-                            var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(SharePointSettings.Current.EntryPoint.ID));
-
-                            if (selectedFolderRef.IsDeleted)
-                            {
-                                EntryPointFolderName.Text = string.Empty;
-                                SelectedFolderName.Text = string.Empty;
-
-                                var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
-                                ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
-                            }
-                        }
-                        catch
-                        {
-                            EntryPointFolderName.Text = string.Empty;
-                            SelectedFolderName.Text = string.Empty;
-
-                            var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.EntryPointFolderName);
-                            ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
-                        }
-
+                        return;
                     }
+
+                    // if entry point folder has been deleted, pop up error message alerting the user
+                    var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.PreviousEntryPointFolderName);
+                    ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
                 }
             }
         }

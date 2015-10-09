@@ -11,6 +11,7 @@ using EPiServer.Packaging;
 using EPiServer.ServiceLocation;
 using System;
 using System.Collections.Concurrent;
+using EPiServer.ConnectForSharePoint.Configuration;
 
 namespace EPiServer.ConnectForSharePoint
 {
@@ -40,20 +41,32 @@ namespace EPiServer.ConnectForSharePoint
             var f = repo.Get<IContent>(cf);
 
             // We need to check that the folder is marked for delete, as this is Moved Event includes moving a folder,
-            // as well as moving it to the trash
-            if (f is ContentFolder && f.IsDeleted)
+            // as well as moving it to the trash.  If it's not deleted or a ContentFolder, just return as we don't want to do anything.
+            if (!(f is ContentFolder) || !f.IsDeleted)
             {
-                var fd = new FolderData();
-                fd = fd.GetFolder(f.ContentLink.ID);
-
-                // The folder passed in may not be one we created, it could be a root folder that a user made.  
-                // If so, we still want to check to see if it has any children and delete them before deleting the current folder.
-                var processor = new SharePointProcessor();
-                processor.DeleteSubFolders(repo, f as ContentFolder);
-
-                // Now delete this folder from the table.
-                FolderData.Delete(fd);
+                return;
             }
+
+            var fd = new FolderData();
+            fd = fd.GetFolder(f.ContentLink.ID);
+
+            // The folder passed in may not be one we created, it could be a root folder that a user made.  
+            // If so, we still want to check to see if it has any children and delete them before deleting the current folder.
+            var processor = new SharePointProcessor();
+            processor.DeleteSubFolders(repo, f as ContentFolder);
+
+            // This is the best place to update the entry point if the folder is being deleted.  Let's cache the folder name
+            // that is being deleted so we can alert the user later on and still clear out the saved value to avoid confusion.
+            if (SharePointSettings.Current.EntryPoint.ID == f.ContentLink.ID)
+            {
+                SharePointSettings.Current.PreviousEntryPointFolderName =
+                    SharePointSettings.Current.EntryPointFolderName;
+                SharePointSettings.Current.EntryPoint = ContentReference.EmptyReference;
+                SharePointSettings.Current.EntryPointFolderName = string.Empty;
+            }
+
+            // Now delete this folder from the table.
+            FolderData.Delete(fd);
         }
 
         /// <inheritdoc /> 
