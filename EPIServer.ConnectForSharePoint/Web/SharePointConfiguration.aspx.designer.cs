@@ -103,13 +103,22 @@ namespace EPiServer.ConnectForSharePoint.Web {
         protected global::System.Web.UI.WebControls.Panel ListSelector;
         
         /// <summary>
-        /// SharePointListCheckBox control.
+        /// lvLists control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList SharePointListCheckBox;
+        protected global::System.Web.UI.WebControls.ListView lvLists;
+        
+        /// <summary>
+        /// hdnSelectedViews control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnSelectedViews;
         
         /// <summary>
         /// EntryPointFolderName control.
@@ -119,30 +128,60 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPointFolderName;
-
+        
         /// <summary>
-        /// 
-        /// </summary>
-        protected global::System.Web.UI.WebControls.TextBox SelectedFolderName;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected global::System.Web.UI.WebControls.TextBox EntryPoint;
-
-        /// <summary>
-        /// btnShow control.
+        /// contentDataSource control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnShow;
+        protected global::EPiServer.ConnectForSharePoint.Models.SharepointContentDataSource contentDataSource;
+        
+        /// <summary>
+        /// pageTreeView control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::EPiServer.UI.WebControls.PageTreeView pageTreeView;
+        
+        /// <summary>
+        /// SelectedFolderName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox SelectedFolderName;
+        
+        /// <summary>
+        /// EntryPoint control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox EntryPoint;
+        
+        /// <summary>
+        /// EntryPointRequired control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator EntryPointRequired;
+        
+        /// <summary>
+        /// EntryPointCache control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
         
         /// <summary>
         /// Save control.

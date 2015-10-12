@@ -128,6 +128,29 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
+        /// Return a List of ListId~ListTitle and a list of corresponding ViewId~ViewTitle for unhidden Views
+        /// </summary>
+        /// <param name="lists">List of SPList</param>
+        public static List<KeyValuePair<string, List<KeyValuePair<string, string>>>> GetListViewPairsData(IEnumerable<SPList> lists)
+        {
+            List<KeyValuePair<string, List<KeyValuePair<string, string>>>> reqLists = new List<KeyValuePair<string, List<KeyValuePair<string, string>>>>();
+            var supportedLists = lists.Where(list => Enum.IsDefined(typeof(SupportedBaseTemplates), list.BaseTemplate));
+            foreach (SPList spl in supportedLists)
+            {
+                var reqViews = new List<KeyValuePair<string, string>>();
+                var unhiddenViews = spl.Views.Where(views => !views.Hidden);
+                foreach (SPListView v in unhiddenViews)
+                {
+                    reqViews.Add(new KeyValuePair<string, string>(string.Format("{0}~{1}", spl.Id, v.Id), v.Title));
+                }
+
+                reqLists.Add(new KeyValuePair<string, List<KeyValuePair<string, string>>>(String.Format("{0}~{1}", spl.Id, spl.Title), reqViews));
+            }
+
+            return reqLists;
+        }
+
+        /// <summary>
         /// Gets the CookieContainer.
         /// </summary>
         /// <param name="spSettings">The SharePoint settings.</param>
