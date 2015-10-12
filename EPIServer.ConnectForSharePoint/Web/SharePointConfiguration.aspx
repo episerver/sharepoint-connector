@@ -27,7 +27,7 @@
 
         function processSelectedViews() {
             var selectedViewIds = '';
-            var $listChkBox = $('span.listCheckBox input:[type="checkbox"]'); // List of all the checkboxes corresponding to lists
+            var $listChkBox = $('span.listCheckBox input[type="checkbox"]'); // List of all the checkboxes corresponding to lists
             var $viewDdl = $('.viewsDropDown'); // List of all the dropdownlists which contain the views of each list.
 
             // Loop through each checkbox
