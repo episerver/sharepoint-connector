@@ -35,12 +35,6 @@
                 window.location.href = window.location.pathname + window.location.search;
             }
 
-            // if there is nothing in the queue and the button is disabled
-            // odd case where just sometimes we are in the wrong state
-            if (result == "0" && button.disabled == true) {
-                window.location.href = window.location.pathname + window.location.search;
-            }
-
             lastValue = result;
         }
         function onError(result) {
@@ -205,14 +199,14 @@
             </fieldset>
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="QueueCountTB" runat="server">
-                    <%= Translate("/sharepoint/admin/remainingitems")%>
-                </asp:Label>
-                <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
-                <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" ReadOnly="False" OnClick="Refresh_Click"
-                    Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" style="vertical-align:top; float: right" />
-            </div>
+                <div class="epi-size15">
+                    <asp:Label AssociatedControlID="QueueCountTB" runat="server">
+                        <%= Translate("/sharepoint/admin/remainingitems")%>
+                    </asp:Label>
+                    <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
+                    <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" Enabled="False" OnClick="Refresh_Click"
+                        Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" style="vertical-align:top; float: right" />
+                </div>
             </fieldset>
 
         </asp:Panel>

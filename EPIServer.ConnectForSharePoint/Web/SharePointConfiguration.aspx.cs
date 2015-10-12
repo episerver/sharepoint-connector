@@ -547,7 +547,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             ListSelector.Enabled = active;
             Refresh.Enabled = Save.Enabled = active;
 
-            if (active == true)
+            if (active)
             {
                 Connect.Enabled = true;
             }
