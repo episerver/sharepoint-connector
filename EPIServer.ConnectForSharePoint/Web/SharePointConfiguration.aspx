@@ -18,6 +18,31 @@
         function updateQueCounts() {
             PageMethods.getCurrentQueCount(onSucess, onError);
         }
+
+        $(document).ready(function () {
+            $('#FullRegion_Save').click(function () {
+                processSelectedViews();
+            });
+        });
+
+        function processSelectedViews() {
+            var selectedViewIds = '';
+            var $listChkBox = $('span.listCheckBox input:[type="checkbox"]'); // List of all the checkboxes corresponding to lists
+            var $viewDdl = $('.viewsDropDown'); // List of all the dropdownlists which contain the views of each list.
+
+            // Loop through each checkbox
+            $listChkBox.each(function () {
+                if ($(this).is(':checked')) {
+                    var viewId = $(this).parent().next($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
+                    if (viewId.indexOf($(this).val()) === 0) { // Additional check to make sure we are choosing the option from the correct List.
+                        selectedViewIds += viewId + ',';
+                    }
+                }
+            });
+
+            $('#hdnSelectedViews').val(selectedViewIds);  // Add the List of Ids (comma-separated string) to the hidden variable.
+        }
+
         var lastValue = "0";
         function onSucess(result) {
             var label = document.getElementById('<%=QueueCountTB.ClientID%>');
@@ -31,7 +56,7 @@
 
             // (save or refersh triggered by another user in another browser)
             // items in the queue, but the buttons are enabled 
-            if( result != "0" && button.disabled == false) {
+            if (result != "0" && button.disabled == false) {
                 window.location.href = window.location.pathname + window.location.search;
             }
 
@@ -54,23 +79,21 @@
             });
 
         });
-        function setval(newval)
-        {
+        function setval(newval) {
             //set foldername text box to show selected folder
             window.PageMethods.GetEntryPointFolderName(newval, onNodePicked, onError);
-                            
+
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
             document.getElementById('<%# EntryPointCache.ClientID %>').value = newval;
             return false;
         }
 
         // called when user clicks a node in the tree
-        function onNodePicked(result)
-        {
+        function onNodePicked(result) {
             var epFolderName = document.getElementById('<%= SelectedFolderName.ClientID %>');
             epFolderName.value = result;
         }
-                            
+
         // called when user clicks Ok in select folder dlg
         function onOkClick() {
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
@@ -82,8 +105,7 @@
         }
 
         // updates the entry point folder text box on the main config screen
-        function onSuccess(result)
-        {
+        function onSuccess(result) {
             var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
             epFolderName.value = result;
         }
@@ -140,7 +162,21 @@
                  <p class="EP-systemInfo">
                     <%= Translate("/sharepoint/admin/selectviewdescription")%>
                 </p>
-                <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />
+                 <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
+                        <LayoutTemplate>
+                            <div>
+                                <asp:PlaceHolder runat="server" ID="phLists" />
+                            </div>
+                        </LayoutTemplate>
+                        <ItemTemplate>
+                            <div style="padding:2px">
+                            <asp:CheckBox ID="chkList" class="listCheckBox" runat="server"></asp:CheckBox>
+                            <asp:DropDownList ID="ddViews" class="viewsDropDown" runat="server"></asp:DropDownList>
+                           </div>
+                        </ItemTemplate>
+                    </asp:ListView>
+                    <asp:HiddenField ID="hdnSelectedViews" ClientIDMode="Static" runat="server"></asp:HiddenField>
+               <%-- <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />--%>
                 <br />
             </asp:Panel>                  
                 

@@ -178,6 +178,48 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
         }
 
+        protected void lvLists_ItemDataBound(object sender, ListViewItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListViewItemType.DataItem)
+            {
+                ListViewDataItem dataItem = (ListViewDataItem)e.Item;
+                CheckBox chkList = (CheckBox)e.Item.FindControl("chkList");
+                DropDownList ddViews = (DropDownList)e.Item.FindControl("ddViews");
+                if (chkList != null && ddViews != null)
+                {
+                    var listData = (KeyValuePair<string, List<KeyValuePair<string, string>>>)dataItem.DataItem;
+
+                    var previousSelectedListIds = SharePointSettings.Current.ListIds.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                    // Populate Checkboxes (Text = List Title, Value = ListId)
+                    string[] listInfo = listData.Key.Split('~');
+                    chkList.Text = listInfo[1];
+                    chkList.Checked = Array.Exists(previousSelectedListIds, element => element.StartsWith(listInfo[0]));
+                    chkList.InputAttributes.Add("Value", listInfo[0]);
+
+                    // Populate Dropdown for corresponding views (Text = View Title, Value = ListId~View Id)
+                    var modViews = listData.Value.ConvertAll(x => new KeyValuePair<string, string>(x.Key.Split('~')[1], x.Value));
+                    ddViews.DataSource = listData.Value;
+                    ddViews.DataTextField = "Value";
+                    ddViews.DataValueField = "Key";
+                    ddViews.DataBind();
+                    foreach (ListItem li in ddViews.Items)
+                    {
+                        if (Array.Exists(previousSelectedListIds, element => element == li.Value))
+
+                        {
+                            // The value of the current ListItem exists in the previously selected Ids.
+                            // So make this the default selected value in the dropdownlist.
+                            ddViews.SelectedValue = li.Value;
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+
         /// <summary>
         /// Handles the Click event of the Connect to Server control.
         /// Bind list of SharePoint Lists
@@ -252,7 +294,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any children.
                     {
                         var children = contentRepository.GetChildren<IContent>(contentLink);
-                        if (children.Count<IContent>() > 0 )
+                        if (children.Count<IContent>() > 0)
                             strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
                     }
                 }
@@ -291,7 +333,8 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
 
             // Get current selected Lits-View Ids
-            var selectedListViewIds = SharePointListCheckBox.Items.Cast<ListItem>().Where(li => li.Selected).Select(li => li.Value);
+            List<string> selectedListViewIds = new List<string>();
+            selectedListViewIds = this.hdnSelectedViews.Value.TrimEnd(new char[] { ',' }).Split(',').ToList();
             if (!IsAnyMatchedId(selectedListViewIds, lists))
             {
                 ShowMessage(Translate("/sharepoint/admin/message/listviewnotmatched"), true);
@@ -383,7 +426,8 @@ namespace EPiServer.ConnectForSharePoint.Web
                 return;
             }
 
-            AppendListItemCollection(SharePointListCheckBox, SharePointHelper.GetListViewPairs(mediaLists));
+            ////AppendListItemCollection(SharePointListCheckBox, SharePointHelper.GetListViewPairs(mediaLists));
+            BindListViewData(SharePointHelper.GetListViewPairsData(mediaLists));
             ActivateControls(true);
 
             if (Page.IsPostBack)
@@ -391,13 +435,18 @@ namespace EPiServer.ConnectForSharePoint.Web
                 ShowMessage(Translate("/sharepoint/admin/message/connectsuccess"), false);
             }
         }
+        private void BindListViewData(List<KeyValuePair<string, List<KeyValuePair<string, string>>>> listViewPairs)
+        {
+            lvLists.DataSource = listViewPairs;
+            lvLists.DataBind();
+        }
 
         private IEnumerable<SPList> GetMediaLists(bool isTest, out string errorMessage)
         {
             errorMessage = string.Empty;
             try
             {
-                if( isTest )
+                if (isTest)
                 {
                     // just test the connection and return a new list that may or may not match what is in the UI
                     return TestConnection();
@@ -460,7 +509,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
             };
-            var svcLists = new ListsViewsService {EndpointContextService = contextService};
+            var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
             // Concatinate the document and custom lists.
             var documentLists = svcLists.GetLists((int)ListBaseType.DocumentLibrary);
