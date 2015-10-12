@@ -349,9 +349,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var messageHelper = new SharePointMessageHelper();
                 // if the entry point is different we need to queue all the current folders for delete
                 if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                    messageHelper.queueRootFoldersForDelete(lists);
+                    messageHelper.QueueRootFoldersForDelete(lists);
                 else // else we only delete folders that have been deselected
-                    messageHelper.queueRootFoldersForDelete(lists, selectedListViewIds);
+                    messageHelper.QueueRootFoldersForDelete(lists, selectedListViewIds);
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
