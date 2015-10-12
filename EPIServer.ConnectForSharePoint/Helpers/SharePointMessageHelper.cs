@@ -9,6 +9,7 @@ using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.Web;
+using EPiServer.DataAbstraction;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -41,11 +42,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _serviceLocator = serviceLocator;
         }
 
-        private void processDocuments(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
+        private void DeleteDocumentsAndItems(IEnumerable<IContent> cmsListItems, IEnumerable<SPListItem> sharepointListItems)
         {
-            IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-            var cmsListItems = repo.GetChildren<IContentData>(folderRef);
-
             foreach (var item in cmsListItems)
             {
                 // If its content
@@ -73,7 +71,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             {
                                 Item = new SPListItem()
                                 {
-                                    entryPointId = folderRef.ID, // id of the folder the item is in
+                                    entryPointId = item.ContentLink.ID, // id of the folder the item is in
                                     GUID = new Guid(mediaItem.SharePointGUID),
                                 },
                             });
@@ -84,7 +82,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             {
                                 Item = new SPListItem()
                                 {
-                                    entryPointId = folderRef.ID, // id of the folder the item is in
+                                    entryPointId = item.ContentLink.ID, // id of the folder the item is in
                                     GUID = new Guid(mediaItem.SharePointGUID),
                                 },
                             });
@@ -94,7 +92,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
         }
 
-        private void processFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
+        public void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
         {
             IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
 
@@ -152,8 +150,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         sharepointListItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
                     }
 
-                    processDocuments(folderRef, sharepointListItems);
-                    processFolders(folderRef, sharepointListItems);
+                    RemoveSharePointAddedFolders(folderRef, sharepointListItems);
                 }
             }
         }
@@ -162,22 +159,29 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// Adds or updates SPListItems that are not folders 
         /// </summary>
         /// <param name="spItem"></param>
-        private void manageItem(SPListItem spItem)
+        private void AddOrUpdate(SPListItem spItem, IEnumerable<IContent> cmsItems)
         {
             if (spItem.Folder == null)
             {
-                ContentReference itemref = null;
-                var parentFolderRef = _contentProviderHelper.FindRecursiveFolders(spItem.ParentFolderName, _settingsHelper.GetEntryPoint());
-                if (parentFolderRef != null)
+                IContent itemref = null;
+
+                foreach (var cmsItem in cmsItems)
                 {
-                    // Determine if we are adding or updating and send the appropriate message.
-                    itemref = _contentProviderHelper.FindMediaInFolder(spItem.GUID, parentFolderRef);
+                    if (cmsItem is ISharePointItem)
+                    {
+                        var thisItem = cmsItem as ISharePointItem;
+                        if (spItem.GUID.ToString().Equals(thisItem.SharePointGUID))
+                        {
+                            itemref = cmsItem;
+                            spItem.ContentLink = cmsItem.ContentLink;
+                        }
+                    }
                 }
 
                 if (spItem.File != null) // is it a document?
                 {   
                     // if there is no parent folder, or the content doesnt exist send a Add message
-                    if (parentFolderRef == null || itemref == null)
+                    if ( itemref == null)
                     {
                         _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
                         _emitterFactory.Create().Emit(new SharePointContentAddMessage()
@@ -197,7 +201,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 else // it is a list item
                 {   
                     // if there is no parent folder, or the content doesnt exist send a Add message
-                    if (parentFolderRef == null || itemref == null)
+                    if ( itemref == null)
                     {
                         _logger.Information("Adding SharePointListItemAddMessage to the queue " + spItem.Title);
                         _emitterFactory.Create().Emit(new SharePointListItemAddMessage()
@@ -224,8 +228,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="selectedList">The list of items associated with all the selected views</param>
         /// <param name="selectedView">The selected views in the configuration</param>
         /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
-        public void processSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
+        public List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
         {
+            List<SPListItem> nonFolderItems = new List<SPListItem>();
+
             var items = _helper.GetItems(selectedList, selectedView, parentFolder);
             var iterator = items.GetEnumerator();
             while (iterator.MoveNext())
@@ -238,15 +244,27 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 else
                     spItem.ParentFolderName = ParentFolderName;
 
-                // Process the folder object, if its a folder item
-                manageFolder(spItem, selectedList, selectedView);
-                if(spItem.Folder != null )
-                    processSubItems(spItem.Folder, selectedList, selectedView);
+                if (spItem.Folder == null)
+                {
+                    spItem.selectedView = selectedView;
+                    nonFolderItems.Add(spItem);
+                }
+                else
+                {
+                    // Add the folder if its not already there
+                    var folderRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
+                    if (folderRef != null)
+                    {
+                        // The folder was previously created so we can assume that we have been here before and this is a refresh.
+                        // get the list of items that should be in this folder and call processLists that will 
+                        var subItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
+                        RemoveSharePointAddedFolders(folderRef, subItems);
+                    }
 
-                // Process the item if its not a folder item
-                spItem.selectedView = selectedView;
-                manageItem(spItem);
+                    nonFolderItems.AddRange( ProcessSubItems(spItem.Folder, selectedList, selectedView) );
+                }
             }
+            return nonFolderItems;
         }
 
         /// <summary>
@@ -310,79 +328,104 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
         }
 
+        private SPListItem CreateParentSPListItem(SPList selectedList, SPListView selectedView)
+        {
+            var FolderName = selectedList.Title + " - " + selectedView.Title;
+            var parentFolder = selectedList.RootFolder;
+
+            // Dummy SPListItem used for message to processor
+            SPListItem item = new SPListItem()
+            {
+                GUID = selectedList.Id,
+                entryPointId = _settingsHelper.GetEntryPoint().ID,
+                Title = selectedView.Title,
+                Folder = new SPFolder()
+                {
+                    Name = FolderName
+                }
+            };
+
+            return item;
+        }
+
+        private void RemoveUserAddedFolders(ContentReference cf)
+        {
+            IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
+            var cmsFolderItems = repo.GetChildren<ContentFolder>(cf);
+            FolderData fd = new FolderData();
+            foreach (var folder in cmsFolderItems)
+            {
+                fd = fd.GetFolder(folder.ContentLink.ID);
+                if (fd.RefId == -1)
+                {
+                    _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                    {
+                        Item = new SPListItem()
+                        {
+                            entryPointId = cf.ID, // id of the folder the item is in
+                            Folder = new SPFolder() { Name = folder.Name }
+                        },
+                    });
+                }
+            }
+        }
+
         /// <summary>
         /// Adds all items to be added (SPFolders and SPItems) to the queue to be added
         /// </summary>
         /// <param name="listids"></param>
         /// <param name="splists"></param>
-        public void beginProcessing(string listids, IEnumerable<SPList> splists)
+        public void BeginProcessing(string listids, IEnumerable<SPList> splists)
         {
+            List<SPListItem> AllSPListItems = new List<SPListItem>();
+
+            // get our selected lists and iterate through them
             var selectedLists = _helper.GetSelectedListViewIds(splists);
-            foreach (var item in selectedLists) // For each view selected
+            foreach (var item in selectedLists) // For each list/view selected
             {
                 // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(item.Key);
 
-                // Get the selected list using the first guid
+                // split the list and view Guid and get the list and view objects 
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-                // Get the selected view to from the second guid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-                var FolderName = selectedList.Title + " - " + selectedView.Title;
-                var parentFolder = selectedList.RootFolder;
+                var sharepointListItems = _helper.GetItems(selectedList, selectedView, selectedList.RootFolder);
 
-                // Dummy SPListItem used for message to processor
-                SPListItem viewListItem = new SPListItem()
+                // create and or update our root folder for this list/view combo
+                SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
+                var folderRef = AddOrUpdateFolder(rootFolder, _settingsHelper.GetEntryPoint());
+                if(folderRef != null ) // if folder exists
                 {
-                    GUID = new Guid(idListAndView[0]),
-                    entryPointId = _settingsHelper.GetEntryPoint().ID,
-                    Title = selectedView.Title,
-                    Folder = new SPFolder()
-                    {
-                        Name = FolderName
-                    }
-                };
+                    // Remove any folders the user may have added in cms or deleted from sharepoint
+                    RemoveUserAddedFolders(folderRef);
+                    RemoveSharePointAddedFolders(folderRef, sharepointListItems);
+                }
 
-                // Add or update the folder if it's not already there
-                ContentReference cf = AddOrUpdateFolder(viewListItem, _settingsHelper.GetEntryPoint());
-                if( cf != null )
+                // All list items that are not folders need the view object
+                foreach (var spItem in sharepointListItems)
                 {
-                    IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-                    var cmsListItems = repo.GetChildren<MediaData>(cf);
-                    var sharepointListItems = _helper.GetItems(selectedList, selectedView, parentFolder);
-
-                    // check for folders that the user may have added that are not supposed to be there.
-                    var cmsFolderItems = repo.GetChildren<ContentFolder>(cf);
-                    FolderData fd = new FolderData();
-                    foreach (var folder in cmsFolderItems)
-                    {
-                        fd = fd.GetFolder(folder.ContentLink.ID);
-                        if(fd.RefId == -1)
-                        {
-                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
-                            {
-                                Item = new SPListItem()
-                                {
-                                    entryPointId = cf.ID, // id of the folder the item is in
-                                    Folder = new SPFolder() { Name = folder.Name }
-                                },
-                            });
-                        }
-                    }
-
-                    manageFolder(viewListItem, selectedList, selectedView, sharepointListItems);
-
-                    // Process the item if its not a folder item
-                    foreach (var spItem in sharepointListItems)
+                    if (spItem.Folder == null)
                     {
                         spItem.selectedView = selectedView;
-                        manageItem(spItem);
+                        spItem.ParentFolderName = rootFolder.Folder.Name;
+                        AllSPListItems.Add(spItem); 
                     }
                 }
 
                 // Process the sub items of this folder.
-                processSubItems(parentFolder, selectedList, selectedView, FolderName);
+                AllSPListItems.AddRange( 
+                    ProcessSubItems(selectedList.RootFolder, selectedList, selectedView, rootFolder.Folder.Name) );
             }
+
+            // get all of our content from cms
+            var contentItems = FindSharePointItems();
+            foreach (var item in AllSPListItems)
+            {
+                AddOrUpdate(item, contentItems);
+            }
+            
+            // delete all items (if any) from cms in this list that have been removed from sharepoint
+            DeleteDocumentsAndItems(contentItems, AllSPListItems);
         }
 
         /// <summary>
@@ -459,5 +502,24 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
             return contentRef;
         }
+
+        private IEnumerable<IContent> FindSharePointItems()
+        {
+            var contentTypeRepo = _serviceLocator.GetInstance<IContentTypeRepository>();
+
+            var cmsTypes = contentTypeRepo.List().Where(ctr => ctr.ModelType != null && typeof(ISharePointItem).IsAssignableFrom(ctr.ModelType)).ToList();
+            var refrences = new List<ContentReference>();
+            foreach (var contentType in cmsTypes)
+            {
+                var items = _serviceLocator.GetInstance<IContentModelUsage>().ListContentOfContentType(contentType).Select(x => x.ContentLink.ToReferenceWithoutVersion()).Distinct().ToList();
+                refrences.AddRange(items);
+            }
+            var dataResults = _serviceLocator.GetInstance<IContentRepository>()
+                .GetItems(refrences, new LoaderOptions() { LanguageLoaderOption.FallbackWithMaster() })
+                .Where(r => !string.IsNullOrEmpty((r as ISharePointItem).SharePointGUID) && r.IsDeleted == false);
+
+            return dataResults;
+        }
+
     }
 }

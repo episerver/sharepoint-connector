@@ -76,7 +76,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var list = new SPList();
             var listView = new SPListView();
             var folderName = "Test Folder";
-            messageHelper.processSubItems(pFolder, list, listView, folderName);
+            messageHelper.ProcessSubItems(pFolder, list, listView, folderName);
 
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.Item.Title == item.Title && spm.Item.ParentFolderName == folderName)), Times.AtLeastOnce, "We didn't call emit or the folder was not the one we expect");
         }
@@ -101,7 +101,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var pFolder = new SPFolder() { Name = "Test Folder Name" };
             var list = new SPList();
             var listView = new SPListView();
-            messageHelper.processSubItems(pFolder, list, listView);
+            messageHelper.ProcessSubItems(pFolder, list, listView);
 
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointContentAddMessage>(spm => spm.Item.ParentFolderName == pFolder.Name)), Times.AtLeastOnce, "We didn't call emit or the item was not the one we expect");
         }
@@ -148,8 +148,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 .Returns(items);
 
             // none of the args actually matter because the mocks return test data
-            messageHelper.processSubItems(new SPFolder() { Name = "Test Folder Name" },
-                new SPList(), new SPListView()); 
+            messageHelper.ProcessSubItems(new SPFolder() { Name = "Test Folder Name" }, new SPList(), new SPListView()); 
 
             // Comparer the quid and make sure its the correct one.
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointContentDeleteMessage>(spm => spm.Item.GUID == new Guid("4F39D06F-B540-466C-BD97-E3DE220034B2"))), 
@@ -238,7 +237,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             ContentReference test = null;
             _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(test);
 
-            messageHelper.beginProcessing(string.Empty, lists);
+            messageHelper.BeginProcessing(string.Empty, lists);
 
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.GetType() == typeof(SharePointFolderAddMessage))), Times.AtLeastOnce, "Emit should be called with a folder add message for the root folder");
         }
@@ -288,7 +287,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
                 .Returns(data);
 
-            messageHelper.beginProcessing(string.Empty, lists);
+            messageHelper.BeginProcessing(string.Empty, lists);
 
             _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointMessage>()), Times.Never, "Emit should be called with a folder add message for the root folder");
         }

@@ -1,4 +1,5 @@
 ﻿using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     public interface ISharePointMessageHelper
     {
         void queueRootFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null);
-        void beginProcessing(string listids, IEnumerable<SPList> splists);
-        void processSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null);
+        void BeginProcessing(string listids, IEnumerable<SPList> splists);
+        List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null);
+        void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems);
     }
 }
