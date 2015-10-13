@@ -11,7 +11,17 @@
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+
 	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
+    <style type="text/css">
+         .listCheckBox input[type="checkbox"] {
+             vertical-align: top;
+         }
+
+         .listViewSelector {
+             padding: 0 0 8px 2px;
+         }
+     </style>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
@@ -33,7 +43,7 @@
             // Loop through each checkbox
             $listChkBox.each(function () {
                 if ($(this).is(':checked')) {
-                    var viewId = $(this).parent().next($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
+                    var viewId = $(this).parent().next($('div.viewSelector')).children($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
                     if (viewId.indexOf($(this).val()) === 0) { // Additional check to make sure we are choosing the option from the correct List.
                         selectedViewIds += viewId + ',';
                     }
@@ -169,9 +179,11 @@
                             </div>
                         </LayoutTemplate>
                         <ItemTemplate>
-                            <div style="padding:2px">
+                           <div class="listViewSelector">
                             <asp:CheckBox ID="chkList" class="listCheckBox" runat="server"></asp:CheckBox>
+                                      <div class="viewSelector">
                             <asp:DropDownList ID="ddViews" class="viewsDropDown" runat="server"></asp:DropDownList>
+                                          </div>
                            </div>
                         </ItemTemplate>
                     </asp:ListView>
