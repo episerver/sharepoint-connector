@@ -1,5 +1,6 @@
 ﻿using System;
 using EPiServer.ConnectForSharePoint.Rest;
+using EPiServer.Core;
 
 namespace EPiServer.ConnectForSharePoint.Models
 {
@@ -80,5 +81,7 @@ namespace EPiServer.ConnectForSharePoint.Models
         /// The view that this object was initially read with
         /// </summary>
         public SPListView selectedView;
+
+        public ContentReference ContentLink;
     }
 }

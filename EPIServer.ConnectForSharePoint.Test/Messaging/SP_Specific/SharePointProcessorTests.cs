@@ -405,9 +405,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
             fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
-                .Returns(new ContentReference(42));
             contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
                 new SharepointGenericMedia()
                 {
@@ -427,7 +424,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg", TimeLastModified = DateTime.Now },
-                entryPointId = 42, GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1")
+                entryPointId = 42, GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1"),
+                ContentLink = new ContentReference(42)
             };
 
             var data = new List<MediaData>();
@@ -447,7 +445,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.UpdateDocument(item);
 
-            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
             fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
             fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
@@ -502,114 +499,21 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var processor = GetUnitUnderTest();
 
             contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
-            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(
-                new ContentReference(42));
-            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(
-                new SharepointGenericMedia()
-                {
-                    Name = "Filename.jpg",
-                    ContentLink = new ContentReference(42),
-                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
-                }
-            );
-
-            MemoryStream mstream = new MemoryStream();
-            StreamWriter myStreamWriter = new StreamWriter(mstream);
-            myStreamWriter.Write("Some stream data");
-
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
-
-            var item = new SPListItem()
-            {
-                File = new SPFile() { Name = "Filename.jpg", TimeLastModified = DateTime.Now },
-                entryPointId = 42,
-                GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1")
-            };
-
-            var data = new List<MediaData>();
-            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
-            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            data.Add(new SharepointGenericMedia()
-            {
-                Name = "Filename.jpg",
-                ContentLink = new ContentReference(42),
-                SharePointTimeLastModified = new DateTime(2014, 1, 1)
-            });
-            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
-                .Returns(data);
-
-            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
-                .Returns(new MediaData());
-
-            processor.DeleteDocument(item);
-
-            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
-            contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.Is<Boolean>(force => force == true), 
-                It.Is<AccessLevel>(al => al == AccessLevel.Delete)), Times.Once, "Save needs to be called once");
-        }
-
-        [TestMethod]
-        public void DeleteDocument_Calls_Delete_AFter_FindRecursiveFolders()
-        {
-            var processor = GetUnitUnderTest();
-
-            contentRepo.Setup(cr => cr.Delete(It.IsAny<ContentReference>(), It.IsAny<Boolean>(), It.IsAny<AccessLevel>())).Verifiable();
-            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>())).Returns(
-                new ContentReference(42));
-            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(
-                new SharepointGenericMedia()
-                {
-                    Name = "Filename.jpg",
-                    ContentLink = new ContentReference(42),
-                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
-                }
-            );
-            contentHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
-            contentHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(
-                new ContentReference());
-
-
-            MemoryStream mstream = new MemoryStream();
-            StreamWriter myStreamWriter = new StreamWriter(mstream);
-            myStreamWriter.Write("Some stream data");
-
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
 
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg", TimeLastModified = DateTime.Now },
                 entryPointId = -1,
                 ParentFolderName = "ParentFolderName",
-                GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1") 
+                GUID = new Guid("8906E84E-DCA7-45CC-A41B-B63BC49943A1"),
+                ContentLink = new ContentReference(42)
             };
-
-            var data = new List<MediaData>();
-            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
-            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            data.Add(new SharepointGenericMedia()
-            {
-                Name = "Filename.jpg",
-                ContentLink = new ContentReference(42),
-                SharePointTimeLastModified = new DateTime(2014, 1, 1)
-            });
-            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
-                .Returns(data);
-
-            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
-                .Returns(new MediaData());
 
             processor.DeleteDocument(item);
 
-            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>()), Times.Once, "Failed to call find recursive folders");
-            contentHelper.Verify(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()), Times.Once, "FindMediaInFolder needs to be called once");
-            contentRepo.Verify(cr => cr.Delete(It.IsAny<ContentReference>(), It.Is<Boolean>(force => force == true),
-                It.Is<AccessLevel>(al => al == AccessLevel.Delete)), Times.Once, "Save needs to be called once");
+            contentRepo.Verify(cr => cr.Delete(It.Is<ContentReference>( cf => cf.ID == 42), 
+                It.Is<Boolean>(force => force == true), 
+                It.Is<AccessLevel>(al => al == AccessLevel.Delete)), Times.Exactly(1), "Save needs to be called once");
         }
 
         [TestMethod]
@@ -704,7 +608,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             {
                 File = new SPFile() { Name = "Filename.jpg" },
                 FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
-                entryPointId = 42
+                entryPointId = 42,
+                ContentLink = new ContentReference(42)
             };
 
             contentRepo.Setup(cr => cr.Get<SharePointBlockData>(It.IsAny<ContentReference>()))

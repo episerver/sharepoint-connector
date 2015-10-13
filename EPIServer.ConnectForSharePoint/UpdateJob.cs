@@ -22,7 +22,7 @@ namespace EPiServer.ConnectForSharePoint
 
             // Put all the add folder messages on the queue
             var messageHelper = new SharePointMessageHelper();
-            messageHelper.beginProcessing(SharePointSettings.Current.ListIds, supportedLists);
+            messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, supportedLists);
             return "Started";
         }
     }
