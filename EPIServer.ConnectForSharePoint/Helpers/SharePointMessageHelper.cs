@@ -235,6 +235,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists)
             {
+                bool delete = true;
+
                 // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(item.Key);
 
@@ -244,43 +246,29 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 // Get the selected view to from the second guid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
-                // Make sure that the view guid and the view guid is in the listids, if its not then it needs to be deleted.
-                var FolderName = selectedList.Title + " - " + selectedView.Title; // assume we are deleting it.
                 if (listids != null) // we are some folders
                 {
                     foreach (var id in listids)
                     {
                         var listIds = id.Split('~');
-                        if (selectedList.Id == Guid.Parse(listIds[0]) && selectedView.Id == Guid.Parse(listIds[1]))
+                        if (selectedList.Id == Guid.Parse(listIds[0]))
                         {
                             // We found a match, this means the view is in the current selection - don't delete it!  
                             // else all the items in the folder will be deleted and existing pages will lose content.
-                            FolderName = string.Empty;
+                            delete = false;
                             break;
                         }
                     }
                 }
 
-                if (!string.IsNullOrEmpty(FolderName))
+                if ( delete )
                 {
                     // The message on the queue will be SPListItem
                     // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
                     // that contains some aspects of both.
-                    SPListItem tbd = new SPListItem()
-                    {
-                        Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
-                        GUID = selectedView.Id,
-                        entryPointId = _settingsHelper.GetEntryPoint().ID,
-                        Folder = new SPFolder()
-                        {
-                            Name = FolderName,
-                        },
-                    };
-
-                    _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
                     _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
                     {
-                        Item = tbd,
+                        Item = CreateParentSPListItem(selectedList, selectedView)
                     });
                 }
             }
@@ -429,6 +417,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                 });
                                 add = false;
                                 done = true;
+                                contentRef = cf.ContentLink; // Make sure we return the content reference
                             }
                             else
                             {
