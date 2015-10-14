@@ -387,6 +387,8 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
 
+            BindListViewData(SharePointHelper.GetListViewPairsData(lists));
+
             #endregion
         }
 
@@ -410,6 +412,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             QueueCountTB.Text = QueueCount;
             Connect.Enabled = false;
             ActivateControls(false);
+            BindListViewData(SharePointHelper.GetListViewPairsData(lists));
         }
 
         #endregion
