@@ -33,7 +33,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-        private static readonly ISharePointContentMappingRepository _spContentMappingRepository = ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>();
 
         /// <summary>
         /// Called by web page during data bind operation

@@ -20,70 +20,22 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private static readonly ILogger _logger = LogManager.GetLogger();
         private IListsViewsService _spListsService;
         private IFilesFoldersService _spFilesFoldersService;
-        private ISharePointContentMappingRepository _spContentMappingRepository;
 
         private static object _lock = new object();
 
         public FileStreamService()
             : this(
                 SharePointHelper.SPServicesHub.SPListsViewsService,
-                SharePointHelper.SPServicesHub.SPFilesFoldersService,
-                ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>())
+                SharePointHelper.SPServicesHub.SPFilesFoldersService)
         {
         }
 
         public FileStreamService(
             IListsViewsService spListsService,
-            IFilesFoldersService spFilesFoldersService,
-            ISharePointContentMappingRepository spContentMappingRepository)
+            IFilesFoldersService spFilesFoldersService)
         {
             _spListsService = spListsService;
             _spFilesFoldersService = spFilesFoldersService;
-            _spContentMappingRepository = spContentMappingRepository;
-        }
-
-        /// <summary>
-        /// Get file stream from SharePoint by its GUID string
-        /// </summary>
-        /// <param name="blobId">The given blob identification</param>
-        /// <returns>File stream</returns>
-        public Stream GetFileStream(Uri blobId)
-        {
-            _logger.Information("GetFileStream blobId: {0} .", blobId);
-            var memoryStream = new MemoryStream();
-
-            try
-            {
-                // Get mapped identity from MappingService
-                var mappedIdentity = _spContentMappingRepository.GetIdentity(Guid.Parse(blobId.Segments[1].Replace("/", string.Empty)));
-                if (mappedIdentity == null || mappedIdentity.ExternalIdentifier == null)
-                {
-                    _logger.Information("Could not find MappedIdentity, return empty MemoryStream.");
-                    return memoryStream;
-                }
-
-                // Segments[1] is providerUniquePath of IdentityMappingService,
-                // the value made by ListID~ViewID~ListItemID(optional)
-                var segments = mappedIdentity.ExternalIdentifier.Segments[1].ToString().Split('~');
-                if (segments.Count() != 3)
-                {
-                    _logger.Information("mappedIdentity.ExternalIdentifier.Segments[1] value is wrong format ({0}), return empty MemoryStream.", mappedIdentity.ExternalIdentifier.Segments[1]);
-                    return memoryStream;
-                }
-
-                // segments[0]: List identification
-                // segments[2]: ListItem identification
-                var parentList = _spListsService.GetList(segments[0]);
-                var listItem = (parentList != null) ? _spListsService.GetListItem(parentList, segments[2]) : null;
-
-                return GetFileStream(listItem, mappedIdentity.ContentLink);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Error occurs when getting file stream from SharePoint", ex);
-            }
-
-            return memoryStream;
         }
 
         /// <summary>
@@ -118,7 +70,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 {
                     _logger.Information("The file has been deleted, remove it from cache.");
                     // code removes the item before returning
-                    RemoveFile(relativeUrl, contentLink);
                     return memoryStream;
                 }
 
@@ -241,16 +192,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Delete mapping to a sharepoint file and flush caches related to that file.
-        /// </summary>
-        /// <param name="serverRelativeUrl">The server relative URL.</param>
-        /// <param name="contentLink">The content link of file</param>
-        private void RemoveFile(string serverRelativeUrl, ContentReference contentLink)
-        {
-            _spContentMappingRepository.Delete(contentLink);
         }
 
         /// <summary>

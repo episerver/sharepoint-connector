@@ -297,7 +297,6 @@
     <Compile Include="Helpers\AccessRightsHelper.cs" />
     <Compile Include="Helpers\ContentProviderHelper.cs" />
     <Compile Include="Helpers\WebHelper.cs" />
-    <Compile Include="ISharePointContentMappingRepository.cs" />
     <Compile Include="Configuration\SharePointSettings.cs" />
     <Compile Include="Models\SPList.cs" />
     <Compile Include="Models\SPListView.cs" />
@@ -318,7 +317,6 @@
     <Compile Include="Rest\Responses\RestResponse.cs" />
     <Compile Include="Rest\SPRestClient.cs" />
     <Compile Include="Authentication\WcfClientContracts.cs" />
-    <Compile Include="SharePointContentMappingRepository.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
     <Compile Include="SPContentReindex.cs" />

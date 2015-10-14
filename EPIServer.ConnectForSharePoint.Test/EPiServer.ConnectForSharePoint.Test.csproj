@@ -215,7 +215,6 @@
     <Compile Include="Messaging\SP_Specific\SharePointProcessFactoryTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointProcessorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\SharePointContentMappingRepositoryTest.cs" />
     <Compile Include="Rest\FileStreamServiceTest.cs" />
     <Compile Include="Rest\FilesFoldersServiceTest.cs" />
     <Compile Include="TestScopeHelper.cs" />
@@ -241,7 +240,9 @@
   <ItemGroup>
     <None Include="PerformancePerceptionTest\loadspitems-test_phantomjs_guide.docx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

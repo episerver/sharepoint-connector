@@ -26,9 +26,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         private static object _lockObject = new Object();
 
-        private static readonly AccessLevel _noAccessLevel = AccessLevel.NoAccess;
-        private static readonly AccessLevel _readAccessLevel = AccessLevel.Read;
-
         public const string ContentProviderKey = "sharepointcontent";
 
         public ContentProviderHelper()
@@ -84,13 +81,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 return;
             }
 
-            if (existingEntries.Count() == 1 && existingEntries.First().Access.Equals(_readAccessLevel))
+            if (existingEntries.Count() == 1 && existingEntries.First().Access.Equals(AccessLevel.Read))
             {
                 _logger.Debug("The existing entry is read only");
                 return;
             }
             var accessHelper = new AccessRightsHelper();
-            accessHelper.SetAccessRight(sharePointRoot, _readAccessLevel);
+            accessHelper.SetAccessRight(sharePointRoot, AccessLevel.Read);
         }
 
         /// <summary>
