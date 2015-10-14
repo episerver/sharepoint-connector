@@ -9,6 +9,9 @@ namespace EPiServer.ConnectForSharePoint.Models
 {
     [EPiServerDataStore(AutomaticallyRemapStore = true, 
         AutomaticallyCreateStore = true, StoreName="SPFolderMappings")]
+    ///
+    /// Dynamic data store class that represents the mapping between folder Guids and cms entry points 
+    ///
     public class FolderData : IDynamicData
     {
         public Identity Id { get; set; }

@@ -298,8 +298,6 @@
     <Compile Include="Helpers\ContentProviderHelper.cs" />
     <Compile Include="Helpers\WebHelper.cs" />
     <Compile Include="ISharePointContentMappingRepository.cs" />
-    <Compile Include="Models\DataMapping.cs" />
-    <Compile Include="Models\IModelWrapper.cs" />
     <Compile Include="Configuration\SharePointSettings.cs" />
     <Compile Include="Models\SPList.cs" />
     <Compile Include="Models\SPListView.cs" />
@@ -310,8 +308,6 @@
     </Compile>
     <Compile Include="Helpers\ModuleHelper.cs" />
     <Compile Include="InitializationModule.cs" />
-    <Compile Include="Models\ModelWrapper.cs" />
-    <Compile Include="Models\SharePointBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\ClaimsWebClient.cs">
       <SubType>Component</SubType>
