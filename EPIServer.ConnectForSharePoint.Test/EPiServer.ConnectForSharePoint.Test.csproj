@@ -219,6 +219,7 @@
     <Compile Include="Rest\FileStreamServiceTest.cs" />
     <Compile Include="Rest\FilesFoldersServiceTest.cs" />
     <Compile Include="TestScopeHelper.cs" />
+    <Compile Include="UpdateJobTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj">
