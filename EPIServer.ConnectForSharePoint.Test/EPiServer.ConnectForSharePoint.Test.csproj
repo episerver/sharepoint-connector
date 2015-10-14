@@ -198,6 +198,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AssemblyInitialize.cs" />
+    <Compile Include="Controller\SharePointControllerTests.cs" />
     <Compile Include="Helpers\ContentProviderHelperTests.cs" />
     <Compile Include="Helpers\SharePointMessageHelperTests.cs" />
     <Compile Include="Helpers\WebHelperTest.cs" />

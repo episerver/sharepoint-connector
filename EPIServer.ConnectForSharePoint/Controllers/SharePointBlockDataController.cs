@@ -5,6 +5,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.Web.Mvc;
 using EPiServer.Web.Routing;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Web.Mvc;
 
 namespace EPiServer.ConnectForSharePoint.Controllers
@@ -12,7 +13,15 @@ namespace EPiServer.ConnectForSharePoint.Controllers
     public class SharePointBlockDataController : BlockController<SharePointBlockData>
     {
         private readonly UrlResolver _urlResolver;
+        private IServiceLocator _serviceLocator;
 
+        internal SharePointBlockDataController(IServiceLocator locator) : base()
+        {
+            _serviceLocator = locator;
+            _urlResolver = _serviceLocator.GetInstance<UrlResolver>();
+        }
+
+        [ExcludeFromCodeCoverage]
         public SharePointBlockDataController() : base()
         {
             _urlResolver = ServiceLocator.Current.GetInstance<UrlResolver>();
@@ -25,7 +34,7 @@ namespace EPiServer.ConnectForSharePoint.Controllers
 
             var model = new ListItemViewModel
             {
-                Name = content.Name,
+                Name = content!= null ? content.Name : "DefaultName",
                 JsonData = str,
                 ListID = Guid.Parse(currentContent.ListID)
             };
