@@ -13,7 +13,7 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
     {
         public virtual DateTime Created { get; set; }
 
-        public virtual XhtmlString Body { get; set; }
+        public virtual string Json { get; set; }
 
         [Editable(false, AllowInitialValue = true)]
         public virtual string SharePointGUID { get; set; }

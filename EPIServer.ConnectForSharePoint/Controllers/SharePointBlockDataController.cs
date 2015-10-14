@@ -21,10 +21,12 @@ namespace EPiServer.ConnectForSharePoint.Controllers
         public override ActionResult Index(SharePointBlockData currentContent)
         {
             var content = currentContent as IContent;
+            string str = currentContent.Json;
+
             var model = new ListItemViewModel
             {
                 Name = content.Name,
-                JsonData = currentContent.Body.ToString(),
+                JsonData = str,
                 ListID = Guid.Parse(currentContent.ListID)
             };
             return PartialView("~/Views/Shared/SharePoint/ListItem.cshtml", model);

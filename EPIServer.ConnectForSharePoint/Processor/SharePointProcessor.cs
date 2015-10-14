@@ -433,7 +433,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public string getListItemData(SPListItem item)
         {
             var restUrl = item.FileUrl; // http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File
-            return _fileStreamService.GetListItemJsonData(item);
+            string str = _fileStreamService.GetListItemJsonData(item);
+
+            string lineSeparator = ((char)0x2028).ToString();
+            string paragraphSeparator = ((char)0x2029).ToString();
+            str = str.Replace("\\u200b", string.Empty);
+            str = str.Replace(@"\r\n", string.Empty).Replace(@"\r", string.Empty).Replace(@"\n", string.Empty);
+
+            return str;
         }
 
         public void AddListItem(SPListItem item)
@@ -466,7 +473,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.GetDefault<SharePointBlockData>(parentFolder, contentType.ID);
-                media.Body = new XhtmlString(getListItemData(item)); // get the xml data from the list item
+                media.Json = getListItemData(item); // get the json data from the list item
 
                 // Set attibutes of the media
                 var content = media as IContent;
@@ -524,7 +531,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     // Only update if the last modified dates dont match
                     if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
                     {
-                        media.Body = new XhtmlString(getListItemData(item)); // get the xml data from the list item
+                        media.Json = getListItemData(item); // get the json data from the list item
 
                         // Set attibutes of the media
                         var content = media as IContent;
