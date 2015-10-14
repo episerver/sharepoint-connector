@@ -354,7 +354,6 @@
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
     </Compile>
     <Compile Include="Helpers\SharePointHelper.cs" />
-    <Compile Include="Providers\SharePointMediaProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ClientResources\Images\DefaultThumbnail.png" />

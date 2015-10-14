@@ -1,6 +1,5 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.ConnectForSharePoint.Rest.Models;
 using EPiServer.ConnectForSharePoint.Rest.Requests;
 using EPiServer.ConnectForSharePoint.SPServices;

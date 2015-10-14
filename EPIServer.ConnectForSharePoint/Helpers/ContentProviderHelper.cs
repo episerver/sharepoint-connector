@@ -1,15 +1,12 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
-using EPiServer.DataAccess;
 using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using System;
-using System.Collections.Specialized;
 using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
@@ -28,7 +25,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private static IContentSecurityRepository _contentSecurityRepository;
 
         private static object _lockObject = new Object();
-        private static SharePointMediaProvider _sharePointMediaProvider = null;
 
         private static readonly AccessLevel _noAccessLevel = AccessLevel.NoAccess;
         private static readonly AccessLevel _readAccessLevel = AccessLevel.Read;
@@ -56,127 +52,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private static ContentReference EntryPoint
         {
             get { return SharePointSettings.Current.EntryPoint; }
-        }
-
-        /// <summary>
-        /// Gets or create a new instance of the SharePointMediaProvider class
-        /// </summary>
-        public static SharePointMediaProvider SharePointMediaProvider
-        {
-            get
-            {
-                if (_sharePointMediaProvider == null)
-                {
-                    lock (_lockObject)
-                    {
-                        if (_sharePointMediaProvider == null)
-                        {
-                            try
-                            {
-                                _sharePointMediaProvider = (_contentProviderManager.GetProvider(ContentProviderKey) as SharePointMediaProvider)
-                                    ?? new SharePointMediaProvider(ContentProviderKey);
-                            }
-                            catch (ContentProviderNotFoundException exc)
-                            {
-                                _logger.Debug(String.Format("{0} content provider was not found", typeof(SharePointMediaProvider)), exc);
-                                _sharePointMediaProvider = new SharePointMediaProvider(ContentProviderKey);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.Debug(String.Format("{0} content provider was not found", typeof(SharePointMediaProvider)), ex);
-                            }
-                        }
-                    }
-                }
-
-                return _sharePointMediaProvider;
-            }
-        }
-
-        /// <summary>
-        /// Map configured SharePoint's media to the EPiServer Asset tree
-        /// </summary>
-        public static void CreateSharePointMediaProvider()
-        {
-            // Do nothing if entry point is empty
-            if (ContentReference.IsNullOrEmpty(EntryPoint))
-            {
-                _logger.Debug("The EntryPoint is null");
-                return;
-            }
-
-            // Create SharePoint Media Provider and add to ProviderMap
-            InitializeSharePointMediaProvider();
-
-            // Concatinate the document and custom lists.
-            var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                .GetLists((int)ListBaseType.DocumentLibrary);
-            var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                .GetLists((int)ListBaseType.GenericList);
-            var supportedLists = documentLists.Concat(customLists);
-
-            var helper = new SharePointHelper();
-            var selectedLists = helper.GetSelectedListViewIds(supportedLists);
-
-            foreach (var list in selectedLists)
-            {
-                var cachedContentLink = SharePointMediaProvider.LookupList(list.Key);
-                // If we can not lookup this list's content link in cache then ignore it.
-                // Its maybe sharepoint return not found on requested file id. (timeout for instance)
-                if (ContentReference.IsNullOrEmpty(cachedContentLink))
-                {
-                    continue;
-                }
-
-                // Create mapping folders for SharePoint lists under the entry point
-                // Create a folder for the list under SharePoint entry point
-                var sharePointMappingFolder = _contentRepository.GetDefault<ContentFolder>(EntryPoint);
-                sharePointMappingFolder.Name = list.Value;
-                sharePointMappingFolder.ContentLink = cachedContentLink;
-                sharePointMappingFolder.ParentLink = EntryPoint;
-
-                _contentRepository.Save(sharePointMappingFolder, SaveAction.Publish, _noAccessLevel);
-            }
-
-            // Set access level to 'Read' on the SharePoint's root folder and its children
-// hem_remove - removed the event listener that sets all the nodes to read only for now
-//            AccessRightsHelper.SetAccessRight(EntryPoint, AccessLevel.Read);
-//           _contentSecurityRepository.ContentSecuritySaved -= ContentSecurityRepository_ContentSecuritySaved;
-//           _contentSecurityRepository.ContentSecuritySaved += ContentSecurityRepository_ContentSecuritySaved;
-        }
-
-        /// <summary>
-        /// Delete the SharePoint Media Provider
-        /// </summary>
-        public static void DeleteSharePointMediaProvider()
-        {
-            // Remove the provider
-            if (SharePointMediaProvider != null)
-            {
-                _contentProviderManager.ProviderMap.RemoveProvider(SharePointMediaProvider.Name);
-            }
-
-            _contentSecurityRepository.ContentSecuritySaved -= ContentSecurityRepository_ContentSecuritySaved;
-        }
-
-        /// <summary>
-        /// Create SharePoint Media Provider for the given entry point
-        /// </summary>
-        /// <param name="entryPointContenLink">The given content reference of the entry point</param>
-        private static void InitializeSharePointMediaProvider()
-        {
-            _contentProviderManager.ProviderMap.RemoveProvider(ContentProviderKey);
-
-            // Init the provider and its settings
-            var config = new NameValueCollection();
-            config.Add("entryPoint", EntryPoint.ID.ToString());
-            config.Add("name", ContentProviderKey);
-            config.Add("type", typeof(SharePointMediaProvider).AssemblyQualifiedName);
-            config.Add("capabilities", string.Join(",", ContentProviderCapabilities.Create, ContentProviderCapabilities.Edit, ContentProviderCapabilities.Copy));
-
-            _sharePointMediaProvider = new SharePointMediaProvider(ContentProviderKey);
-            _sharePointMediaProvider.Initialize(ContentProviderKey, config);
-            _contentProviderManager.ProviderMap.AddProvider(_sharePointMediaProvider);
         }
 
         /// <summary>

@@ -99,7 +99,6 @@ namespace EPiServer.ConnectForSharePoint
         /// <inheritdoc /> 
         public override void BeforeUninstall()
         {
-            ContentProviderHelper.DeleteSharePointMediaProvider();
         }
 
         #endregion
