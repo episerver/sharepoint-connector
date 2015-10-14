@@ -574,6 +574,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
+            fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
 
             var item = new SPListItem()
             {
@@ -603,6 +604,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
                 .Returns(new ContentReference(42));
+            fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
 
             var item = new SPListItem()
             {

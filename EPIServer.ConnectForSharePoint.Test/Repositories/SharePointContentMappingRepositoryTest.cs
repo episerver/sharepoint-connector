@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPiServer.ConnectForSharePoint.Providers.Constructions;
 using EPiServer.Core;
-using EPiServer.ServiceLocation;
 using Moq;
 using EPiServer.DataAbstraction;
 

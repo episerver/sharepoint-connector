@@ -1,20 +1,17 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers.Constructions;
 using EPiServer.Construction;
 using EPiServer.Core;
 using EPiServer.Core.Transfer;
 using EPiServer.DataAbstraction;
 using EPiServer.Logging;
-using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Validation;
 using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Providers
 {
@@ -28,7 +25,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
         private readonly IContentEvents _contentEvents;
         private readonly ContentMediaResolver _contentMediaResolver;
         private readonly IContentRepository _contentRepository;
-        private IEnumerable<ISharePointDataBuilder> _contentBuilders;
 
         private ISharePointContentMappingRepository _sharePointRepository;
         private Func<ContentReference, object> _getCMSCachedContent;
@@ -63,7 +59,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
                 ServiceLocator.Current.GetInstance<IContentEvents>(),
                 ServiceLocator.Current.GetInstance<ContentMediaResolver>(),
                 ServiceLocator.Current.GetInstance<IContentRepository>(),
-                ServiceLocator.Current.GetAllInstances<ISharePointDataBuilder>(),
                 ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>(),
                 (contentLink) => { return CacheManager.Get(DataFactoryCache.PageMasterLanguageCacheKey(contentLink)); },
                 () => { return SharePointSettings.Current.EntryPoint; }) { }
@@ -80,7 +75,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
             IContentEvents contentEvents,
             ContentMediaResolver contentMediaResolver,
             IContentRepository contentRepository,
-            IEnumerable<ISharePointDataBuilder> sharePointDataBuilders,
             ISharePointContentMappingRepository sharePointRepository,
             Func<ContentReference, object> getCMSCachedContent,
             Func<ContentReference> getEntryPoint)
@@ -96,7 +90,6 @@ namespace EPiServer.ConnectForSharePoint.Providers
             _contentEvents = contentEvents;
             _contentMediaResolver = contentMediaResolver;
             _contentRepository = contentRepository;
-            _contentBuilders = sharePointDataBuilders;
             _sharePointRepository = sharePointRepository;
             _getCMSCachedContent = getCMSCachedContent;
             _getEntryPoint = getEntryPoint;

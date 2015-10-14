@@ -313,12 +313,6 @@
     <Compile Include="Models\ModelWrapper.cs" />
     <Compile Include="Models\SharePointBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\Constructions\SharePointDataBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointMediaBuilder.cs" />
-    <Compile Include="Providers\Constructions\ISharePointDataBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointFolderBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointImageBuilder.cs" />
-    <Compile Include="Providers\SharePointBlobProvider.cs" />
     <Compile Include="Authentication\ClaimsWebClient.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -213,12 +213,7 @@
     <Compile Include="Messaging\SP_Specific\SharePointMessageHandlerTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointProcessFactoryTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointProcessorTests.cs" />
-    <Compile Include="Providers\Constructions\SharePointFolderBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\Constructions\SharePointImageBuilderTest.cs" />
-    <Compile Include="Providers\Constructions\SharePointMediaBuilderTest.cs" />
-    <Compile Include="Providers\SharePointBlobProviderTest.cs" />
-    <Compile Include="Providers\SharePointMediaProviderTest.cs" />
     <Compile Include="Repositories\SharePointContentMappingRepositoryTest.cs" />
     <Compile Include="Rest\FileStreamServiceTest.cs" />
     <Compile Include="Rest\FilesFoldersServiceTest.cs" />
