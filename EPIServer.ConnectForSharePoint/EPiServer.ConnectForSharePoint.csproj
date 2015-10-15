@@ -319,7 +319,6 @@
     <Compile Include="Authentication\WcfClientContracts.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
-    <Compile Include="SPContentReindex.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
     <Compile Include="SPServices\REST\FilesFoldersService.cs" />
