@@ -26,8 +26,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         private static object _lockObject = new Object();
 
-        public const string ContentProviderKey = "sharepointcontent";
-
         public ContentProviderHelper()
         {
             _serviceLocator = ServiceLocator.Current;
@@ -49,93 +47,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private static ContentReference EntryPoint
         {
             get { return SharePointSettings.Current.EntryPoint; }
-        }
-
-        /// <summary>
-        /// Sets access right each time the given content changed its security level
-        /// </summary>
-        /// <param name="sender">The given sender object</param>
-        /// <param name="e">The given event</param>
-        private static void ContentSecurityRepository_ContentSecuritySaved(object sender, ContentSecurityEventArg e)
-        {
-            ResetAccessRight(e.ContentLink);
-        }
-
-        /// <summary>
-        /// Reset access right on the given content reference object and its descendents
-        /// </summary>
-        /// <param name="contentLink">The given content reference object</param>
-        private static void ResetAccessRight(ContentReference contentLink)
-        {
-            var sharePointRoot = GetSharePointRoot(contentLink);
-            if (sharePointRoot == null)
-            {
-                _logger.Debug("The SharePoint root not found");
-                return;
-            }
-
-            var existingEntries = _contentSecurityRepository.Get(sharePointRoot).Entries;
-            if (existingEntries == null || existingEntries.Count() == 0)
-            {
-                _logger.Debug("The entry not existed");
-                return;
-            }
-
-            if (existingEntries.Count() == 1 && existingEntries.First().Access.Equals(AccessLevel.Read))
-            {
-                _logger.Debug("The existing entry is read only");
-                return;
-            }
-            var accessHelper = new AccessRightsHelper();
-            accessHelper.SetAccessRight(sharePointRoot, AccessLevel.Read);
-        }
-
-        /// <summary>
-        /// Gets SharePoint root object from the given content reference object
-        /// </summary>
-        /// <param name="contentLink">The given content reference object</param>
-        /// <returns>The SharePoint root content reference object</returns>
-        private static ContentReference GetSharePointRoot(ContentReference contentLink)
-        {
-            if (contentLink == null)
-            {
-                _logger.Debug("GetSharePointRoot: The content link is null");
-                return null;
-            }
-
-            var content = _contentRepository.Get<IContent>(contentLink);
-            if (content != null)
-            {
-                // CASE: directly set access right on the SharePoint root asset
-                if (ContentReference.Equals(content.ContentLink, EntryPoint))
-                {
-                    return content.ContentLink;
-                }
-
-                // CASE: set access right on one of the SharePoint root assest ancestors
-                // ex.:
-                //      Set access right on the "Global Assets" or "Root"
-                var descendents = _contentRepository.GetDescendents(contentLink);
-                if (descendents == null || descendents.Count() == 0)
-                {
-                    _logger.Debug("The are not any descendent of content link", contentLink);
-                    return null;
-                }
-
-                foreach (var item in descendents)
-                {
-                    content = _contentRepository.Get<IContent>(item);
-                    if (content != null)
-                    {
-                        if (ContentReference.Equals(content.ContentLink, EntryPoint))
-                        {
-                            return content.ContentLink;
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -163,50 +74,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// checks the current folder for the media item.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="startRef"></param>
-        /// <returns></returns>
-        public ContentReference FindMediaInFolder(string name, ContentReference folderRef)
-        {
-            // Check this folder
-            var medialist = _contentRepository.GetChildren<MediaData>(folderRef);
-            foreach (var item in medialist)
-            {
-                if (item.Name == name)
-                    return item.ContentLink;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Set the given access rights for the given content reference
-        /// </summary>
-        /// <param name="contentReference">The given content reference</param>
-        /// <param name="accessLevel">The given access rights</param>
-        public void SetAccessRight(ContentReference contentReference, AccessLevel accessLevel)
-        {
-            var contentSecurity = _contentSecurityRepository.Get(contentReference).CreateWritableClone() as IContentSecurityDescriptor;
-            if (contentSecurity == null)
-            {
-                return;
-            }
-
-            // The Access Control List does not support adding or modifying entries when it is set to inherited
-            // So that, convert it to local
-            if (contentSecurity.IsInherited)
-            {
-                contentSecurity.ToLocal();
-            }
-
-            contentSecurity.Clear();
-            // Add access right for the default groups
-            contentSecurity.AddEntry(new AccessControlEntry("Everyone", accessLevel));
-            _contentSecurityRepository.Save(contentReference, contentSecurity, SecuritySaveType.Replace);
         }
 
         /// <summary>

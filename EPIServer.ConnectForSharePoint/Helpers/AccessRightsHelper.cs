@@ -8,7 +8,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// <summary>
     /// Helper class for checking access right
     /// </summary>
-    public class AccessRightsHelper
+    public class AccessRightsHelper : IAccessRightsHelper
     {
         private IServiceLocator _serviceLocator;
         private static IContentSecurityRepository _contentSecurityRepository;

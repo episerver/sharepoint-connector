@@ -230,6 +230,8 @@
     <Compile Include="Controllers\SharePointImageController.cs" />
     <Compile Include="Controllers\SharePointVideoController.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Helpers\AccessRightsHelper.cs" />
+    <Compile Include="Helpers\IAccessRightsHelper.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
     <Compile Include="Helpers\ISharePointMessageHelper.cs" />
@@ -294,7 +296,6 @@
     <Compile Include="Rest\Models\JsonViewCollection.cs" />
     <Compile Include="Rest\Models\SharedClasses.cs" />
     <Compile Include="Rest\Models\GetContextWebInformation.cs" />
-    <Compile Include="Helpers\AccessRightsHelper.cs" />
     <Compile Include="Helpers\ContentProviderHelper.cs" />
     <Compile Include="Helpers\WebHelper.cs" />
     <Compile Include="Configuration\SharePointSettings.cs" />

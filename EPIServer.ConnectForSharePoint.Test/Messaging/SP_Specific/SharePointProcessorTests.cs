@@ -42,6 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IContentTypeRepository> contentTypeRepo;
         private Mock<IFileStreamService> fileStreamService;
         private Mock<IListsViewsService> listViewService;
+        private Mock<IAccessRightsHelper> accessRightsHelper;
 
         private Mock<ILogger> logger;
 
@@ -52,6 +53,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo = new Mock<IContentTypeRepository>();
             fileStreamService = new Mock<IFileStreamService>();
             listViewService = new Mock<IListsViewsService>();
+            accessRightsHelper = new Mock<IAccessRightsHelper>();
 
             logger = new Mock<ILogger>();
 
@@ -65,7 +67,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
             contentHelper = new Mock<IContentProviderHelper>();
-            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, fileStreamService.Object, listViewService.Object);
+            return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, 
+                fileStreamService.Object, listViewService.Object, accessRightsHelper.Object);
         }
 
         [TestMethod]
@@ -73,7 +76,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         {
             var processor = GetUnitUnderTest();
 
-            contentHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
+            accessRightsHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
             contentRepo.Setup(cr => cr.GetDefault<ContentFolder>(It.IsAny<ContentReference>()))
                 .Returns(new ContentFolder());
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
@@ -95,7 +98,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             ddsf.Verify(fact => fact.CreateStore(It.IsAny<Type>()), Times.Once, "Failed to create data store");
             dds.Verify(dd => dd.Save(It.IsAny<FolderData>()), Times.Once, "Failed to save the folder data");
-            contentHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
+            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
             contentRepo.Verify(cr => cr.Save(  It.Is<ContentFolder> (con => con.Name == item.Folder.Name && 
                 con.ParentLink != null ),
                 It.Is<SaveAction>(sa => sa == SaveAction.Publish), It.Is<AccessLevel>(al => al == AccessLevel.FullAccess)),
@@ -108,7 +111,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         {
             var processor = GetUnitUnderTest();
 
-            contentHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
+            accessRightsHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
             contentRepo.Setup(cr => cr.GetDefault<ContentFolder>(It.IsAny<ContentReference>())).Returns(new ContentFolder());
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Returns(new ContentReference(42));
@@ -138,7 +141,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             ddsf.Verify(fact => fact.CreateStore(It.IsAny<Type>()), Times.Once, "Failed to create data store");
             dds.Verify(dd => dd.Save(It.IsAny<FolderData>()), Times.Once, "Failed to save the folder data");
 
-            contentHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
+            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
 
             // Make sure the find recursive was called and the parent link id was set, and that the proper access control level was set.
             contentRepo.Verify(cr => cr.Save(It.Is<ContentFolder>(con => con.Name == item.Folder.Name &&
@@ -151,7 +154,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         public void DeleteFolder_Calls_SetAccessRight()
         {
             var processor = GetUnitUnderTest();
-            contentHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
+            accessRightsHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
 
             var item = new SPListItem()
             {
@@ -161,7 +164,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.DeleteFolder(item);
 
-            contentHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
+            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
         }
 
         [TestMethod]

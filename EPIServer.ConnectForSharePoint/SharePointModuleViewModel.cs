@@ -9,13 +9,5 @@ namespace EPiServer.ConnectForSharePoint
     {
         public SharePointModuleViewModel(ShellModule shellModule, IClientResourceService clientResourceService)
             : base(shellModule, clientResourceService) { }
-
-        public string ProviderKey
-        {
-            get
-            {
-                return ContentProviderHelper.ContentProviderKey;
-            }
-        }
     }
 }
