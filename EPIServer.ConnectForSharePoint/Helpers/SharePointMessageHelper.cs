@@ -10,6 +10,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.Web;
 using EPiServer.DataAbstraction;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -22,6 +23,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
 
+        [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
         {
             _logger = LogManager.GetLogger();
@@ -134,7 +136,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="spItem">The item to update or add</param>
         /// <param name="cmsItems">A list of all items currently in cms</param>
-        private void AddOrUpdate(SPListItem spItem, IEnumerable<IContent> cmsItems)
+        internal void AddOrUpdateItem(SPListItem spItem, IEnumerable<IContent> cmsItems)
         {
             if (spItem.Folder == null)
             {
@@ -367,7 +369,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var contentItems = FindSharePointItems();
             foreach (var item in AllSPListItems)
             {
-                AddOrUpdate(item, contentItems);
+                AddOrUpdateItem(item, contentItems);
             }
             
             // delete all items (if any) from cms that have been removed from sharepoint

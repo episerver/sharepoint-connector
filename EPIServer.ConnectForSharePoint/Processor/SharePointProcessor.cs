@@ -29,6 +29,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         IContentProviderHelper _contentProviderHelper;
         IFileStreamService _fileStreamService;
         IListsViewsService _listViewsService;
+        IAccessRightsHelper _accessRightsHelper;
 
         private ILogger _logger;
 
@@ -40,11 +41,13 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _contentProviderHelper = new ContentProviderHelper();
             _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
             _listViewsService = SharePointHelper.SPServicesHub.SPListsViewsService;
+            _accessRightsHelper = new AccessRightsHelper();
+
             _logger = LogManager.GetLogger();
         }
 
         internal SharePointProcessor(IServiceLocator serviceLocator, IContentProviderHelper contentProviderHelper, 
-            IFileStreamService fileStreamService, IListsViewsService listViewsService)
+            IFileStreamService fileStreamService, IListsViewsService listViewsService, IAccessRightsHelper accessRightsHelper)
         {
             _serviceLocator = serviceLocator;
             _contentSecurityRepository = _serviceLocator.GetInstance<IContentSecurityRepository>();
@@ -52,6 +55,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             _fileStreamService = fileStreamService;
             _listViewsService = listViewsService;
             _logger = _serviceLocator.GetInstance<ILogger>();
+            _accessRightsHelper = accessRightsHelper;
         }
 
         public void AddDocument(SPListItem item)
@@ -83,7 +87,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Only search from the entry point down
                 parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
-            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             // Now check the folder to see if the item already exists. 
             ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
@@ -152,7 +156,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     new ContentReference(item.rootCMSFolderEntryPointID));
             }
 
-            _contentProviderHelper.SetAccessRight(cref, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(cref, AccessLevel.FullAccess);
 
             // Create a folder for the list under SharePoint entry point
             var cmsFolder = contentRepository.GetDefault<ContentFolder>(cref);
@@ -190,7 +194,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             // Set access level to 'Read' on the SharePoint's root folder and its children
             ContentReference rootRef = new ContentReference(item.entryPointId);
-            _contentProviderHelper.SetAccessRight(rootRef, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(rootRef, AccessLevel.FullAccess);
 
             var children = repo.GetChildren<ContentFolder>(rootRef);
             foreach (var child in children)
@@ -257,7 +261,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Only search from the entry point down
                 parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
-            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             if (item.ContentLink != null)
             {
@@ -465,7 +469,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Only search from the entry point down
                 parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
-            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             // Now check the folder to see if the item already exists. 
             ContentReference cref = _contentProviderHelper.FindMediaInFolder(item.GUID, parentFolder);
@@ -518,7 +522,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 // Only search from the entry point down
                 parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
             }
-            _contentProviderHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
+            _accessRightsHelper.SetAccessRight(parentFolder, AccessLevel.FullAccess);
 
             if (item.ContentLink != null)
             {
