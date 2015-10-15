@@ -1,13 +1,9 @@
-﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Models.FileTypes;
+﻿using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.Logging;
-using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using System;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -18,37 +14,22 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     public class ContentProviderHelper : IContentProviderHelper
     {
         private IServiceLocator _serviceLocator;
-        private static readonly ILogger _logger = LogManager.GetLogger();
 
         private static IContentRepository _contentRepository;
-        private static IContentProviderManager _contentProviderManager;
-        private static IContentSecurityRepository _contentSecurityRepository;
 
-        private static object _lockObject = new Object();
-
+        [ExcludeFromCodeCoverageAttribute]
         public ContentProviderHelper()
         {
             _serviceLocator = ServiceLocator.Current;
             _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-            _contentProviderManager = ServiceLocator.Current.GetInstance<IContentProviderManager>();
-            _contentSecurityRepository = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
         }
 
         internal ContentProviderHelper(IServiceLocator serviceLocator)
         {
             _serviceLocator = serviceLocator;
             _contentRepository = serviceLocator.GetInstance<IContentRepository>();
-            _contentProviderManager = serviceLocator.GetInstance<IContentProviderManager>();
-            _contentSecurityRepository = serviceLocator.GetInstance<IContentSecurityRepository>();
         }
-        /// <summary>
-        /// Return entry point from settings
-        /// </summary>
-        private static ContentReference EntryPoint
-        {
-            get { return SharePointSettings.Current.EntryPoint; }
-        }
-
+ 
         /// <summary>
         /// Recursively searches for specific ContentFolder given a name and a startRef (if null uses SiteDefinition.Current.GlobalAssetsRoot)
         /// </summary>
@@ -60,14 +41,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             if( startRef == null )
                 startRef = SiteDefinition.Current.GlobalAssetsRoot;
 
-            var rootFolders = _contentRepository.GetChildren<ContentFolder>(startRef);
-            foreach (var rootFolder in rootFolders)
+            var folders = _contentRepository.GetChildren<ContentFolder>(startRef);
+            foreach (var folder in folders)
             {
-                if (rootFolder.Name == name)
-                    return rootFolder.ContentLink;
+                if (folder.Name == name)
+                    return folder.ContentLink;
                 else
                 {
-                    ContentReference cref = FindRecursiveFolders(name, rootFolder.ContentLink);
+                    ContentReference cref = FindRecursiveFolders(name, folder.ContentLink);
                     if (cref != null)
                         return cref;
                 }
