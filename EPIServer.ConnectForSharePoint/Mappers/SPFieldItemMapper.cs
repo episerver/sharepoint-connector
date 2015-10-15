@@ -12,13 +12,38 @@ namespace EPiServer.ConnectForSharePoint.Mappers
         {
             return new SPFieldItem()
             {
+                CanBeDeleted = source.CanBeDeleted,
                 DefaultValue = source.DefaultValue,
+                Description = source.Description,
+                Direction = source.Direction,
+                EnforceUniqueValues = source.EnforceUniqueValues,
+                EntityPropertyName = source.EntityPropertyName,
                 Filterable = source.Filterable,
+                FromBaseType = source.FromBaseType,
+                Group = source.Group,
                 Hidden = source.Hidden,
+                Id = source.Id,
+                Indexed = source.Indexed,
                 InternalName = source.InternalName,
+                JSLink = source.JSLink,
+                ReadOnlyField = source.ReadOnlyField,
+                Required = source.Required,
+                SchemaXml = source.SchemaXml,
+                Scope = source.Scope,
+                Sealed = source.Sealed,
+                Sortable = source.Sortable,
                 StaticName = source.StaticName,
-                Title = source.Title,
-                Group = source.Group
+                Title = source.Title, // display name
+                FieldTypeKind = source.FieldTypeKind,
+                TypeAsString = source.TypeAsString,
+                TypeDisplayName = source.TypeDisplayName,
+                TypeShortDescription = source.TypeShortDescription,
+                ValidationFormula = source.ValidationFormula,
+                ValidationMessage = source.ValidationMessage,
+                FillInChoice = source.FillInChoice,
+                Mappings = source.Mappings,
+                Choices = source.Choices,
+                EditFormat = source.EditFormat
             };
         }
 
