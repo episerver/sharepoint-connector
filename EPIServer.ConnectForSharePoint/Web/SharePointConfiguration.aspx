@@ -35,6 +35,10 @@
             });
 
             // Disable 'Save' button when no list checkboxes are selected
+            if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
+                $('#FullRegion_Save').attr("disabled", "disabled");
+            }
+
             $('span.listCheckBox input[type="checkbox"]').change(function () {
                 if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
                     $('#FullRegion_Save').attr("disabled", "disabled");

@@ -389,16 +389,19 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             // dont test the connection, that would get the data from the control which could have been changed
             var lists = GetMediaLists(false, out errorMessage);
-            var messageHelper = new SharePointMessageHelper();
-            // Put all the add folder messages on the queue
-            messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+            
+            if (lists != null && lists.Any())
+            {
+                var messageHelper = new SharePointMessageHelper();
+                // Put all the add folder messages on the queue
+                messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
 
-            ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
-
-            QueueCountTB.Text = QueueCount;
-            Connect.Enabled = false;
-            ActivateControls(false);
-            BindListViewData(SharePointHelper.GetListViewPairsData(lists));
+                ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
+                QueueCountTB.Text = QueueCount;
+                Connect.Enabled = false;
+                ActivateControls(false);
+                BindListViewData(SharePointHelper.GetListViewPairsData(lists));
+            }
         }
 
         #endregion
@@ -583,7 +586,8 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             ListSelector.Visible = true;
             ListSelector.Enabled = active;
-            Refresh.Enabled = Save.Enabled = active;
+            Save.Enabled = active;
+            Refresh.Enabled = !string.IsNullOrEmpty(CurrentSettings.ListIds);
 
             if (active)
             {
@@ -596,7 +600,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// </summary>
         /// <param name="msg">The message.</param>
         /// <param name="isWarning">if set to <c>true</c> message is a warning.</param>
-        private void ShowMessage(String msg, bool isWarning)
+        private void ShowMessage(string msg, bool isWarning)
         {
             ShowMessage(msg, null, isWarning);
         }
@@ -607,11 +611,11 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="msg">The message.</param>
         /// <param name="tooltip">The tooltip.</param>
         /// <param name="isWarning">if set to <c>true</c> message is a warning.</param>
-        private void ShowMessage(String msg, String tooltip, bool isWarning)
+        private void ShowMessage(string msg, string tooltip, bool isWarning)
         {
             Panel message = new Panel();
 
-            if (!String.IsNullOrEmpty(tooltip))
+            if (!string.IsNullOrEmpty(tooltip))
             {
                 MessagePanel.ToolTip = tooltip;
             }
@@ -626,7 +630,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// Shows the message connection to SharePoint 365 information.
         /// </summary>
         /// <param name="msg">The message.</param>
-        private void ShowConnectionNote(String msg)
+        private void ShowConnectionNote(string msg)
         {
             Panel message = new Panel();
 
