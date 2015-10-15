@@ -100,19 +100,6 @@ namespace EPiServer.ConnectForSharePoint.Web
             return fullPath;
         }
 
-        /// <summary>
-        /// HelpUrl of current SharePoint Connector Shell Module
-        /// </summary>
-        protected string ModuleHelpUrl
-        {
-            get
-            {
-                var shellModule = ModuleHelper.GetShellModule();
-
-                return null != shellModule ? shellModule.GetHelpUrl() : string.Empty;
-            }
-        }
-
         #region Events
 
         /// <summary>
