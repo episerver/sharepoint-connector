@@ -11,7 +11,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
     [TestClass]
     public class AccessRightsHelperTests
     {
-        AccessRightsHelper accessRightsHelper;
         Mock<IServiceLocator> serviceLocator;
         Mock<IContentSecurityRepository> contentSecurityRepo;
 
