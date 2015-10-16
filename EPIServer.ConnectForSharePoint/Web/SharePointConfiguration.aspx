@@ -70,14 +70,21 @@
             label.innerHTML = result;
 
             // we are done processing, queue is empty - get buttons into proper state
-            if (lastValue != "0" && result == "0") {
-                window.location.href = window.location.pathname + window.location.search;
+
+            if (result == "0" && $('span.listCheckBox input[type="checkbox"]:checked').length > 0) {
+                $('span.listCheckBox input[type="checkbox"]').removeAttr('disabled'); // List of all the checkboxes corresponding to lists
+                $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
+                $('#FullRegion_Save').removeAttr('disabled');
             }
 
             // (save or refersh triggered by another user in another browser)
             // items in the queue, but the buttons are enabled 
             if (result != "0" && button.disabled == false) {
-                window.location.href = window.location.pathname + window.location.search;
+                $('span.listCheckBox input[type="checkbox"]').attr('disabled', 'disabled'); // List of all the checkboxes corresponding to lists
+                $('.listViewSelector select').attr('disabled', 'disabled'); // List of all the dropdownlists which contain the views of each list.
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled')
+                $('#FullRegion_Save').attr('disabled', 'disabled');
             }
 
             lastValue = result;
