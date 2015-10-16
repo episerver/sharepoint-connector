@@ -235,8 +235,10 @@
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
     <Compile Include="Helpers\ISharePointMessageHelper.cs" />
+    <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
     <Compile Include="Helpers\ISharePointSettingsHelper.cs" />
     <Compile Include="Helpers\SharePointMessageHelper.cs" />
+    <Compile Include="Helpers\SharePointProcessorHelper.cs" />
     <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\SPFieldItemMapper.cs" />

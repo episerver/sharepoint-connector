@@ -19,9 +19,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private IMapper<JsonFolder.D, SPFolder> _folderMapper;
         private IMapper<JsonFile.D, SPFile> _fileMapper;
         private IMapper<JsonFieldItem.D, SPFieldItem> _fieldMapper;
-        private Dictionary<string, Dictionary<string, SPFieldItem>> fieldItemDictionaryCache =
-            new Dictionary<string, Dictionary<string, SPFieldItem>>();
-
 
         public ListsViewsService() : this(new SPListMapper(), new SPViewMapper(), new SPFolderMapper(), 
             new SPFileMapper(), new SPListItemMapper(), new SPFieldItemMapper() ){ }
@@ -164,21 +161,16 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         public Dictionary<string, SPFieldItem> GetFieldItemDictionary(Guid ListID)
         {
-            Dictionary<string, SPFieldItem> dic;
-            if( !fieldItemDictionaryCache.TryGetValue(ListID.ToString(), out dic) )
+            Dictionary<string, SPFieldItem> dic = new Dictionary<string, SPFieldItem>();
+
+            string requeststring = "/_api/web/lists(guid'{0}')/fields";
+            var restRequest = new RestJsonRequest(string.Format(requeststring, ListID), "GET", null);
+            var fields = BuildListFieldItems(SendRequest(restRequest, null, null, true));
+
+            dic = new Dictionary<string, SPFieldItem>();
+            foreach (var field in fields)
             {
-                // todo : save this in mem so we only make the reqest once
-                string requeststring = "/_api/web/lists(guid'{0}')/fields";
-                var restRequest = new RestJsonRequest(string.Format(requeststring, ListID), "GET", null);
-                var fields = BuildListFieldItems(SendRequest(restRequest, null, null, true));
-
-                dic = new Dictionary<string, SPFieldItem>();
-                foreach (var field in fields)
-                {
-                    dic.Add(field.InternalName, field);
-                }
-
-                fieldItemDictionaryCache.Add(ListID.ToString(), dic);
+                dic.Add(field.InternalName, field);
             }
                 
             return dic;

@@ -2,6 +2,7 @@
 using EPiServer.DataAbstraction;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -13,6 +14,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private IServiceLocator _serviceLocator;
         private static IContentSecurityRepository _contentSecurityRepository;
 
+        [ExcludeFromCodeCoverage]
         public AccessRightsHelper()
         {
             _serviceLocator = ServiceLocator.Current;

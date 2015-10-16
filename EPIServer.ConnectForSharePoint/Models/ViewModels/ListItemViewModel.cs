@@ -1,8 +1,6 @@
-﻿using EPiServer.ConnectForSharePoint.Messaging;
+﻿using EPiServer.ConnectForSharePoint.Helpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 
 namespace EPiServer.ConnectForSharePoint.Models.ViewModels
 {
@@ -16,8 +14,9 @@ namespace EPiServer.ConnectForSharePoint.Models.ViewModels
         {
             get
             {
-                var pro = new SharePointProcessor();
-                return pro.getFields(ListID, JsonData);
+                var helper = new SharePointProcessorHelper();
+                SPList list = new SPList() { Id = ListID };
+                return helper.ParseRawListItemData(helper.GetMetaData(list), JsonData);
             }
         }
     }

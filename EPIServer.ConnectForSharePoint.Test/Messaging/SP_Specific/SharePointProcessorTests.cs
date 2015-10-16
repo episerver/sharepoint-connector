@@ -43,6 +43,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         private Mock<IFileStreamService> fileStreamService;
         private Mock<IListsViewsService> listViewService;
         private Mock<IAccessRightsHelper> accessRightsHelper;
+        private Mock<ISharePointProcessorHelper> processinghelper;
 
         private Mock<ILogger> logger;
 
@@ -54,6 +55,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             fileStreamService = new Mock<IFileStreamService>();
             listViewService = new Mock<IListsViewsService>();
             accessRightsHelper = new Mock<IAccessRightsHelper>();
+            processinghelper = new Mock<ISharePointProcessorHelper>();
 
             logger = new Mock<ILogger>();
 
@@ -62,6 +64,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<IContentSecurityRepository>()).Returns(contentSecurityRepo.Object);
             serviceLocator.Setup(sl => sl.GetInstance<IContentRepository>()).Returns(contentRepo.Object);
             serviceLocator.Setup(sl => sl.GetInstance<IContentTypeRepository>()).Returns(contentTypeRepo.Object);
+            serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessorHelper>()).Returns(processinghelper.Object);
+
             ContentMediaResolver cmr = new ContentMediaResolver();
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
             serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
@@ -287,21 +291,17 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        public void AddDocument_Calls_FileStreamMethods()
+        public void AddDocument_Calls_GetDocumentStream()
         {
             var processor = GetUnitUnderTest();
 
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
+            processinghelper.Setup(ph => ph.GetDocumentStream(It.IsAny<SPListItem>())).Verifiable();
 
             MemoryStream mstream = new MemoryStream();
             StreamWriter myStreamWriter = new StreamWriter(mstream);
             myStreamWriter.Write("Some stream data");
-
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileSteam(It.IsAny<string>())).Returns(mstream);
 
             var item = new SPListItem()
             {
@@ -321,8 +321,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.AddDocument(item);
 
-            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
-            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
+            processinghelper.Verify(ph => ph.GetDocumentStream(It.IsAny<SPListItem>()), Times.Once, "GetDocumentStream needs to be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
@@ -400,14 +399,14 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        public void UpdateDocument_Calls_FileStreamMethods()
+        public void UpdateDocument_Calls_GetDocumentStream()
         {
             var processor = GetUnitUnderTest();
 
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Verifiable();
-            fileStreamService.Setup(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>())).Returns("hereissomepath");
+            processinghelper.Setup(ph => ph.GetDocumentStream(It.IsAny<SPListItem>())).Verifiable();
+
             contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
                 new SharepointGenericMedia()
                 {
@@ -448,8 +447,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.UpdateDocument(item);
 
-            fileStreamService.Verify(fss => fss.GetFileSteam(It.IsAny<string>()), Times.Once, "GetFileSteam not called or thumbnail arg not false");
-            fileStreamService.Verify(fss => fss.GetFileRelativeUrl(It.IsAny<SPListItem>()), Times.Once, "GetFileRelativeUrl or thumbnail arg not false");
+            processinghelper.Verify(ph => ph.GetDocumentStream(It.IsAny<SPListItem>()), Times.Once, "GetDocumentStream needs to be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
@@ -578,6 +576,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
+            processinghelper.Setup(ph => ph.GetRawListItemData(It.IsAny<SPListItem>())).Verifiable();
 
             var item = new SPListItem()
             {
@@ -595,6 +594,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.AddListItem(item);
 
+            processinghelper.Verify(ph => ph.GetRawListItemData(It.IsAny<SPListItem>()), Times.Once, "GetListItemData needs to be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 
@@ -608,6 +608,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentHelper.Setup(ch => ch.FindMediaInFolder(It.IsAny<Guid>(), It.IsAny<ContentReference>()))
                 .Returns(new ContentReference(42));
             fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
+            processinghelper.Setup(ph => ph.GetRawListItemData(It.IsAny<SPListItem>())).Verifiable();
 
             var item = new SPListItem()
             {
@@ -624,6 +625,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             processor.UpdateListItem(item);
 
+            processinghelper.Verify(ph => ph.GetRawListItemData(It.IsAny<SPListItem>()), Times.Once, "GetListItemData needs to be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
         }
 

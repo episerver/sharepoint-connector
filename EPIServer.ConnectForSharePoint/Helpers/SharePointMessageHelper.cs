@@ -18,6 +18,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     {
         private ILogger _logger;
         private ISharePointHelper _helper;
+        private ISharePointProcessorHelper _processorHelper;
         private IContentProviderHelper _contentProviderHelper;
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
@@ -32,6 +33,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _settingsHelper = new SharePointSettingsHelper();
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
+            _processorHelper = new SharePointProcessorHelper();
         }
 
         internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
@@ -41,7 +43,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _contentProviderHelper = contentHelper;
             _settingsHelper = settings;
             _emitterFactory = emitter;
+
             _serviceLocator = serviceLocator;
+            _processorHelper = _serviceLocator.GetInstance<ISharePointProcessorHelper>();
         }
 
         private void DeleteDocumentsAndItems(IEnumerable<IContent> cmsListItems, IEnumerable<SPListItem> sharepointListItems)
@@ -335,6 +339,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                 // split the list and view Guid and get the root folder items for this list
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                // Invalidate the metadata cache for this list, this ensures that if the metadata changes
+                // we can fix it when the user hits save, refresh, or the scheduled task runs.
+                _processorHelper.GetMetaData(selectedList, true);
+
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
                 var rootFolderItems = _helper.GetItems(selectedList, selectedView, selectedList.RootFolder);
 
