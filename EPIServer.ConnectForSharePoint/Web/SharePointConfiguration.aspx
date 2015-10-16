@@ -1,6 +1,5 @@
 <%@ Page Language="c#" AutoEventWireup="False" CodeBehind="SharePointConfiguration.aspx.cs"
     Inherits="EPiServer.ConnectForSharePoint.Web.SharePointConfiguration, EPiServer.ConnectForSharePoint" Title="EPiServer ConnectForSharePoint Add-on" %>
-
 <%@ Import Namespace="EPiServer" %>
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
@@ -68,16 +67,18 @@
         window.setInterval(updateQueCounts, 1000);
     </script>
     <script type='text/javascript'>
-        $(function () {
-            $("#treedialog").dialog({
+        $(document).ready(function() {
+           var dlg = $("#treedialog").dialog({
                 autoOpen: false,
-                modal: true,
+                modal: true
             });
+            
             $("#btnShow").click(function () {
-                $("#treedialog").dialog("open");
+                dlg.dialog("open");
                 $(".ui-dialog-titlebar").hide();
             });
 
+        
         });
         function setval(newval) {
             //set foldername text box to show selected folder
@@ -99,8 +100,11 @@
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
             document.getElementById('<%# EntryPoint.ClientID %>').value = document.getElementById('<%# EntryPointCache.ClientID %>').value;
 
+            var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
+            var newFolderName = document.getElementById('<%# TBNewFolderName.ClientID %>').value;
+
             //set foldername text box to show selected folder
-            window.PageMethods.GetEntryPointFolderName(document.getElementById('<%# EntryPointCache.ClientID %>').value, onSuccess, onError);
+            window.PageMethods.GetEntryPointFolderName(document.getElementById('<%# EntryPointCache.ClientID %>').value, isNotChecked, newFolderName, onSuccess, onError);
             $("#treedialog").dialog("close");
         }
 
@@ -114,6 +118,19 @@
             document.getElementById('<%# EntryPointCache.ClientID %>').value = null;
             $("#treedialog").dialog("close");
         }
+
+        function onCBClick() {
+            var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
+
+            if (isNotChecked) {
+                document.getElementById('<%# TBNewFolderName.ClientID %>').disabled = true;
+            } else {
+                document.getElementById('<%# TBNewFolderName.ClientID %>').disabled = false;
+            }
+
+            return false;
+        }
+
     </script>
 
     <div class="epi-contentContainer epi-padding">
@@ -176,15 +193,14 @@
                         </ItemTemplate>
                     </asp:ListView>
                     <asp:HiddenField ID="hdnSelectedViews" ClientIDMode="Static" runat="server"></asp:HiddenField>
-               <%-- <asp:CheckBoxList ID="SharePointListCheckBox" runat="server" />--%>
                 <br />
             </asp:Panel>                  
-                
                 <!-- Modal Tree Dlg -->
                 <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectfolder") %>&nbsp;</asp:Label>
                 <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                 <input type="button" ID="btnShow" Value="..." />
-                <div id="treedialog" >
+                <div id="treedialog" class="ui-helper-hidden" >
+                    <asp:Label runat="server"><%# Translate("/sharepoint/admin/entrypointinstructions") %></asp:Label>
                     <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
                         AccessLevel="NoAccess" 
                         runat="server" 
@@ -206,9 +222,11 @@
                             </TreeNodeTemplate>
                         </EPiServerUI:PageTreeView>
                     </div> 
-                    <div>
-                        <asp:Label AssociatedControlID="SelectedFolderName" runat="server"><%# Translate("/sharepoint/admin/selectedfolder") %> </asp:Label>
-                        <asp:TextBox ID="SelectedFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                    <div class="epi-size15">
+                        <asp:TextBox ID="SelectedFolderName" style="display:none" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                        <asp:CheckBox ID="CBCreateNewFolder" onmousedown="onCBClick();" runat="server" Text='<%# Translate("/sharepoint/admin/newsubfolder") %>' checked="<%# !CurrentSettings.UseSelectedFolder %>"/>
+                        <asp:TextBox ID="TBNewFolderName" runat="server" Enabled="False"></asp:TextBox>
+                        <br />
                     </div>
                     <br />
                     <div align="right">

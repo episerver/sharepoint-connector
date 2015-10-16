@@ -16,6 +16,8 @@ using System.Net;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using EPiServer.DataAccess;
+using EPiServer.Security;
 using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Web
@@ -34,6 +36,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static readonly ISharePointContentMappingRepository _spContentMappingRepository = ServiceLocator.Current.GetInstance<ISharePointContentMappingRepository>();
+        private static bool _createNewEntryPointFolder = false;
 
         /// <summary>
         /// Called by web page during data bind operation
@@ -82,7 +85,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="id"></param>
         /// <returns></returns>
         [System.Web.Services.WebMethod]
-        public static string GetEntryPointFolderName(string id)
+        public static string GetEntryPointFolderName(string id, bool isChecked, string newFolderName)
         {
             //var numVal = int.Parse(id);
             var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(id));
@@ -97,6 +100,13 @@ namespace EPiServer.ConnectForSharePoint.Web
                 fullPath = parentRef.Name + "/" + fullPath;
                 parent = parentRef.ParentLink;
             }
+
+            if (isChecked)
+            {
+                fullPath += "/" + newFolderName;
+            }
+
+            _createNewEntryPointFolder = isChecked;
 
             return fullPath;
         }
@@ -140,6 +150,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         protected override void OnLoad(EventArgs e)
         {
+            
             base.OnLoad(e);
 
             if (!Page.IsPostBack)
@@ -273,45 +284,68 @@ namespace EPiServer.ConnectForSharePoint.Web
                 return;
             }
 
-            var strErrors = new StringBuilder();
             var entryPointId = 0;
-            if (!int.TryParse(EntryPoint.Text.Trim(), out entryPointId))
-            {
-                strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
-            }
-            else
-            {
-                try
-                {
-                    var contentLink = new ContentReference(entryPointId);
-                    var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-                    var content = contentRepository.Get<IContent>(contentLink);
 
-                    if (content == null || content.IsDeleted || !(content is ContentFolder))
+            // if we aren't creating a new folder, then it's business as usual
+            if (!_createNewEntryPointFolder)
+            {
+                var strErrors = new StringBuilder();
+                
+                if (!int.TryParse(EntryPoint.Text.Trim(), out entryPointId))
+                {
+                    strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
+                }
+                else
+                {
+                    try
+                    {
+                        var contentLink = new ContentReference(entryPointId);
+                        var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+                        var content = contentRepository.Get<IContent>(contentLink);
+
+                        if (content == null || content.IsDeleted || !(content is ContentFolder))
+                        {
+                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
+                        }
+                        else if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
+                            // If the ID is different, check to see if there are any children.
+                        {
+                            var children = contentRepository.GetChildren<IContent>(contentLink);
+                            if (children.Count<IContent>() > 0)
+                                strErrors.AppendLine(
+                                    Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+                        }
+                    }
+                    catch (Exception exc)
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
-                    }
-                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any children.
-                    {
-                        var children = contentRepository.GetChildren<IContent>(contentLink);
-                        if (children.Count<IContent>() > 0)
-                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+                        _logger.Error("Error when saving entry point", exc);
                     }
                 }
-                catch (Exception exc)
+
+                if (strErrors.Length > 0)
                 {
-                    strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
-                    _logger.Error("Error when saving entry point", exc);
+                    // reset text box values to previous valid settings
+                    EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
+                    EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
+                    ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
+                    return;
                 }
             }
-
-            if (strErrors.Length > 0)
+            else // otherwise, we create a new folder, which by default is empty so we can just carry on
             {
-                // reset text box values to previous valid settings
-                EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
-                EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
-                ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
-                return;
+                int.TryParse(EntryPoint.Text.Trim(), out entryPointId);
+                var parentReference = new ContentReference(entryPointId);
+                var folders = EntryPointFolderName.Text.Split('/');
+                var parent = folders.ElementAt(folders.Length - 2);
+
+                var newFolder = _contentRepository.GetDefault<ContentFolder>(parentReference);
+                newFolder.Name = folders.Last();
+                newFolder.ContentLink = ContentReference.EmptyReference;
+                newFolder.ParentLink = parentReference;
+
+                var newFolderRef = _contentRepository.Save(newFolder, SaveAction.Publish, AccessLevel.FullAccess);
+                entryPointId = newFolderRef.ID;
             }
 
             #endregion
