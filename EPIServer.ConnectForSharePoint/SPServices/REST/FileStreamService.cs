@@ -38,50 +38,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             _spFilesFoldersService = spFilesFoldersService;
         }
 
-        /// <summary>
-        /// Get file stream of a SharePoint's ListItem
-        /// </summary>
-        /// <param name="listItem">The file item from share point site</param>
-        /// <param name="contentLink">The content link has been mapped identity</param>
-        /// <returns></returns>
-        public Stream GetFileStream(SPListItem listItem, ContentReference contentLink)
-        {
-            if (listItem == null || listItem.File == null)
-            {
-                _logger.Information("GetFileStream: listItem is null, return null.");
-                return null;
-            }
-
-            var relativeUrl = GetFileRelativeUrl(listItem);
-            // Try get data memory stream from SharePoint site first
-            var memoryStream = GetFileSteam(relativeUrl);
-
-            // The file was renamed or even the item was deleted then try to reload the item (along with the file)
-            if (memoryStream == null)
-            {
-                _logger.Information("Reload data from SharePoint to check whether the file has been renamed or not.");
-                // Note: the same file is "duplicatedly" to different SPListItem object and cached in different parent folders,
-                // then this code happens for each contentLink. Must recall that SharePoint views are for groupping list items by certain conditions
-                // and avoid having the same list items in different views in mind
-                var parent = listItem.ParentList;
-                listItem = _spListsService.GetListItem(parent, listItem.Id.ToString());
-
-                if (listItem == null || listItem.File == null)
-                {
-                    _logger.Information("The file has been deleted, remove it from cache.");
-                    // code removes the item before returning
-                    return memoryStream;
-                }
-
-                // get refreshed file URL then stream
-                relativeUrl = GetFileRelativeUrl(listItem);
-                _logger.Information("The file has been renamed, try to read it based on the new Url.");
-                memoryStream = GetFileSteam(relativeUrl);
-            }
-
-            return memoryStream;
-        }
-
         public Stream GetFileSteam(string relativeUrl)
         {
             // get stream from SharePoint site
