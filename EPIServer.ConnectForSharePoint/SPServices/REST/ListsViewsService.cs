@@ -161,19 +161,21 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         public Dictionary<string, SPFieldItem> GetFieldItemDictionary(Guid ListID)
         {
-            Dictionary<string, SPFieldItem> dic = new Dictionary<string, SPFieldItem>();
+            Dictionary<string, SPFieldItem> dictionary = new Dictionary<string, SPFieldItem>();
+            if (ListID.Equals(Guid.Empty))
+                return dictionary;
 
             string requeststring = "/_api/web/lists(guid'{0}')/fields";
             var restRequest = new RestJsonRequest(string.Format(requeststring, ListID), "GET", null);
             var fields = BuildListFieldItems(SendRequest(restRequest, null, null, true));
 
-            dic = new Dictionary<string, SPFieldItem>();
+            dictionary = new Dictionary<string, SPFieldItem>();
             foreach (var field in fields)
             {
-                dic.Add(field.InternalName, field);
+                dictionary.Add(field.InternalName, field);
             }
                 
-            return dic;
+            return dictionary;
         }
 
         private IEnumerable<SPFieldItem> BuildListFieldItems(string responseString)
