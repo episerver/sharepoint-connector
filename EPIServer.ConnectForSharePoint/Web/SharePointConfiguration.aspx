@@ -1,5 +1,6 @@
 <%@ Page Language="c#" AutoEventWireup="False" CodeBehind="SharePointConfiguration.aspx.cs"
     Inherits="EPiServer.ConnectForSharePoint.Web.SharePointConfiguration, EPiServer.ConnectForSharePoint" Title="EPiServer ConnectForSharePoint Add-on" %>
+
 <%@ Import Namespace="EPiServer" %>
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
@@ -13,14 +14,14 @@
 
 	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
     <style type="text/css">
-         .listCheckBox input[type="checkbox"] {
-             vertical-align: top;
-         }
+        .listCheckBox input[type="checkbox"] {
+            vertical-align: top;
+        }
 
-         .listViewSelector {
-             padding: 0 0 8px 2px;
-         }
-     </style>
+        .listViewSelector {
+            padding: 0 0 8px 2px;
+        }
+    </style>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
@@ -35,15 +36,15 @@
 
             // Disable 'Save' button when no list checkboxes are selected
             if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
-                $('#FullRegion_Save').attr("disabled", "disabled");
+                $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
             }
 
             $('span.listCheckBox input[type="checkbox"]').change(function () {
                 if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
-                    $('#FullRegion_Save').attr("disabled", "disabled");
+                    $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
                 }
                 else {
-                    $('#FullRegion_Save').removeAttr("disabled");
+                    $('#FullRegion_Save').removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
                 }
             });
         });
@@ -86,7 +87,7 @@
             if (result != "0" && button.disabled == false) {
                 $('span.listCheckBox input[type="checkbox"]').attr('disabled', 'disabled'); // List of all the checkboxes corresponding to lists
                 $('.listViewSelector select').attr('disabled', 'disabled'); // List of all the dropdownlists which contain the views of each list.
-                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled')
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled');
                 $('#FullRegion_Save').attr('disabled', 'disabled');
             }
 
@@ -98,12 +99,12 @@
         window.setInterval(updateQueCounts, 1000);
     </script>
     <script type='text/javascript'>
-        $(document).ready(function() {
-           var dlg = $("#treedialog").dialog({
+        $(document).ready(function () {
+            var dlg = $("#treedialog").dialog({
                 autoOpen: false,
                 modal: true
             });
-            
+
             $("#btnShow").click(function () {
                 dlg.dialog("open");
                 $(".ui-dialog-titlebar").hide();
