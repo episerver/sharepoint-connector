@@ -77,8 +77,6 @@
                 dlg.dialog("open");
                 $(".ui-dialog-titlebar").hide();
             });
-
-        
         });
         function setval(newval) {
             //set foldername text box to show selected folder

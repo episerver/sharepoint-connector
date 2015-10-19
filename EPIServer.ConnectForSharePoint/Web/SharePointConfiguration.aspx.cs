@@ -285,21 +285,17 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
 
             var entryPointId = 0;
+            var success = int.TryParse(EntryPoint.Text.Trim(), out entryPointId);
+            var strErrors = new StringBuilder();
 
-            // if we aren't creating a new folder, then it's business as usual
-            if (!_createNewEntryPointFolder)
+            if (success)
             {
-                var strErrors = new StringBuilder();
-                
-                if (!int.TryParse(EntryPoint.Text.Trim(), out entryPointId))
-                {
-                    strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
-                }
-                else
+                var contentLink = new ContentReference(entryPointId);
+
+                if (!_createNewEntryPointFolder) // if we aren't creating a new folder, then it's business as usual
                 {
                     try
                     {
-                        var contentLink = new ContentReference(entryPointId);
                         var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
                         var content = contentRepository.Get<IContent>(contentLink);
 
@@ -311,7 +307,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                             // If the ID is different, check to see if there are any children.
                         {
                             var children = contentRepository.GetChildren<IContent>(contentLink);
-                            if (children.Count<IContent>() > 0)
+                            if (children.Any())
                                 strErrors.AppendLine(
                                     Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
                         }
@@ -322,30 +318,32 @@ namespace EPiServer.ConnectForSharePoint.Web
                         _logger.Error("Error when saving entry point", exc);
                     }
                 }
-
-                if (strErrors.Length > 0)
+                else // otherwise, we create a new folder, which by default is empty so we can just carry on
                 {
-                    // reset text box values to previous valid settings
-                    EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
-                    EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
-                    ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
-                    return;
+                    var folders = EntryPointFolderName.Text.Split('/');
+                    var newUserFolder = _contentRepository.GetDefault<ContentFolder>(contentLink);
+
+                    newUserFolder.Name = folders.Last();
+                    newUserFolder.ContentLink = ContentReference.EmptyReference;
+                    newUserFolder.ParentLink = contentLink;
+
+                    // save new folder to db and get a reference to it so we can the entry point to this new folder
+                    var newFolderRef = _contentRepository.Save(newUserFolder, SaveAction.Publish, AccessLevel.FullAccess);
+                    entryPointId = newFolderRef.ID;
                 }
             }
-            else // otherwise, we create a new folder, which by default is empty so we can just carry on
+            else
             {
-                int.TryParse(EntryPoint.Text.Trim(), out entryPointId);
-                var parentReference = new ContentReference(entryPointId);
-                var folders = EntryPointFolderName.Text.Split('/');
-                var parent = folders.ElementAt(folders.Length - 2);
+                strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
+            }
 
-                var newFolder = _contentRepository.GetDefault<ContentFolder>(parentReference);
-                newFolder.Name = folders.Last();
-                newFolder.ContentLink = ContentReference.EmptyReference;
-                newFolder.ParentLink = parentReference;
-
-                var newFolderRef = _contentRepository.Save(newFolder, SaveAction.Publish, AccessLevel.FullAccess);
-                entryPointId = newFolderRef.ID;
+            if (strErrors.Length > 0)
+            {
+                // reset text box values to previous valid settings
+                EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
+                EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
+                ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
+                return;
             }
 
             #endregion
