@@ -21,6 +21,8 @@
                 <selectedfolder>Selected Folder:</selectedfolder>
                 <selectfolder>Select Folder:</selectfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
+                <entrypointinstructions>Select a folder that will be the entry point location.  In addition, if you would like to create a new sub-folder, use the text box below:</entrypointinstructions>
+                <newsubfolder>Create New Sub-Folder:</newsubfolder>  
                 <expirationtime>Expiration Time</expirationtime>
                 <refreshcache>Refresh</refreshcache>
                 <entrypointrequired>Connection Entry Point is required.</entrypointrequired>

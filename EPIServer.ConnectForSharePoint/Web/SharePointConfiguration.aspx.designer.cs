@@ -182,7 +182,17 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected global::System.Web.UI.WebControls.TextBox TBNewFolderName;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected global::System.Web.UI.WebControls.CheckBox CBCreateNewFolder;
+
         /// <summary>
         /// Save control.
         /// </summary>

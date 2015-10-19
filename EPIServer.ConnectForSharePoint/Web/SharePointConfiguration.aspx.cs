@@ -16,6 +16,8 @@ using System.Net;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using EPiServer.DataAccess;
+using EPiServer.Security;
 using EPiServer.Web;
 
 namespace EPiServer.ConnectForSharePoint.Web
@@ -33,6 +35,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+        private static bool _createNewEntryPointFolder = false;
 
         /// <summary>
         /// Called by web page during data bind operation
@@ -81,7 +84,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <param name="id"></param>
         /// <returns></returns>
         [System.Web.Services.WebMethod]
-        public static string GetEntryPointFolderName(string id)
+        public static string GetEntryPointFolderName(string id, bool isChecked, string newFolderName)
         {
             //var numVal = int.Parse(id);
             var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(id));
@@ -96,6 +99,13 @@ namespace EPiServer.ConnectForSharePoint.Web
                 fullPath = parentRef.Name + "/" + fullPath;
                 parent = parentRef.ParentLink;
             }
+
+            if (isChecked)
+            {
+                fullPath += "/" + newFolderName;
+            }
+
+            _createNewEntryPointFolder = isChecked;
 
             return fullPath;
         }
@@ -126,6 +136,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         protected override void OnLoad(EventArgs e)
         {
+            
             base.OnLoad(e);
 
             if (!Page.IsPostBack)
@@ -259,17 +270,18 @@ namespace EPiServer.ConnectForSharePoint.Web
                 return;
             }
 
-            var strErrors = new StringBuilder();
             var entryPointId = 0;
-            if (!int.TryParse(EntryPoint.Text.Trim(), out entryPointId))
+            var success = int.TryParse(EntryPoint.Text.Trim(), out entryPointId);
+            var strErrors = new StringBuilder();
+
+            if (success)
             {
-                strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
-            }
-            else
+                var contentLink = new ContentReference(entryPointId);
+
+                if (!_createNewEntryPointFolder) // if we aren't creating a new folder, then it's business as usual
             {
                 try
                 {
-                    var contentLink = new ContentReference(entryPointId);
                     var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
                     var content = contentRepository.Get<IContent>(contentLink);
 
@@ -277,11 +289,13 @@ namespace EPiServer.ConnectForSharePoint.Web
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
                     }
-                    else if (entryPointId != SharePointSettings.Current.EntryPoint.ID) // If the ID is different, check to see if there are any children.
+                        else if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
+                            // If the ID is different, check to see if there are any children.
                     {
                         var children = contentRepository.GetChildren<IContent>(contentLink);
-                        if (children.Count<IContent>() > 0)
-                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+                            if (children.Any())
+                                strErrors.AppendLine(
+                                    Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
                     }
                 }
                 catch (Exception exc)
@@ -289,6 +303,24 @@ namespace EPiServer.ConnectForSharePoint.Web
                     strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
                     _logger.Error("Error when saving entry point", exc);
                 }
+                }
+                else // otherwise, we create a new folder, which by default is empty so we can just carry on
+                {
+                    var folders = EntryPointFolderName.Text.Split('/');
+                    var newUserFolder = _contentRepository.GetDefault<ContentFolder>(contentLink);
+
+                    newUserFolder.Name = folders.Last();
+                    newUserFolder.ContentLink = ContentReference.EmptyReference;
+                    newUserFolder.ParentLink = contentLink;
+
+                    // save new folder to db and get a reference to it so we can the entry point to this new folder
+                    var newFolderRef = _contentRepository.Save(newUserFolder, SaveAction.Publish, AccessLevel.FullAccess);
+                    entryPointId = newFolderRef.ID;
+                }
+            }
+            else
+            {
+                strErrors.AppendLine(Translate("/sharepoint/admin/message/invalidentrypoint"));
             }
 
             if (strErrors.Length > 0)
@@ -392,14 +424,14 @@ namespace EPiServer.ConnectForSharePoint.Web
             
             if (lists != null && lists.Any())
             {
-                var messageHelper = new SharePointMessageHelper();
-                // Put all the add folder messages on the queue
-                messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+            var messageHelper = new SharePointMessageHelper();
+            // Put all the add folder messages on the queue
+            messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
 
-                ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
-                QueueCountTB.Text = QueueCount;
-                Connect.Enabled = false;
-                ActivateControls(false);
+            ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
+            QueueCountTB.Text = QueueCount;
+            Connect.Enabled = false;
+            ActivateControls(false);
                 BindListViewData(SharePointHelper.GetListViewPairsData(lists));
             }
         }

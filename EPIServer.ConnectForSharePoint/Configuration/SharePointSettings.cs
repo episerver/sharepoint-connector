@@ -53,6 +53,10 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string PreviousEntryPointFolderName { get; set; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public bool UseSelectedFolder { get; set; }
+        /// <summary>
         /// Indicates if we are connecting to a SharePoint Online instance
         /// </summary>
         public bool IsSharePointOnline { get; set; }
@@ -95,6 +99,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             EntryPoint = ContentReference.EmptyReference;
             EntryPointFolderName = string.Empty;
             ThumbnailOption = ThumbnailOptions.GenericThumbnailForAll;
+            UseSelectedFolder = true;
         }
 
         /// <summary>
