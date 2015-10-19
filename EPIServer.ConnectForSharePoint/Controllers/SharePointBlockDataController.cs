@@ -34,9 +34,9 @@ namespace EPiServer.ConnectForSharePoint.Controllers
 
             var model = new ListItemViewModel
             {
-                Name = content!= null ? content.Name : "DefaultName",
+                Name = content != null ? content.Name : "DefaultName",
                 JsonData = str,
-                ListID = Guid.Parse(currentContent.ListID)
+                ListID = !string.IsNullOrEmpty(currentContent.ListID) ? Guid.Parse(currentContent.ListID) : Guid.Empty
             };
             return PartialView("~/Views/Shared/SharePoint/ListItem.cshtml", model);
         }

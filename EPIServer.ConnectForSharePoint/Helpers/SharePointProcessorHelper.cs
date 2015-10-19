@@ -102,6 +102,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         public List<ListItemField> ParseRawListItemData(IDictionary<string, SPFieldItem> dictionary, string rawdata)
         {
             var list = new List<ListItemField>();
+            if (string.IsNullOrEmpty(rawdata) || dictionary == null)
+                return list;
+
             JObject obj = JObject.Parse(rawdata);
             if (obj["d"]["results"].HasValues == false)
                 return list;

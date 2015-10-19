@@ -102,5 +102,28 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var helper = GetUnitUnderTest();
             List<ListItemField> items = helper.ParseRawListItemData(dictionary, rawdata);
         }
+
+        [TestMethod]
+        public void ParseRawListItemData_Returns_EmptyList_DictionaryNull()
+        {
+            string rawdata = "{\"d\":{\"results\":[{\"__metadata\":{\"id\":\"Web / Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6') / Items(17)\",\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)\",\"etag\":\"\\\"8\\\"\",\"type\":\"SP.Data.Herbs_x0020_Custom_x0020_ListsListItem\"},\"FirstUniqueAncestorSecurableObject\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/FirstUniqueAncestorSecurableObject\"}},\"RoleAssignments\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/RoleAssignments\"}},\"AttachmentFiles\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/AttachmentFiles\"}},\"ContentType\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/ContentType\"}},\"FieldValuesAsHtml\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/FieldValuesAsHtml\"}},\"FieldValuesAsText\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/FieldValuesAsText\"}},\"FieldValuesForEdit\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/FieldValuesForEdit\"}},\"File\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/File\"}},\"Folder\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/Folder\"}},\"ParentList\":{\"__deferred\":{\"uri\":\"http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'cf57b2f2-3c57-42c4-825c-b65e54b3d6e6')/Items(17)/ParentList\"}},\"FileSystemObjectType\":0,\"IDDD\":17,\"ID\":17,\"Title\":\"Amendola\",\"richtextcolumn\":null,\"Created\":\"2015-09-29T17:28:16Z\",\"Modified\":\"2015-10-01T15:45:07Z\"}]}}";
+            var helper = GetUnitUnderTest();
+            List<ListItemField> items = helper.ParseRawListItemData(null, rawdata);
+
+            // I guess you could make the argument that it should not be empty if there was no dictionary
+            Assert.AreEqual(0, items.Count, "List is expected to be empty when the dictionary is null");
+        }
+
+        [TestMethod]
+        public void ParseRawListItemData_Returns_EmptyList_RawDataIsNull()
+        {
+            var helper = GetUnitUnderTest();
+            Dictionary<string, SPFieldItem> dictionary = new Dictionary<string, SPFieldItem>();
+            dictionary.Add("test", new SPFieldItem());
+            List<ListItemField> items = helper.ParseRawListItemData(dictionary, null);
+
+            // No data returns an empty list of fields
+            Assert.AreEqual(0, items.Count, "List is expected to be empty when the json data is null");
+        }
     }
 }
