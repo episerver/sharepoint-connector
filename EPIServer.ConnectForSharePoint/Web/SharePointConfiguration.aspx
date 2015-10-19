@@ -110,8 +110,11 @@
             });
         });
         function setval(newval) {
+            var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
+            var newFolderName = document.getElementById('<%# TBNewFolderName.ClientID %>').value;
+
             //set foldername text box to show selected folder
-            window.PageMethods.GetEntryPointFolderName(newval, onNodePicked, onError);
+            window.PageMethods.GetEntryPointFolderName(newval, isNotChecked, newFolderName, onNodePicked, onError);
 
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
             document.getElementById('<%# EntryPointCache.ClientID %>').value = newval;
@@ -126,14 +129,15 @@
 
         // called when user clicks Ok in select folder dlg
         function onOkClick() {
+            var cachedValue = document.getElementById('<%# EntryPointCache.ClientID %>').value;
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
-            document.getElementById('<%# EntryPoint.ClientID %>').value = document.getElementById('<%# EntryPointCache.ClientID %>').value;
+            document.getElementById('<%# EntryPoint.ClientID %>').value = cachedValue;
 
             var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
             var newFolderName = document.getElementById('<%# TBNewFolderName.ClientID %>').value;
 
             //set foldername text box to show selected folder
-            window.PageMethods.GetEntryPointFolderName(document.getElementById('<%# EntryPointCache.ClientID %>').value, isNotChecked, newFolderName, onSuccess, onError);
+            window.PageMethods.GetEntryPointFolderName(cachedValue, isNotChecked, newFolderName, onSuccess, onError);
             $("#treedialog").dialog("close");
         }
 

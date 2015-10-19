@@ -79,25 +79,31 @@ namespace EPiServer.ConnectForSharePoint.Web
         }
 
         /// <summary>
-        /// Return folder name given an id
+        /// 
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">selected folder id</param>
+        /// <param name="isChecked">Tells us to create a new folder or not</param>
+        /// <param name="newFolderName">folder name to create if isChecked is True</param>
         /// <returns></returns>
         [System.Web.Services.WebMethod]
-        public static string GetEntryPointFolderName(string id, bool isChecked, string newFolderName)
+        public static string GetEntryPointFolderName(string id, bool isChecked = false, string newFolderName = "")
         {
             //var numVal = int.Parse(id);
             var selectedFolderRef = _contentRepository.Get<IContent>(new ContentReference(id));
             var fullPath = selectedFolderRef.Name;
-            var parent = selectedFolderRef.ParentLink;
 
-            // traverse up the tree to display path to selected folder
-            while (parent != null && parent != SiteDefinition.Current.GlobalAssetsRoot)
+            // if true, then the root was selected and there is nowhere to traverse as we are at the top already
+            if (selectedFolderRef.ContentTypeID != SiteDefinition.Current.GlobalAssetsRoot.ID)
             {
-                var parentRef = _contentRepository.Get<ContentFolder>(new ContentReference(parent.ID));
+                var parent = selectedFolderRef.ParentLink;
+                // traverse up the tree to display path to selected folder
+                while (parent != null && parent != SiteDefinition.Current.GlobalAssetsRoot)
+                {
+                    var parentRef = _contentRepository.Get<ContentFolder>(new ContentReference(parent.ID));
 
-                fullPath = parentRef.Name + "/" + fullPath;
-                parent = parentRef.ParentLink;
+                    fullPath = parentRef.Name + "/" + fullPath;
+                    parent = parentRef.ParentLink;
+                }
             }
 
             if (isChecked)
