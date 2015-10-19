@@ -1,6 +1,5 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.Providers;
 using EPiServer.ConnectForSharePoint.Rest.Models;
 using EPiServer.ConnectForSharePoint.Rest.Requests;
 using EPiServer.ConnectForSharePoint.SPServices;
@@ -23,7 +22,6 @@ namespace EPiServer.ConnectForSharePoint.Test
     {
         Mock<IListsViewsService> _spListsService;
         Mock<IFilesFoldersService> _spFilesFoldersService;
-        Mock<ISharePointContentMappingRepository> _spContentMappingRepository;
 
         Mock<FileStreamService> _serviceTesting;
 
@@ -65,14 +63,9 @@ namespace EPiServer.ConnectForSharePoint.Test
             _spFilesFoldersService = new Mock<IFilesFoldersService>();
             _spFilesFoldersService.Setup(s => s.LoadFile(It.IsAny<SPListItem>())).Returns(new SPFile());
 
-            // Init dependency and mock functions for SPContentMappingRepository
-            _spContentMappingRepository = new Mock<ISharePointContentMappingRepository>();
-            _spContentMappingRepository.Setup(s => s.GetIdentity(It.IsAny<Guid>())).Returns(_mappedIdentity);
-            _spContentMappingRepository.Setup(s => s.Delete(It.IsAny<ContentReference>()));
-
             // Mock for SendRequest method of base class            
             var jsonString = "Mock";
-            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object, _spContentMappingRepository.Object) { CallBase = true };
+            _serviceTesting = new Mock<FileStreamService>(_spListsService.Object, _spFilesFoldersService.Object) { CallBase = true };
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null)).Returns(jsonString);
             _serviceTesting.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null, false)).Returns(jsonString);
             _serviceTesting.Setup(x => x.GetResponseStream(It.IsAny<IRestRequest>(), It.IsAny<string>(), It.IsAny<NameValueCollection>())).Returns(new MemoryStream());
@@ -102,35 +95,6 @@ namespace EPiServer.ConnectForSharePoint.Test
             f.d.Author =  new JsonUser().d;
             f.d.ModifiedBy = new JsonUser().d;
             return f;
-        }
-
-        [TestMethod]
-        public void GetFileStream_with_uri_and_not_thumbnail_expected_not_null_and_length_equal_zero()
-        {
-            var url = string.Format("http://Test/{0}/abc.gif", Guid.NewGuid());
-            var result = _serviceTesting.Object.GetFileStream(new Uri(url));
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Length, 0); // Empty memory stream
-        }
-
-        //[TestMethod]
-        //public void GetFileStream_with_SPListItem_not_have_url_expected_not_null_and_length_equal_zero()
-        //{
-        //    _fileItem.File.ServerRelativeUrl = ""; // make sure its not null and length = zero.. not sure y we would have this test.
-
-        //    var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000));
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(result.Length, 0); // Empty memory stream
-        //}
-
-        [TestMethod]
-        public void GetFileStream_with_SPListItem_has_relative_url_expected_not_null_and_length_equal_zero()
-        {
-            _fileItem.File.ServerRelativeUrl = "http://test/abc.gif";
-
-            var result = _serviceTesting.Object.GetFileStream(_fileItem, new ContentReference(100000));
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Length, 0); // Empty memory stream
         }
     }
 }

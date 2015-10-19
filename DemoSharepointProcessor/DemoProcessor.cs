@@ -1,7 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Messaging;
-using System;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ServiceLocation;
+using EPiServer.ConnectForSharePoint.Helpers;
 
 namespace DemoSharepointProcessor
 {
@@ -27,7 +27,8 @@ namespace DemoSharepointProcessor
 
             // The splistitem does not contain the data stream associated with the file.
             // The following line is an example of how to get the data associated with the SPListItem
-            var data = defaultProcessor.getFileStream(item);
+            SharePointProcessorHelper helper = new SharePointProcessorHelper();
+            var rawdata = helper.GetDocumentStream(item);
 
             // Optionally call the default processor - note that the default processor 
             // also gets the data stream so that the data can be inserted into EPiServer
@@ -46,11 +47,10 @@ namespace DemoSharepointProcessor
         {
             // Do some custom processing
 
-            // The splistitem does not contain the the xml data associated with the list item.
-            // The following lines are an example of how to get the data associated with the SPListItem
-            // and parse the data int a list of fields
-            var data = defaultProcessor.getListItemData(item);
-            var fields = defaultProcessor.getFields(data.ToString());
+            SharePointProcessorHelper helper = new SharePointProcessorHelper();
+            var rawdata = helper.GetRawListItemData(item);
+            var dictionary = helper.GetMetaData(item.ParentList);
+            var fields = helper.ParseRawListItemData(dictionary, rawdata);
 
             // Optionally call the default processor
             defaultProcessor.AddListItem(item);

@@ -16,6 +16,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
         Mock<IContentProviderHelper> contentHelper = new Mock<IContentProviderHelper>();
         Mock<IFileStreamService> fileStreamService = new Mock<IFileStreamService>();
         Mock<IListsViewsService> listViewService = new Mock<IListsViewsService>();
+        Mock<IAccessRightsHelper> accessRightsHelper = new Mock<IAccessRightsHelper>();
 
         private SharePointProcessorFactory GetUnitUnderTest()
         {
@@ -30,7 +31,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
             serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>())
                 .Returns((ISharePointProcessor)null);
 
-            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object, listViewService.Object);
+            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object, listViewService.Object, accessRightsHelper.Object);
             Assert.IsInstanceOfType(aProcessor, typeof(SharePointProcessor));
 
             serviceLocator.Verify(sl => sl.GetInstance<ISharePointProcessor>(), Times.Once, "ServiceLocator needs to be called at least once looking for ISharePointProcessor");
@@ -46,7 +47,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging
             serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessor>())
                 .Returns(processor);
 
-            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object, listViewService.Object);
+            var aProcessor = myFactory.GetSharePointProcessor(contentHelper.Object, fileStreamService.Object, listViewService.Object, accessRightsHelper.Object);
 
             // Verify get instance was called.
             serviceLocator.Verify(sl => sl.GetInstance<ISharePointProcessor>(), Times.Once, "ServiceLocator needs to be called at least once looking for ISharePointProcessor");

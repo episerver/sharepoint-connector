@@ -4,7 +4,7 @@ using EPiServer.Web.Mvc;
 using EPiServer.Web.Routing;
 using System.Web.Mvc;
 
-namespace EPiServer.ConnectForSharePoint.Controller
+namespace EPiServer.ConnectForSharePoint.Controllers
 {
     public class SharePointImageController : PartialContentController<SharepointImageFile>
     {

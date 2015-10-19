@@ -10,6 +10,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.Web;
 using EPiServer.DataAbstraction;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -17,11 +18,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     {
         private ILogger _logger;
         private ISharePointHelper _helper;
+        private ISharePointProcessorHelper _processorHelper;
         private IContentProviderHelper _contentProviderHelper;
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
 
+        [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
         {
             _logger = LogManager.GetLogger();
@@ -30,6 +33,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _settingsHelper = new SharePointSettingsHelper();
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
+            _processorHelper = new SharePointProcessorHelper();
         }
 
         internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
@@ -39,7 +43,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _contentProviderHelper = contentHelper;
             _settingsHelper = settings;
             _emitterFactory = emitter;
+
             _serviceLocator = serviceLocator;
+            _processorHelper = _serviceLocator.GetInstance<ISharePointProcessorHelper>();
         }
 
         private void DeleteDocumentsAndItems(IEnumerable<IContent> cmsListItems, IEnumerable<SPListItem> sharepointListItems)
@@ -134,7 +140,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="spItem">The item to update or add</param>
         /// <param name="cmsItems">A list of all items currently in cms</param>
-        private void AddOrUpdate(SPListItem spItem, IEnumerable<IContent> cmsItems)
+        internal void AddOrUpdateItem(SPListItem spItem, IEnumerable<IContent> cmsItems)
         {
             if (spItem.Folder == null)
             {
@@ -235,6 +241,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists)
             {
+                bool delete = true;
+
                 // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(item.Key);
 
@@ -244,43 +252,29 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 // Get the selected view to from the second guid
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
-                // Make sure that the view guid and the view guid is in the listids, if its not then it needs to be deleted.
-                var FolderName = selectedList.Title + " - " + selectedView.Title; // assume we are deleting it.
                 if (listids != null) // we are some folders
                 {
                     foreach (var id in listids)
                     {
                         var listIds = id.Split('~');
-                        if (selectedList.Id == Guid.Parse(listIds[0]) && selectedView.Id == Guid.Parse(listIds[1]))
+                        if (selectedList.Id == Guid.Parse(listIds[0]))
                         {
                             // We found a match, this means the view is in the current selection - don't delete it!  
                             // else all the items in the folder will be deleted and existing pages will lose content.
-                            FolderName = string.Empty;
+                            delete = false;
                             break;
                         }
                     }
                 }
 
-                if (!string.IsNullOrEmpty(FolderName))
+                if ( delete )
                 {
                     // The message on the queue will be SPListItem
                     // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
                     // that contains some aspects of both.
-                    SPListItem tbd = new SPListItem()
-                    {
-                        Title = selectedList.Title + " - " + selectedView.Title, // the title will be a combo of the list and view names
-                        GUID = selectedView.Id,
-                        entryPointId = _settingsHelper.GetEntryPoint().ID,
-                        Folder = new SPFolder()
-                        {
-                            Name = FolderName,
-                        },
-                    };
-
-                    _logger.Information("Deleting SharePointFolderAddMessage to the queue " + tbd.Title);
                     _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
                     {
-                        Item = tbd,
+                        Item = CreateParentSPListItem(selectedList, selectedView)
                     });
                 }
             }
@@ -345,6 +339,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                 // split the list and view Guid and get the root folder items for this list
                 var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                // Invalidate the metadata cache for this list, this ensures that if the metadata changes
+                // we can fix it when the user hits save, refresh, or the scheduled task runs.
+                _processorHelper.GetMetaData(selectedList, true);
+
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
                 var rootFolderItems = _helper.GetItems(selectedList, selectedView, selectedList.RootFolder);
 
@@ -379,7 +378,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var contentItems = FindSharePointItems();
             foreach (var item in AllSPListItems)
             {
-                AddOrUpdate(item, contentItems);
+                AddOrUpdateItem(item, contentItems);
             }
             
             // delete all items (if any) from cms that have been removed from sharepoint
@@ -429,6 +428,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                                 });
                                 add = false;
                                 done = true;
+                                contentRef = cf.ContentLink; // Make sure we return the content reference
                             }
                             else
                             {

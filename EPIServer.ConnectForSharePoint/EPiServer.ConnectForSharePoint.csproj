@@ -42,6 +42,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -229,11 +230,15 @@
     <Compile Include="Controllers\SharePointImageController.cs" />
     <Compile Include="Controllers\SharePointVideoController.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Helpers\AccessRightsHelper.cs" />
+    <Compile Include="Helpers\IAccessRightsHelper.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
     <Compile Include="Helpers\ISharePointMessageHelper.cs" />
+    <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
     <Compile Include="Helpers\ISharePointSettingsHelper.cs" />
     <Compile Include="Helpers\SharePointMessageHelper.cs" />
+    <Compile Include="Helpers\SharePointProcessorHelper.cs" />
     <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\SPFieldItemMapper.cs" />
@@ -293,12 +298,8 @@
     <Compile Include="Rest\Models\JsonViewCollection.cs" />
     <Compile Include="Rest\Models\SharedClasses.cs" />
     <Compile Include="Rest\Models\GetContextWebInformation.cs" />
-    <Compile Include="Helpers\AccessRightsHelper.cs" />
     <Compile Include="Helpers\ContentProviderHelper.cs" />
     <Compile Include="Helpers\WebHelper.cs" />
-    <Compile Include="ISharePointContentMappingRepository.cs" />
-    <Compile Include="Models\DataMapping.cs" />
-    <Compile Include="Models\IModelWrapper.cs" />
     <Compile Include="Configuration\SharePointSettings.cs" />
     <Compile Include="Models\SPList.cs" />
     <Compile Include="Models\SPListView.cs" />
@@ -307,17 +308,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\ModuleHelper.cs" />
     <Compile Include="InitializationModule.cs" />
-    <Compile Include="Models\ModelWrapper.cs" />
-    <Compile Include="Models\SharePointBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\Constructions\SharePointDataBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointMediaBuilder.cs" />
-    <Compile Include="Providers\Constructions\ISharePointDataBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointFolderBuilder.cs" />
-    <Compile Include="Providers\Constructions\SharePointImageBuilder.cs" />
-    <Compile Include="Providers\SharePointBlobProvider.cs" />
     <Compile Include="Authentication\ClaimsWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -327,10 +319,8 @@
     <Compile Include="Rest\Responses\RestResponse.cs" />
     <Compile Include="Rest\SPRestClient.cs" />
     <Compile Include="Authentication\WcfClientContracts.cs" />
-    <Compile Include="SharePointContentMappingRepository.cs" />
     <Compile Include="SharePointModule.cs" />
     <Compile Include="SharePointModuleViewModel.cs" />
-    <Compile Include="SPContentReindex.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
     <Compile Include="SPServices\REST\FilesFoldersService.cs" />
@@ -359,7 +349,6 @@
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
     </Compile>
     <Compile Include="Helpers\SharePointHelper.cs" />
-    <Compile Include="Providers\SharePointMediaProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ClientResources\Images\DefaultThumbnail.png" />

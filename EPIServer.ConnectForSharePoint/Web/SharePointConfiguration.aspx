@@ -10,7 +10,17 @@
 
 <asp:content contentplaceholderid="FullRegion" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+
 	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
+    <style type="text/css">
+         .listCheckBox input[type="checkbox"] {
+             vertical-align: top;
+         }
+
+         .listViewSelector {
+             padding: 0 0 8px 2px;
+         }
+     </style>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
@@ -22,6 +32,20 @@
             $('#FullRegion_Save').click(function () {
                 processSelectedViews();
             });
+
+            // Disable 'Save' button when no list checkboxes are selected
+            if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
+                $('#FullRegion_Save').attr("disabled", "disabled");
+            }
+
+            $('span.listCheckBox input[type="checkbox"]').change(function () {
+                if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
+                    $('#FullRegion_Save').attr("disabled", "disabled");
+                }
+                else {
+                    $('#FullRegion_Save').removeAttr("disabled", "disabled");
+                }
+            });
         });
 
         function processSelectedViews() {
@@ -32,7 +56,7 @@
             // Loop through each checkbox
             $listChkBox.each(function () {
                 if ($(this).is(':checked')) {
-                    var viewId = $(this).parent().next($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
+                    var viewId = $(this).parent().next($('div.viewSelector')).children($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
                     if (viewId.indexOf($(this).val()) === 0) { // Additional check to make sure we are choosing the option from the correct List.
                         selectedViewIds += viewId + ',';
                     }
@@ -49,14 +73,21 @@
             label.innerHTML = result;
 
             // we are done processing, queue is empty - get buttons into proper state
-            if (lastValue != "0" && result == "0") {
-                window.location.href = window.location.pathname + window.location.search;
+
+            if (result == "0" && $('span.listCheckBox input[type="checkbox"]:checked').length > 0) {
+                $('span.listCheckBox input[type="checkbox"]').removeAttr('disabled'); // List of all the checkboxes corresponding to lists
+                $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
+                $('#FullRegion_Save').removeAttr('disabled');
             }
 
             // (save or refersh triggered by another user in another browser)
             // items in the queue, but the buttons are enabled 
             if (result != "0" && button.disabled == false) {
-                window.location.href = window.location.pathname + window.location.search;
+                $('span.listCheckBox input[type="checkbox"]').attr('disabled', 'disabled'); // List of all the checkboxes corresponding to lists
+                $('.listViewSelector select').attr('disabled', 'disabled'); // List of all the dropdownlists which contain the views of each list.
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled')
+                $('#FullRegion_Save').attr('disabled', 'disabled');
             }
 
             lastValue = result;
@@ -184,9 +215,11 @@
                             </div>
                         </LayoutTemplate>
                         <ItemTemplate>
-                            <div style="padding:2px">
+                           <div class="listViewSelector">
                             <asp:CheckBox ID="chkList" class="listCheckBox" runat="server"></asp:CheckBox>
+                                      <div class="viewSelector">
                             <asp:DropDownList ID="ddViews" class="viewsDropDown" runat="server"></asp:DropDownList>
+                                          </div>
                            </div>
                         </ItemTemplate>
                     </asp:ListView>

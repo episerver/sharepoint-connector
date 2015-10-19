@@ -2,17 +2,19 @@
 using EPiServer.DataAbstraction;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
     /// <summary>
     /// Helper class for checking access right
     /// </summary>
-    public class AccessRightsHelper
+    public class AccessRightsHelper : IAccessRightsHelper
     {
         private IServiceLocator _serviceLocator;
         private static IContentSecurityRepository _contentSecurityRepository;
 
+        [ExcludeFromCodeCoverage]
         public AccessRightsHelper()
         {
             _serviceLocator = ServiceLocator.Current;

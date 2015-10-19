@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>EPiServer.ConnectForSharePoint</id>
-        <version>2.0.0.9000</version>
+        <version>2.0.1.9000</version>
         <title>EPiServer Connect For SharePoint</title>
         <authors>EPiServer</authors>
         <owners>EPiServer</owners>
@@ -10,11 +10,11 @@
         <description>Integrate EPiServer site with SharePoint</description>
         <copyright>Copyright EPiServer 2015</copyright>
         <releaseNotes>
-            Changes in  for CMS 9:
-            --- Media and Custom list support
-            --- Asyncronous import of items for large list support
-            --- Support SharePoint 2013, SharePoint Foundation 2013, and SharePoint Online (Office 365)
-			--- Overridable document injester to support custom object creation from SharePoint items
+			Changes for CMS 9
+				•	Media and Custom list support.
+				•	Asynchronous import of items for large list support.
+				•	Supports SharePoint 2013, SharePoint Foundation 2013, and SharePoint Online (Office 365).
+				•	Developer access to override the default document processor to support custom object creation from SharePoint items.
         </releaseNotes>
         <tags>EPiServerModulePackage EPiServerBetaAddon EPiServer SharePoint Connector</tags>
         <dependencies>
