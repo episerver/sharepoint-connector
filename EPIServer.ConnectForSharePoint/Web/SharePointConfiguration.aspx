@@ -80,6 +80,9 @@
                 $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
                 $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
                 $('#FullRegion_Save').removeAttr('disabled');
+
+                $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
+                $('#FullRegion_Refresh').removeAttr('disabled');
             }
 
             // (save or refersh triggered by another user in another browser)
@@ -89,6 +92,9 @@
                 $('.listViewSelector select').attr('disabled', 'disabled'); // List of all the dropdownlists which contain the views of each list.
                 $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled');
                 $('#FullRegion_Save').attr('disabled', 'disabled');
+
+                $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButtondisabled');
+                $('#FullRegion_Refresh').attr('disabled', 'disabled');
             }
 
             lastValue = result;
