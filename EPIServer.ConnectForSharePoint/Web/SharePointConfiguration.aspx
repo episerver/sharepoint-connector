@@ -98,6 +98,7 @@
         window.setInterval(updateQueCounts, 1000);
     </script>
     <script type='text/javascript'>
+        var disabled = true;
         $(document).ready(function() {
            var dlg = $("#treedialog").dialog({
                 autoOpen: false,
@@ -107,13 +108,16 @@
             $("#btnShow").click(function () {
                 dlg.dialog("open");
                 $(".ui-dialog-titlebar").hide();
+
+                // disable Ok button until a folder is selected
+                document.getElementById('<%# FolderOk.ClientID %>').disabled = disabled;
             });
         });
         function setval(newval) {
             var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
             var newFolderName = document.getElementById('<%# TBNewFolderName.ClientID %>').value;
 
-            //set foldername text box to show selected folder
+            // set foldername text box to show selected folder
             window.PageMethods.GetEntryPointFolderName(newval, isNotChecked, newFolderName, onNodePicked, onError);
 
             // set hidden text box to be selected folder id so everything continues to work behind the scenes
@@ -125,7 +129,12 @@
         function onNodePicked(result) {
             var epFolderName = document.getElementById('<%= SelectedFolderName.ClientID %>');
             epFolderName.value = result;
+
+            // enable Ok button once a folder is selected
+            disabled = false;
+            document.getElementById('<%# FolderOk.ClientID %>').disabled = false;
         }
+
 
         // called when user clicks Ok in select folder dlg
         function onOkClick() {
@@ -265,7 +274,7 @@
                     </div>
                     <br />
                     <div align="right">
-                        <EPiServerUI:ToolButton runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.ok %>" OnClientClick="return onOkClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools" />
+                        <EPiServerUI:ToolButton ID="FolderOk" runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.ok %>" OnClientClick="return onOkClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools" />
                         <EPiServerUI:ToolButton runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.cancel %>" OnClientClick="onCloseClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools"/>
                     </div>
                     <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
