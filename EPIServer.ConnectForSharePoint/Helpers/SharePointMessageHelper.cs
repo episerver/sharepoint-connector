@@ -358,14 +358,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     RemoveSharePointAddedFolders(folderRef, rootFolderItems);
                 }
 
-                // add the view object and parent folder name to all the non folder items
+                // Make sure the selectedView and parent folder name attribute is set.
                 foreach (var spItem in rootFolderItems)
                 {
                     if (spItem.Folder == null)
                     {
                         spItem.selectedView = selectedView;
                         spItem.ParentFolderName = rootFolder.Folder.Name;
-                        AllSPListItems.Add(spItem); 
                     }
                 }
 

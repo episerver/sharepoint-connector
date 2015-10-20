@@ -445,11 +445,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             var contentRepository = _serviceLocator.GetInstance<IContentRepository>();
 
-            // Now check the folder to see if the item already exists. 
-            ContentReference cref = new ContentReference(item.entryPointId);
             try
             {
-                contentRepository.Delete(cref, true, AccessLevel.Delete);
+                contentRepository.Delete(item.ContentLink, true, AccessLevel.Delete);
             }
             catch (Exception e)
             {

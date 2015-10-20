@@ -1,5 +1,6 @@
 <%@ Page Language="c#" AutoEventWireup="False" CodeBehind="SharePointConfiguration.aspx.cs"
     Inherits="EPiServer.ConnectForSharePoint.Web.SharePointConfiguration, EPiServer.ConnectForSharePoint" Title="EPiServer ConnectForSharePoint Add-on" %>
+
 <%@ Import Namespace="EPiServer" %>
 <%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
 <%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
@@ -34,16 +35,16 @@
             });
 
             // Disable 'Save' button when no list checkboxes are selected
-            if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
-                $('#FullRegion_Save').attr("disabled", "disabled");
+            if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
+                $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
             }
 
             $('span.listCheckBox input[type="checkbox"]').change(function () {
-                if ($('span.listCheckBox input[type="checkbox"]:checked').length == 0) {
-                    $('#FullRegion_Save').attr("disabled", "disabled");
+                if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
+                    $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
                 }
                 else {
-                    $('#FullRegion_Save').removeAttr("disabled", "disabled");
+                    $('#FullRegion_Save').removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
                 }
             });
         });
@@ -86,7 +87,7 @@
             if (result != "0" && button.disabled == false) {
                 $('span.listCheckBox input[type="checkbox"]').attr('disabled', 'disabled'); // List of all the checkboxes corresponding to lists
                 $('.listViewSelector select').attr('disabled', 'disabled'); // List of all the dropdownlists which contain the views of each list.
-                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled')
+                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButtondisabled');
                 $('#FullRegion_Save').attr('disabled', 'disabled');
             }
 
