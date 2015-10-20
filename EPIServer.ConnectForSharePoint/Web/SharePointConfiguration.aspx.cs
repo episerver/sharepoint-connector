@@ -93,7 +93,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             var fullPath = selectedFolderRef.Name;
 
             // if true, then the root was selected and there is nowhere to traverse as we are at the top already
-            if (selectedFolderRef.ContentTypeID != SiteDefinition.Current.GlobalAssetsRoot.ID)
+            if (id != SiteDefinition.Current.GlobalAssetsRoot.ID.ToString())
             {
                 var parent = selectedFolderRef.ParentLink;
                 // traverse up the tree to display path to selected folder
@@ -334,7 +334,18 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // reset text box values to previous valid settings
                 EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
                 EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
+
+                // something happened that caused an error, we need to still bind teh list view data to the page; otherwise,
+                // the user needs to refresh manually.
+                string errMessage;
+                var mediaList = GetMediaLists(true, out errMessage);
+                if (!string.IsNullOrEmpty(errMessage))
+                {
+                    strErrors.AppendLine(errMessage);
+                }
                 ShowMessage(strErrors.ToString().Replace(Environment.NewLine, "<br/>"), true);
+
+                BindListViewData(SharePointHelper.GetListViewPairsData(mediaList));
                 return;
             }
 
