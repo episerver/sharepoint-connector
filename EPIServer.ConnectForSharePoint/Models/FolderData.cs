@@ -99,5 +99,12 @@ namespace EPiServer.ConnectForSharePoint.Models
             //return first item as FolderData;
             return folders.ToList().First<FolderData>();
         }
+
+        public IEnumerable<FolderData> GetFolders()
+        {
+            // Get data store for FolderData
+            var store = ddsf.CreateStore(typeof(FolderData));
+            return store.Items<FolderData>();
+        }
     }
 }

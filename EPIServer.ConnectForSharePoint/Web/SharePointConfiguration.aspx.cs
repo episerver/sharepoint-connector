@@ -19,6 +19,8 @@ using System.Web.UI.WebControls;
 using EPiServer.DataAccess;
 using EPiServer.Security;
 using EPiServer.Web;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -382,9 +384,34 @@ namespace EPiServer.ConnectForSharePoint.Web
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
                 var messageHelper = new SharePointMessageHelper();
-                // if the entry point is different we need to queue all the current folders for delete
-                if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                    messageHelper.QueueRootFoldersForDelete(lists);
+
+                // if the entry point is different or the url is differnt or 
+                // we need to queue all the current folders for delete
+                if (entryPointId != SharePointSettings.Current.EntryPoint.ID ||
+                    !ConfiguredUrl.Equals(SharePointSettings.Current.SiteUrl))
+                {
+                    SharePointMessageEmitterFactory emmiter = new SharePointMessageEmitterFactory();
+
+                    // Delete all the folders we created under the current entry point.
+                    FolderData fd = new FolderData();
+                    var folders = fd.GetFolders();
+                    foreach( var folder in folders )
+                    {
+                        var cmsfolder = _contentRepository.Get<ContentFolder>(new ContentReference(folder.RefId));
+                        if( cmsfolder != null )
+                        {
+                            SPListItem item = new SPListItem()
+                            {
+                                entryPointId = SharePointSettings.Current.EntryPoint.ID,
+                                Folder = new SPFolder() { Name = cmsfolder.Name }
+                            };
+                            emmiter.Create().Emit(new SharePointFolderDeleteMessage()
+                            {
+                                Item = item
+                            });
+                        }
+                    }
+                }
                 else // else we only delete folders that have been deselected
                     messageHelper.QueueRootFoldersForDelete(lists, selectedListViewIds);
 
