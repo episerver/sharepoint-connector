@@ -165,6 +165,10 @@
 
         function onCloseClick() {
             document.getElementById('<%# EntryPointCache.ClientID %>').value = null;
+            document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked = false;
+            document.getElementById('<%# TBNewFolderName.ClientID %>').value = "";
+            document.getElementById('<%# TBNewFolderName.ClientID %>').disabled = true;
+
             $("#treedialog").dialog("close");
         }
 
