@@ -422,6 +422,9 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             ShowMessage(Translate("/sharepoint/admin/message/savesuccess"), false);
 
+            // need to reset the folder create flag upon a successful save so we don't continue to make new nested folders
+            _createNewEntryPointFolder = false;
+
             BindListViewData(SharePointHelper.GetListViewPairsData(lists));
 
             #endregion
