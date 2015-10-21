@@ -83,6 +83,9 @@
 
                 $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
                 $('#FullRegion_Refresh').removeAttr('disabled');
+
+                $('#FullRegion_Connect').parent().attr('class', 'epi-cmsButton');
+                $('#FullRegion_Connect').removeAttr('disabled');
             }
 
             // (save or refersh triggered by another user in another browser)
@@ -95,6 +98,9 @@
 
                 $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButtondisabled');
                 $('#FullRegion_Refresh').attr('disabled', 'disabled');
+
+                $('#FullRegion_Connect').parent().attr('class', 'epi-cmsButtondisabled');
+                $('#FullRegion_Connect').attr('disabled', 'disabled');
             }
 
             lastValue = result;
