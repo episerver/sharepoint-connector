@@ -6,11 +6,11 @@
                 <ok>Ok</ok>
                 <cancel>Cancel</cancel>
                 <displayname>Connect For SharePoint</displayname>
-                <description>Provide username, password and URL of the SharePoint site you want to connect to.</description>
-                <queuedescription>Queue Information.</queuedescription>
+                <description>SharePoint Site Credentials</description>
+                <queuedescription>Queue Information</queuedescription>
                 <remainingitems>Remaining items</remainingitems>
-                <selectviewdescription>Select SharePoint views to get media from.</selectviewdescription>
-                <serverurl>SharePoint Site URL</serverurl>
+                <selectviewdescription>Select one or more lists and corresponding views.</selectviewdescription>
+                <serverurl>Site URL</serverurl>
                 <username>Username</username>
                 <password>Password</password>
                 <connectiontype>Connection type</connectiontype>
@@ -18,7 +18,7 @@
                 <onpremises>On-premises</onpremises>
                 <save>Save</save>
                 <connect>Test connection</connect>
-                <selectedfolder>Selected Folder:</selectedfolder>
+                <selectedfolder>Folder</selectedfolder>
                 <selectfolder>Select Folder:</selectfolder>
                 <entrypoint>Connection Entry Point</entrypoint>
                 <entrypointinstructions>Select a folder that will be the entry point location.  In addition, if you would like to create a new sub-folder, use the text box below:</entrypointinstructions>
