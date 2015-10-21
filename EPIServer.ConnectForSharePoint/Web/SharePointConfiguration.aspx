@@ -29,44 +29,6 @@
             PageMethods.getCurrentQueCount(onSucess, onError);
         }
 
-        $(document).ready(function () {
-            $('#FullRegion_Save').click(function () {
-                processSelectedViews();
-            });
-
-            // Disable 'Save' button when no list checkboxes are selected
-            if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
-                $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
-            }
-
-            $('span.listCheckBox input[type="checkbox"]').change(function () {
-                if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
-                    $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
-                }
-                else {
-                    $('#FullRegion_Save').removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
-                }
-            });
-        });
-
-        function processSelectedViews() {
-            var selectedViewIds = '';
-            var $listChkBox = $('span.listCheckBox input[type="checkbox"]'); // List of all the checkboxes corresponding to lists
-            var $viewDdl = $('.viewsDropDown'); // List of all the dropdownlists which contain the views of each list.
-
-            // Loop through each checkbox
-            $listChkBox.each(function () {
-                if ($(this).is(':checked')) {
-                    var viewId = $(this).parent().next($('div.viewSelector')).children($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
-                    if (viewId.indexOf($(this).val()) === 0) { // Additional check to make sure we are choosing the option from the correct List.
-                        selectedViewIds += viewId + ',';
-                    }
-                }
-            });
-
-            $('#hdnSelectedViews').val(selectedViewIds);  // Add the List of Ids (comma-separated string) to the hidden variable.
-        }
-
         var lastValue = "0";
         function onSucess(result) {
             var label = document.getElementById('<%=QueueCountTB.ClientID%>');
@@ -78,11 +40,15 @@
             if (result == "0" && $('span.listCheckBox input[type="checkbox"]:checked').length > 0) {
                 $('span.listCheckBox input[type="checkbox"]').removeAttr('disabled'); // List of all the checkboxes corresponding to lists
                 $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
-                $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
-                $('#FullRegion_Save').removeAttr('disabled');
 
-                $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
-                $('#FullRegion_Refresh').removeAttr('disabled');
+                var fldrName = $('#FullRegion_EntryPointFolderName').val();
+                if (fldrName != undefined && fldrName != "") {
+                    $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
+                    $('#FullRegion_Save').removeAttr('disabled');
+
+                    $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
+                    $('#FullRegion_Refresh').removeAttr('disabled');
+                }
 
                 $('#FullRegion_Connect').parent().attr('class', 'epi-cmsButton');
                 $('#FullRegion_Connect').removeAttr('disabled');
@@ -112,12 +78,12 @@
     </script>
     <script type='text/javascript'>
         var disabled = true;
-        $(document).ready(function() {
-           var dlg = $("#treedialog").dialog({
+        $(document).ready(function () {
+            var dlg = $("#treedialog").dialog({
                 autoOpen: false,
                 modal: true
             });
-            
+
             $("#btnShow").click(function () {
                 dlg.dialog("open");
                 $(".ui-dialog-titlebar").hide();
@@ -125,7 +91,70 @@
                 // disable Ok button until a folder is selected
                 document.getElementById('<%# FolderOk.ClientID %>').disabled = disabled;
             });
+
+            $('#FullRegion_Save').click(function () {
+                processSelectedViews();
+            });
+
+            // Activate Save and Refresh buttons when folder is selected.
+            $('#FullRegion_EntryPointFolderName').change(function () {
+                setSaveButtonState();
+            });
+
+            // Disable Save and Refresh buttons when no list checkboxes are selected
+            if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
+                $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+                $('#FullRegion_Refresh').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+
+            }
+
+            // Enable or Disable Save and Refresh buttons based on checkbox selection(s).
+            $('span.listCheckBox input[type="checkbox"]').change(function () {
+                setSaveButtonState();
+            });
         });
+
+        function setSaveButtonState() {
+            var fldrName = $('#FullRegion_EntryPointFolderName').val();
+            var $saveBtn = $('#FullRegion_Save');
+            var $refreshBtn = $('#FullRegion_Refresh');
+
+            // Enable Save and Refresh buttons only if one or more list/view combinations are selected
+            // and a folder in the cms is also chosen to import the Sharepoint data into.
+            if (fldrName != undefined && fldrName != "") {
+                if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
+                    $saveBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+                    $refreshBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+                }
+                else {
+                    $saveBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
+                    $refreshBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
+                }
+            }
+            else {
+                $saveBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+                $refreshBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
+            }
+        };
+
+        function processSelectedViews() {
+            var selectedViewIds = '';
+            var $listChkBox = $('span.listCheckBox input[type="checkbox"]'); // List of all the checkboxes corresponding to lists
+            var $viewDdl = $('.viewsDropDown'); // List of all the dropdownlists which contain the views of each list.
+
+            // Loop through each checkbox
+            $listChkBox.each(function () {
+                if ($(this).is(':checked')) {
+                    var viewId = $(this).parent().next($('div.viewSelector')).children($('.viewsDropDown')).val(); // Id ('ListId~ViewId') of the option selected from the dropdownlist.
+                    if (viewId.indexOf($(this).val()) === 0) { // Additional check to make sure we are choosing the option from the correct List.
+                        selectedViewIds += viewId + ',';
+                    }
+                }
+            });
+
+            $('#hdnSelectedViews').val(selectedViewIds);  // Add the List of Ids (comma-separated string) to the hidden variable.
+        };
+
         function setval(newval) {
             var isNotChecked = document.getElementById('<%# CBCreateNewFolder.ClientID %>').checked;
             var newFolderName = document.getElementById('<%# TBNewFolderName.ClientID %>').value;
@@ -165,8 +194,12 @@
 
         // updates the entry point folder text box on the main config screen
         function onSuccess(result) {
-            var epFolderName = document.getElementById('<%= EntryPointFolderName.ClientID %>');
-            epFolderName.value = result;
+            var epFolderName = $('#FullRegion_EntryPointFolderName');
+            epFolderName.val(result);
+
+            // Trigger the change event on the folder name textbox so that 
+            // the save button state can be set appropriately.
+            epFolderName.change();
         }
 
         function onCloseClick() {
