@@ -278,7 +278,7 @@
                            ExpandOnSelect="false"
                            DataNavigateUrlField="ContentLink" EnableViewState="false">
                             <TreeNodeTemplate>
-                                <a href="#" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
+                                <a style="outline:none !important" href="#" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
                                     <%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>
                                 </a>
                             </TreeNodeTemplate>
