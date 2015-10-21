@@ -42,12 +42,17 @@
                 $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
 
                 var fldrName = $('#FullRegion_EntryPointFolderName').val();
+                var listIds = $('#hdnListIds').val();
+
                 if (fldrName != undefined && fldrName != "") {
                     $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
                     $('#FullRegion_Save').removeAttr('disabled');
 
-                    $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
-                    $('#FullRegion_Refresh').removeAttr('disabled');
+                    // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
+                    if (listIds != undefined && listIds != "") {
+                        $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
+                        $('#FullRegion_Refresh').removeAttr('disabled');
+                    }
                 }
 
                 $('#FullRegion_Connect').parent().attr('class', 'epi-cmsButton');
@@ -75,8 +80,7 @@
         }
         document.body.onload = updateQueCounts;
         window.setInterval(updateQueCounts, 1000);
-    </script>
-    <script type='text/javascript'>
+
         var disabled = true;
         $(document).ready(function () {
             var dlg = $("#treedialog").dialog({
@@ -116,6 +120,7 @@
 
         function setSaveButtonState() {
             var fldrName = $('#FullRegion_EntryPointFolderName').val();
+            var listIds = $('#hdnListIds').val();
             var $saveBtn = $('#FullRegion_Save');
             var $refreshBtn = $('#FullRegion_Refresh');
 
@@ -128,7 +133,11 @@
                 }
                 else {
                     $saveBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
-                    $refreshBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
+
+                    // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
+                    if (listIds != undefined && listIds != "") {
+                        $refreshBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
+                    }
                 }
             }
             else {
@@ -271,6 +280,7 @@
                 </br>
                 <%= Translate("/sharepoint/admin/selectviewdescription")%>
             </asp:Label>
+                <asp:HiddenField ID="hdnListIds" ClientIDMode="Static" Value="<%# CurrentSettings.ListIds %>" runat="server"></asp:HiddenField>
             <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False"  Height="300px" ScrollBars="Auto">
                  <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
                         <LayoutTemplate>
