@@ -267,10 +267,11 @@
                 <EPiServerUI:ToolButton runat="server" SkinID="ArrowRight" ID="Connect" OnClick="Connect_Click" 
                     Text="<%$ Resources: EPiServer, sharepoint.admin.connect %>" />
             </div>        
-            <p class="EP-systemInfo">
+            <asp:Label ID = "ListSelectorLabel" runat="server" Visible="False">
+                </br>
                 <%= Translate("/sharepoint/admin/selectviewdescription")%>
-            </p>
-            <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False" Height="300px" ScrollBars="Auto">
+            </asp:Label>
+            <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False"  Height="300px" ScrollBars="Auto">
                  <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
                         <LayoutTemplate>
                             <div>
@@ -287,7 +288,6 @@
                         </ItemTemplate>
                     </asp:ListView>
                     <asp:HiddenField ID="hdnSelectedViews" ClientIDMode="Static" runat="server"></asp:HiddenField>
-                <br />
             </asp:Panel>                  
                 <br />
                 <!-- Modal Tree Dlg -->
