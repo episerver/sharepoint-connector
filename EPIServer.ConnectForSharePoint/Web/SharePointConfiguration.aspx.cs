@@ -38,6 +38,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static bool _createNewEntryPointFolder = false;
+        private static string _newFolderName;
 
         /// <summary>
         /// Called by web page during data bind operation
@@ -110,6 +111,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             if (isChecked)
             {
+                _newFolderName = newFolderName;
                 fullPath += "/" + newFolderName;
             }
 
@@ -144,7 +146,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         protected override void OnLoad(EventArgs e)
         {
-            
+
             base.OnLoad(e);
 
             if (!Page.IsPostBack)
@@ -314,10 +316,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else // otherwise, we create a new folder, which by default is empty so we can just carry on
                 {
-                    var folders = EntryPointFolderName.Text.Split('/');
                     var newUserFolder = _contentRepository.GetDefault<ContentFolder>(contentLink);
 
-                    newUserFolder.Name = folders.Last();
+                    newUserFolder.Name = _newFolderName;
                     newUserFolder.ContentLink = ContentReference.EmptyReference;
                     newUserFolder.ParentLink = contentLink;
 
@@ -336,6 +337,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // reset text box values to previous valid settings
                 EntryPointFolderName.Text = SharePointSettings.Current.EntryPointFolderName;
                 EntryPoint.Text = SharePointSettings.Current.EntryPoint.ID.ToString();
+                _newFolderName = string.Empty;
 
                 // something happened that caused an error, we need to still bind teh list view data to the page; otherwise,
                 // the user needs to refresh manually.
