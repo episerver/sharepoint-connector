@@ -22,6 +22,9 @@
         // more info: http://techtrainingnotes.blogspot.com/2008/01/sharepoint-registrationid-list-template.html
         GenericList = 100,
         DocumentLibrary = 101,
+        Announcements = 104,    // MAI-176
+        Contacts = 105,         // MAI-178
+        Events = 106,           // MAI-177
         PictureLibrary = 109,   // implicitly supports thumbnail
         AssetLibary = 851,      // implicitly supports thumbnail
         WebPageLibrary = 119
