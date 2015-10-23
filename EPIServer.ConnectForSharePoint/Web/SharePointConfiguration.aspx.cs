@@ -99,12 +99,19 @@ namespace EPiServer.ConnectForSharePoint.Web
             if (id != SiteDefinition.Current.GlobalAssetsRoot.ID.ToString())
             {
                 var parent = selectedFolderRef.ParentLink;
+                bool atRoot = false;
                 // traverse up the tree to display path to selected folder
-                while (parent != null && parent != SiteDefinition.Current.GlobalAssetsRoot)
+                while (parent != null && !atRoot)
                 {
                     var parentRef = _contentRepository.Get<ContentFolder>(new ContentReference(parent.ID));
 
                     fullPath = parentRef.Name + "/" + fullPath;
+
+                    if (parent == SiteDefinition.Current.GlobalAssetsRoot)
+                    {
+                        atRoot = true;
+                    }
+
                     parent = parentRef.ParentLink;
                 }
             }
