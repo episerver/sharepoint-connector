@@ -205,7 +205,7 @@
         function onSuccess(result) {
             var epFolderName = $('#FullRegion_EntryPointFolderName');
             epFolderName.val(result);
-
+            epFolderName.attr("title", result);
             // Trigger the change event on the folder name textbox so that 
             // the save button state can be set appropriately.
             epFolderName.change();
@@ -302,7 +302,7 @@
                 <br />
                 <!-- Modal Tree Dlg -->
                 <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectfolder") %>&nbsp;</asp:Label>
-                <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>" ToolTip="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
                 <input type="button" ID="btnShow" Value="..." />
                 <div id="treedialog" class="ui-helper-hidden" >
                     <asp:Label runat="server"><%# Translate("/sharepoint/admin/entrypointinstructions") %></asp:Label>
