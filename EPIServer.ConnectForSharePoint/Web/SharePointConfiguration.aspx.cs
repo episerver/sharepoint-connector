@@ -251,6 +251,12 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 BindListData(lists);
             }
+            else
+            {
+                Connect.Enabled = true;
+                ListSelectorLabel.Enabled = false;
+                ListSelectorLabel.Visible = false;
+            }
         }
 
         /// <summary>
@@ -496,7 +502,14 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             if (mediaLists == null)
             {
+                ListSelectorLabel.Enabled = false;
+                ListSelectorLabel.Visible = false;
                 return;
+            }
+            else
+            {
+                ListSelectorLabel.Enabled = true;
+                ListSelectorLabel.Visible = true;
             }
 
             ////AppendListItemCollection(SharePointListCheckBox, SharePointHelper.GetListViewPairs(mediaLists));

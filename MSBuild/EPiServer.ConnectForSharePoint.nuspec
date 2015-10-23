@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>EPiServer.ConnectForSharePoint</id>
-        <version>2.0.1.9000</version>
+        <version>2.0.2.9000</version>
         <title>EPiServer Connect For SharePoint</title>
         <authors>EPiServer</authors>
         <owners>EPiServer</owners>
