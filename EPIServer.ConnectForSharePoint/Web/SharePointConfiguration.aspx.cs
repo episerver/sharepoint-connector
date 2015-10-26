@@ -299,45 +299,75 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             if (success)
             {
+                var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
                 var contentLink = new ContentReference(entryPointId);
 
                 if (!_createNewEntryPointFolder) // if we aren't creating a new folder, then it's business as usual
-            {
-                try
                 {
-                    var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
-                    var content = contentRepository.Get<IContent>(contentLink);
+                    try
+                    {
+                        var content = contentRepository.Get<IContent>(contentLink);
 
-                    if (content == null || content.IsDeleted || !(content is ContentFolder))
+                        if (content == null || content.IsDeleted || !(content is ContentFolder))
+                        {
+                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
+                        }
+                        else if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
+                        {
+                            // If the ID is different, check to see if there are any children.
+                            var children = contentRepository.GetChildren<IContent>(contentLink);
+                                if (children.Any())
+                                    strErrors.AppendLine(
+                                        Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+
+                            // make sure the new folder is not a sub folder of the old parent.
+                            var current = new ContentReference(SharePointSettings.Current.EntryPoint.ID);
+                            var parents = contentRepository.GetAncestors(contentLink);
+                            foreach (var folder in parents)
+                            {
+                                if (folder.ContentLink == current)
+                                {
+                                    strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointcannotbechildofprevious"));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception exc)
                     {
                         strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
+                        _logger.Error("Error when saving entry point", exc);
                     }
-                        else if (entryPointId != SharePointSettings.Current.EntryPoint.ID)
-                            // If the ID is different, check to see if there are any children.
-                    {
-                        var children = contentRepository.GetChildren<IContent>(contentLink);
-                            if (children.Any())
-                                strErrors.AppendLine(
-                                    Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
-                    }
-                }
-                catch (Exception exc)
-                {
-                    strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointmustbecontentfolder"));
-                    _logger.Error("Error when saving entry point", exc);
-                }
                 }
                 else // otherwise, we create a new folder, which by default is empty so we can just carry on
                 {
-                    var newUserFolder = _contentRepository.GetDefault<ContentFolder>(contentLink);
+                    // make sure we dont keep trying to create it under success or failure conditions.
+                    _createNewEntryPointFolder = false; 
 
-                    newUserFolder.Name = _newFolderName;
-                    newUserFolder.ContentLink = ContentReference.EmptyReference;
-                    newUserFolder.ParentLink = contentLink;
+                    // make sure the new folder is not a sub folder of the old parent.
+                    var current = new ContentReference(SharePointSettings.Current.EntryPoint.ID);
+                    var parents = contentRepository.GetAncestors(contentLink);
+                    foreach (var folder in parents)
+                    {
+                        if (folder.ContentLink == current)
+                        {
+                            strErrors.AppendLine(Translate("/sharepoint/admin/message/entrypointcannotbechildofprevious"));
+                            break;
+                        }
+                    }
 
-                    // save new folder to db and get a reference to it so we can the entry point to this new folder
-                    var newFolderRef = _contentRepository.Save(newUserFolder, SaveAction.Publish, AccessLevel.FullAccess);
-                    entryPointId = newFolderRef.ID;
+                    if (strErrors.Length == 0)
+                    {
+                        var newUserFolder = _contentRepository.GetDefault<ContentFolder>(contentLink);
+
+                        newUserFolder.Name = _newFolderName;
+                        newUserFolder.ContentLink = ContentReference.EmptyReference;
+                        newUserFolder.ParentLink = contentLink;
+
+                        // save new folder to db and get a reference to it so we can the entry point to this new folder
+                        var newFolderRef = _contentRepository.Save(newUserFolder, SaveAction.Publish, AccessLevel.FullAccess);
+                        entryPointId = newFolderRef.ID;
+                    }
                 }
             }
             else

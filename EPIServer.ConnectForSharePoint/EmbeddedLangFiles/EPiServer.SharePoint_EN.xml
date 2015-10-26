@@ -40,7 +40,8 @@
                     <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
                     <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
                     <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any 'Blocks' or media items.</entrypointmustnothavechildren>
-                    <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
+                    <entrypointcannotbechildofprevious>Selected folder cannot be a child of the previously selected folder.  Please select a different folder.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
                     <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
                     <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
                 </message>
