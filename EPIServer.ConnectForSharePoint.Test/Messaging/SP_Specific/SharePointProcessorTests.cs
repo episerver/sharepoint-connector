@@ -578,6 +578,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
             processinghelper.Setup(ph => ph.GetRawListItemData(It.IsAny<SPListItem>())).Verifiable();
 
+            IList<SPListView> views = new List<SPListView>();
+            views.Add(new SPListView(){ Id = Guid.Empty});
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg" },
@@ -585,7 +587,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 entryPointId = 42,
                 ParentList = new SPList()
                 {
-                    Id = Guid.Empty
+                    Id = Guid.Empty,
+                    Views = views
                 }
             };
 
@@ -610,12 +613,20 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             fileStreamService.Setup(fss => fss.GetListItemJsonData(It.IsAny<SPListItem>())).Returns("hereissomepath");
             processinghelper.Setup(ph => ph.GetRawListItemData(It.IsAny<SPListItem>())).Verifiable();
 
+            IList<SPListView> views = new List<SPListView>();
+            views.Add(new SPListView() { Id = Guid.Empty });
+
             var item = new SPListItem()
             {
                 File = new SPFile() { Name = "Filename.jpg" },
                 FileUrl = "http://nicenewvm/sites/SP2013QA/_api/Web/Lists(guid'f2c6da74-b21c-4f9b-ad50-bb51ae7b2bd5')/Items(1)/File",
                 entryPointId = 42,
-                ContentLink = new ContentReference(42)
+                ContentLink = new ContentReference(42),
+                ParentList = new SPList()
+                {
+                    Id = Guid.Empty,
+                    Views = views
+                }
             };
 
             contentRepo.Setup(cr => cr.Get<SharePointBlockData>(It.IsAny<ContentReference>()))
