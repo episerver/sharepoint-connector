@@ -366,6 +366,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 if (content != null)
                     content.Name = fileName;
 
+                // Set the view being used.
+                if (item.selectedView == null)
+                    media.ViewID = item.ParentList.Views.First().Id.ToString();
+                else
+                    media.ViewID = item.selectedView.Id.ToString();
+                 
                 media.Created = item.Created;
                 media.SharePointGUID = item.GUID.ToString();
                 media.SharePointTimeLastModified = item.Modified;
@@ -413,9 +419,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 if (media is ISharePointItem) // ExtraMediaData is our custom attributes, basically a mapping from episerver object to sharepoint object
                 {
                     var mediaEX = media as ISharePointItem;
+                    // Get the current view.
+                    SPListView view = null;
+                    if (item.selectedView == null)
+                        view = item.ParentList.Views.First();
+                    else
+                        view = item.selectedView;
 
                     // Only update if the last modified dates dont match
-                    if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
+                    // or the view has changed.
+                    if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0 ||
+                        view.Id != Guid.Parse(mediaEX.ViewID) )
                     {
                         media.Json = _helper.GetRawListItemData(item); // get the json data from the list item
 
@@ -426,6 +440,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
                         media.Created = item.Created;
 
+                        mediaEX.ViewID = view.Id.ToString();
                         mediaEX.SharePointGUID = item.GUID.ToString();
                         mediaEX.SharePointTimeLastModified = item.Modified;
                         try

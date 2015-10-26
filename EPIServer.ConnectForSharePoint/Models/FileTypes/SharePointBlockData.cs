@@ -26,5 +26,7 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         }
         [Editable(false, AllowInitialValue = true)]
         public virtual string ListID { get; set; }
+        [Editable(false, AllowInitialValue = true)]
+        public virtual string ViewID { get; set; }
     }
 }

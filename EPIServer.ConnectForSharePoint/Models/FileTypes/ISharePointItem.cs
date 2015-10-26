@@ -25,6 +25,11 @@ namespace EPiServer.ConnectForSharePoint.Models.FileTypes
         /// <summary>
         /// Sharepoint list Guid
         /// </summary>
-        string ListID { get; set; } 
+        string ListID { get; set; }
+
+        /// <summary>
+        /// the view id that was used originally when the data was retrieved.
+        /// </summary>
+        string ViewID { get; set; }
     }
 }

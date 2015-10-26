@@ -24,7 +24,7 @@
         DocumentLibrary = 101,
         Announcements = 104,    // MAI-176
         Contacts = 105,         // MAI-178
-        Events = 106,           // MAI-177
+        // Events = 106,           // MAI-177 - buggy, not getting re-occuring schedule, needs to be investigated
         PictureLibrary = 109,   // implicitly supports thumbnail
         AssetLibary = 851,      // implicitly supports thumbnail
         WebPageLibrary = 119
