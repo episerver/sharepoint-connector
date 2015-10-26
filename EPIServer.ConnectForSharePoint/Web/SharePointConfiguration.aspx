@@ -217,6 +217,10 @@
             document.getElementById('<%# TBNewFolderName.ClientID %>').value = "";
             document.getElementById('<%# TBNewFolderName.ClientID %>').disabled = true;
 
+            var epFolderName = $('#FullRegion_EntryPointFolderName');
+            epFolderName.val('<%# CurrentSettings.EntryPointFolderName %>');
+            epFolderName.attr("title", '<%# CurrentSettings.EntryPointFolderName %>');
+
             $("#treedialog").dialog("close");
         }
 
