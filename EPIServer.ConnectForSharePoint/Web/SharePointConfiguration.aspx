@@ -265,15 +265,19 @@
                 <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
             </div>
 
-            <div class="epi-size15">
-                <br />
-                <label><%# Translate("/sharepoint/admin/connectiontype") %></label>
-                <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" Text=<%# Translate("/sharepoint/admin/onpremises") %> runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
+           <div class="epi-size15">
+                <label style="position:absolute; vertical-align:bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
                 <br />
                 <label></label>
-                <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" Text=<%# Translate("/sharepoint/admin/online") %> runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
+                <asp:RadioButton ID="RadioButton1" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
+                <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
+                <br />
+                <label></label>
+                <asp:RadioButton ID="RadioButton2" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
+                <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/online") %></label>
                 <br />
             </div>
+
             <div class="epi-size15">
                 <br />
                 <label></label>
