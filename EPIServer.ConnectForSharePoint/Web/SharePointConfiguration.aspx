@@ -269,11 +269,11 @@
                 <label style="position:absolute; vertical-align:bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
                 <br />
                 <label></label>
-                <asp:RadioButton ID="RadioButton1" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
+                <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
                 <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
                 <br />
                 <label></label>
-                <asp:RadioButton ID="RadioButton2" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
+                <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
                 <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/online") %></label>
                 <br />
             </div>
