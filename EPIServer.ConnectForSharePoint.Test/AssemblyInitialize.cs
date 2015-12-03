@@ -13,7 +13,7 @@ namespace EPiServer.ConnectForSharePoint.Test
     [TestClass]
     public class AssemblyInitialize
     {
-        //testing build
+        //testing build 2
         public static TestScopeHelper AssemblyScope { get; set; }
 
         [AssemblyInitialize]
