@@ -7,9 +7,13 @@ using EPiServer.Licensing;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("EPiServer.ConnectForSharePoint")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Messaging engine for EPiServer Connect For Sharepoint")]
+[assembly: AssemblyCompany("EPiServer AB")]
 [assembly: AssemblyProduct("EPiServer.ConnectForSharePoint")]
+[assembly: AssemblyCopyright("©  2015 by EPiServer AB. All rights reserved")]
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
