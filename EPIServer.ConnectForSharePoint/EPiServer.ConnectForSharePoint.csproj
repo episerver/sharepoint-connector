@@ -356,6 +356,17 @@
   <ItemGroup>
     <Content Include="ClientResources\Images\DefaultThumbnail.png" />
     <Content Include="ClientResources\Scripts\SharePointModule.js" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DA.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DE.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_ES.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_FI.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_FR.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_IT.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_JA.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_NL.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_NO.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_SV.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_ZH.xml" />
     <Content Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
