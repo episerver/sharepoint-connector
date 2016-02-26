@@ -29,7 +29,6 @@ namespace EPiServer.ConnectForSharePoint.Web
     /// </summary>
     [GuiPlugIn(Area = PlugInArea.AdminConfigMenu,
         UrlFromModuleFolder = "Web/SharePointConfiguration.aspx",
-        DisplayName = "SharePoint Configuration",
         LanguagePath = "/sharepoint/admin")]
     public partial class SharePointConfiguration : WebFormsBase
     {
