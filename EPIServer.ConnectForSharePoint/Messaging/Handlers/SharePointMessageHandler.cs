@@ -1,8 +1,11 @@
-﻿using EPiServer.ConnectForSharePoint.Messaging.Messages;
+﻿using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.Logging;
+using EPiServer.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
@@ -20,6 +23,11 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
     {
         private ILogger _logger;
         private ISharePointProcessor _documentProcessor;
+        private string error1 = "* Verify that CmsAdmins virtual role exists in the web.config file and that it maps " +
+            "to the \"Administrators\" user group.";
+        private string error2 = "* Verify that CmsAdmins role or the role that the CmsAdmins role maps to has full access to " +
+            "the folder specified in the \"Connect for Sharepoint\" configuration.";
+
 
         /// <summary>
         /// Default Constructor
@@ -33,6 +41,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         {
             _logger = theLogger;
             _documentProcessor = theProcessor;
+        }
+
+        private void showErrorHelperMessages()
+        {
+            _logger.Error(error1);
+            _logger.Error(error2);
         }
 
         /// <summary>
@@ -55,13 +69,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 
         public void Handle(SharePointFolderAddMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.AddFolder(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddFolder", e);
+                try
+                {
+                    processor.AddFolder(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error AddFolder", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
@@ -71,25 +90,35 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointFolderUpdateMessage message)
         {
-            try
-            { 
-                processor.UpdateFolder(message.Item);
-            }
-            catch (Exception e)
+            using (var pp = new PrincipalPreserver())
             {
-                _logger.Error("Error UpdateFolder", e);
+                try
+                {
+                    processor.UpdateFolder(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error UpdateFolder", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
         public void Handle(SharePointFolderDeleteMessage message)
         {
-            try
-            { 
-                processor.DeleteFolder(message.Item);
-            }
-            catch (Exception e)
+            using (var pp = new PrincipalPreserver())
             {
-                _logger.Error("Error DeleteFolder", e);
+                try
+                {
+                    processor.DeleteFolder(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error DeleteFolder", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
@@ -99,13 +128,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.AddDocument(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
+                try
+                {
+                    processor.AddDocument(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error AddDocument", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
@@ -115,13 +149,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentUpdateMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.UpdateDocument(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
+                try
+                {
+                    processor.UpdateDocument(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error UpdateDocument", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
@@ -131,50 +170,93 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentDeleteMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.DeleteDocument(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
+                try
+                {
+                    processor.DeleteDocument(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error DeleteDocument", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
         }
 
         public void Handle(SharePointListItemAddMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.AddListItem(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
+                try
+                {
+                    processor.AddListItem(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error AddListItem", e);
+                    if( e is EPiServer.Core.AccessDeniedException )
+                        showErrorHelperMessages();
+                }
             }
         }
 
         public void Handle(SharePointListItemUpdateMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.UpdateListItem(message.Item);
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
+                try
+                {
+                    processor.UpdateListItem(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error UpdateListItem", e);
+                    if( e is EPiServer.Core.AccessDeniedException )
+                        showErrorHelperMessages();
+                }
             }
         }
 
         public void Handle(SharePointListItemDeleteMessage message)
         {
-            try
+            using (var pp = new PrincipalPreserver())
             {
-                processor.DeleteListItem(message.Item);
+                try
+                {
+                    processor.DeleteListItem(message.Item);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Error DeleteListItem", e);
+                    if (e is EPiServer.Core.AccessDeniedException)
+                        showErrorHelperMessages();
+                }
             }
-            catch (Exception e)
-            {
-                _logger.Error("Error AddDocument", e);
-            }
+        }
+    }
+
+    /// <summary>
+    /// Class that sets the current principal to be a generic identity that is part of the CmsAdmins group,
+    /// this allows us to perform updates in a folder without having to toggle permissions etc, the only requirement
+    /// is that the folder has the CmsAdmins group assigned to it with full administrative access.
+    /// </summary>
+    public class PrincipalPreserver : IDisposable
+    {
+        IPrincipal p;
+
+        public PrincipalPreserver()
+        {
+            p = PrincipalInfo.CurrentPrincipal;
+            PrincipalInfo.CurrentPrincipal = new GenericPrincipal(
+                            new GenericIdentity("Sharepoint Processor"),
+                            new[] { "CmsAdmins" });
+        }
+
+        public void Dispose()
+        {
+            PrincipalInfo.CurrentPrincipal = p;
         }
     }
 }

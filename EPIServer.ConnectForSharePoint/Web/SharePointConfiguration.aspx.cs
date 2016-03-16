@@ -21,6 +21,7 @@ using EPiServer.Security;
 using EPiServer.Web;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.DataAbstraction;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -471,6 +472,16 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Save();
 
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
+
+                // Make sure the selected folder has the CmsAdmin full access rights.
+                var repo = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
+                var contentSecurity = repo.Get(SharePointSettings.Current.EntryPoint).CreateWritableClone() as IContentSecurityDescriptor;
+                if (contentSecurity.IsInherited)
+                {
+                    contentSecurity.ToLocal();
+                }
+                contentSecurity.AddEntry(new AccessControlEntry("CmsAdmins", AccessLevel.FullAccess));
+                repo.Save(SharePointSettings.Current.EntryPoint, contentSecurity, SecuritySaveType.Replace);
 
                 // Put all the add folder messages on the queue, this will take care of any new folders selected.
                 messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);

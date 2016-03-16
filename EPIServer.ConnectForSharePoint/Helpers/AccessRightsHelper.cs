@@ -2,6 +2,7 @@
 using EPiServer.DataAbstraction;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
@@ -9,6 +10,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// <summary>
     /// Helper class for checking access right
     /// </summary>
+    [Obsolete("Obsolete : The methods in this class are very specific and assign specified access level to the Everyone group.")]
     public class AccessRightsHelper : IAccessRightsHelper
     {
         private IServiceLocator _serviceLocator;
