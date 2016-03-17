@@ -318,7 +318,7 @@
                         AccessLevel="NoAccess" 
                         runat="server" 
                         IncludeRootItem="true" 
-                        ContentLink="<%# EPiServer.Web.SiteDefinition.Current.SiteAssetsRoot %>" />
+                        ContentLink="<%# EPiServer.Web.SiteDefinition.Current.GlobalAssetsRoot %>" />
                     <div class="episcroll episerver-pagetree-selfcontained" style="max-height:250px;">
                        <EPiServerUI:PageTreeView ID="pageTreeView" 
                            DataSourceID="contentDataSource" 
