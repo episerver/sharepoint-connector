@@ -102,7 +102,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             ddsf.Verify(fact => fact.CreateStore(It.IsAny<Type>()), Times.Once, "Failed to create data store");
             dds.Verify(dd => dd.Save(It.IsAny<FolderData>()), Times.Once, "Failed to save the folder data");
-            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
             contentRepo.Verify(cr => cr.Save(  It.Is<ContentFolder> (con => con.Name == item.Folder.Name && 
                 con.ParentLink != null ),
                 It.Is<SaveAction>(sa => sa == SaveAction.Publish), It.Is<AccessLevel>(al => al == AccessLevel.FullAccess)),
@@ -145,30 +144,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             ddsf.Verify(fact => fact.CreateStore(It.IsAny<Type>()), Times.Once, "Failed to create data store");
             dds.Verify(dd => dd.Save(It.IsAny<FolderData>()), Times.Once, "Failed to save the folder data");
 
-            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
-
             // Make sure the find recursive was called and the parent link id was set, and that the proper access control level was set.
             contentRepo.Verify(cr => cr.Save(It.Is<ContentFolder>(con => con.Name == item.Folder.Name &&
              con.ParentLink != null),
                 It.Is<SaveAction>(sa => sa == SaveAction.Publish), It.Is<AccessLevel>(al => al == AccessLevel.FullAccess)),
                 Times.Once, "Save was called with unexpected values");
-        }
-
-        [TestMethod]
-        public void DeleteFolder_Calls_SetAccessRight()
-        {
-            var processor = GetUnitUnderTest();
-            accessRightsHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
-
-            var item = new SPListItem()
-            {
-                Folder = new SPFolder() { Name = "My Folder Name" },
-                entryPointId = 42
-            };
-
-            processor.DeleteFolder(item);
-
-            accessRightsHelper.Verify(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>()), Times.Once, "SetAccessRights needs to be called once");
         }
 
         [TestMethod]

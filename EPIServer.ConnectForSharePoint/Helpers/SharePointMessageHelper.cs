@@ -101,20 +101,25 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         public void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
         {
             IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
-
-            var cmsFolderItems = repo.GetChildren<ContentFolder>(folderRef);
             FolderData fd = new FolderData();
-            foreach (var item in cmsFolderItems)
+
+            var cmsFolders = repo.GetChildren<ContentFolder>(folderRef);
+            foreach (var cmsFolder in cmsFolders)
             {
                 Boolean delete = true;
+                fd = fd.GetFolder(cmsFolder.ContentLink.ID);
+                if (fd.Id.Equals(-1))
+                {
+                    delete = false;
+                }
 
                 // now iterate through the sharepoint list and check to see if its there. 
                 // If its not, it needs to be deleted.
                 foreach (var spItem2 in sharepointListItems)
                 {
-                    fd = fd.GetFolder(item.ContentLink.ID);
+                    fd = fd.GetFolder(cmsFolder.ContentLink.ID);
 
-                    if (spItem2.GUID == fd.FolderGuid)
+                    if ( spItem2.GUID.Equals(fd.FolderGuid) )
                     {
                         delete = false; // the item is in both lists, we wont delete it. 
                         break;
@@ -126,9 +131,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     {
                         Item = new SPListItem()
                         {
-                            entryPointId = folderRef.ID, // id of the folder the item is in
+                            entryPointId = fd.RefId, // id of the folder the item is in
                             GUID = fd.FolderGuid,
-                            Folder = new SPFolder() { Name = item.Name }
+                            Folder = new SPFolder() { Name = cmsFolder.Name }
                         },
                     });
                 }
