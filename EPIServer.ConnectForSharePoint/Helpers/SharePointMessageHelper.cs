@@ -199,7 +199,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="selectedList">The list of items associated with all the selected views</param>
         /// <param name="selectedView">The selected views in the configuration</param>
         /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
-        public List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, string ParentFolderName = null)
+        public List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, SPListItem ParentFolder = null)
         {
             List<SPListItem> nonFolderItems = new List<SPListItem>();
 
@@ -208,10 +208,15 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
                 spItem.rootCMSFolderEntryPointID = _settingsHelper.GetEntryPoint().ID;
-                if (string.IsNullOrEmpty(ParentFolderName))
+                if (ParentFolder == null)
+                {
                     spItem.ParentFolderName = parentFolder.Name;
+                }
                 else
-                    spItem.ParentFolderName = ParentFolderName;
+                {
+                    spItem.ParentFolderName = ParentFolder.Folder.Name;
+                    spItem.ParentFolderSharePointGuid = ParentFolder.GUID;
+                }
 
                 if (spItem.Folder == null)
                 {
@@ -230,7 +235,18 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         RemoveSharePointAddedFolders(folderRef, subItems);
                     }
 
-                    nonFolderItems.AddRange( ProcessSubItems(spItem.Folder, selectedList, selectedView) );
+                    var tmplist = ProcessSubItems(spItem.Folder, selectedList, selectedView, spItem);
+                    foreach (var item in tmplist)
+                    {
+                        // make sure the sharepoint folder Guid is set so we know where to put the item 
+                        // in episerver while we are processing
+                        if (item.ParentFolderSharePointGuid == null || item.ParentFolderSharePointGuid.Equals(Guid.Empty) )
+                        {
+                            item.ParentFolderSharePointGuid = spItem.GUID;
+                        }
+                    }
+
+                    nonFolderItems.AddRange( tmplist );
                 }
             }
             return nonFolderItems;
@@ -371,11 +387,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         spItem.selectedView = selectedView;
                         spItem.ParentFolderName = rootFolder.Folder.Name;
                     }
+
+                    spItem.ParentFolderSharePointGuid = rootFolder.GUID;
                 }
 
                 // Process the sub items of this folder.
                 AllSPListItems.AddRange( 
-                    ProcessSubItems(selectedList.RootFolder, selectedList, selectedView, rootFolder.Folder.Name) );
+                    ProcessSubItems(selectedList.RootFolder, selectedList, selectedView, rootFolder) );
             }
 
             // get all of our content from cms
@@ -394,73 +412,70 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="item"></param>
         /// <param name="entryPoint">The current entry point that is saved in the settings.</param>
-        /// <returns></returns>
+        /// <returns>the content reference of the folder if found</returns>
         private ContentReference AddOrUpdateFolder(SPListItem item, ContentReference entryPoint)
         {
-            var contentRef = _contentProviderHelper.FindRecursiveFolders(item.Folder.Name, entryPoint);
-            if (contentRef == null)
+            var add = true;
+            ContentReference contentRef = null;
+
+            // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
+            // we can assume the name changed and we just need to update it
+            var fd = new FolderData();
+            var foundData = fd.GetFolder(item.GUID);
+
+            if (foundData.RefId != -1)
             {
-                var add = true;
+                // we found it, but it doesn't mean it's the correct one. If the user changed the dest folder
+                // these items could have been marked for delete in previous methods and are still in the queue
+                var repo = _serviceLocator.GetInstance<IContentRepository>();
+                var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
 
-                // before we add it, lets see if the item is in the SPFolderMappings dynamic data store, if it is 
-                // we can assume the name changed and we just need to update it
-                var fd = new FolderData();
-                var foundData = fd.GetFolder(item.GUID);
-
-                if (foundData.RefId != -1)
+                if (cf != null) // did the item actually exist?
                 {
-                    // we found it, but it doesn't mean it's the correct one. If the user changed the dest folder
-                    // these items could have been marked for delete in previous methods and are still in the queue
-                    var repo = _serviceLocator.GetInstance<IContentRepository>();
-                    var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
-
-                    if (cf != null) // did the item actually exist?
+                    // walk up the parent list and see if it's the current selected folder, if it's not
+                    // there it means the item is in the delete queue and the user selected a different folder.
+                    // If it is under the current folder, it means the folder needs to be updated becuase it changed
+                    // in sharepoint.
+                    var done = false;
+                    do
                     {
-                        // walk up the parent list and see if it's the current selected folder, if it's not
-                        // there it means the item is in the delete queue and the user selected a different folder.
-                        // If it is under the current folder, it means the folder needs to be updated becuase it changed
-                        // in sharepoint.
-                        var done = false;
-                        do
+                        if (cf.ParentLink.ID == entryPoint.ID)
                         {
-                            if (cf.ParentLink.ID == entryPoint.ID)
+                            _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                            _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
                             {
-                                _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
-                                _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
-                                {
-                                    Item = item,
-                                });
-                                add = false;
-                                done = true;
-                                contentRef = cf.ContentLink; // Make sure we return the content reference
-                            }
-                            else
-                            {
-                                cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
-                            }
+                                Item = item,
+                            });
+                            add = false;
+                            done = true;
+                            contentRef = cf.ContentLink; // Make sure we return the content reference
+                        }
+                        else
+                        {
+                            cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
+                        }
 
-                            if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
-                            {
-                                done = true;
-                            }
-                        } while (!done);
-                    }
-                    else
-                    {
-                        // Remove the folder data, it's invalid.
-                        FolderData.Delete(foundData);
-                    }
+                        if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
+                        {
+                            done = true;
+                        }
+                    } while (!done);
                 }
-
-                if (add)
+                else
                 {
-                    // Add the view folder.
-                    _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);
-                    _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
-                    {
-                        Item = item,
-                    });
+                    // Remove the folder data, it's invalid.
+                    FolderData.Delete(foundData);
                 }
+            }
+
+            if (add)
+            {
+                // Add the view folder.
+                _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);
+                _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
+                {
+                    Item = item,
+                });
             }
             return contentRef;
         }
