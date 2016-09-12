@@ -12,12 +12,6 @@ using EPiServer.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using EPiServer;
-using System.Xml;
-using System.Net;
-using EPiServer.ConnectForSharePoint.Models.ViewModels;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
@@ -80,8 +74,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             // Now check the folder to see if the item already exists. 
@@ -145,10 +140,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Its ok to search for the parent folder by name, its not going to be changing ever during this 
-                // message.
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName,
-                    new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                cref = new ContentReference(fdata.RefId);
             }
 
             if (cref != null)
@@ -257,8 +251,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             if (item.ContentLink != null)
@@ -344,8 +339,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             // Now check the folder to see if the item already exists. 
@@ -402,8 +398,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             if (item.ContentLink != null)
