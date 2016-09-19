@@ -185,23 +185,25 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public void DeleteFolder(SPListItem item)
         {
             var repo = _serviceLocator.GetInstance<IContentRepository>();
-
-            // Set access level to 'Read' on the SharePoint's root folder and its children
-            ContentReference rootRef = new ContentReference(item.entryPointId);
-
-            var children = repo.GetChildren<ContentFolder>(rootRef);
-            foreach (var child in children)
+            FolderData fd = new FolderData();
+            var folderData = fd.GetFolder(item.GUID);
+            if (folderData.RefId != -1)
             {
-                if (child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase))
+                ContentReference rootRef = new ContentReference(folderData.RefId);
+
+                var children = repo.GetChildren<ContentFolder>(rootRef);
+                foreach (var child in children)
                 {
                     // before we delete this folder, delete all the sub folders
                     DeleteSubFolders(repo, child);
 
-                    repo.Delete(child.ContentLink, true, AccessLevel.Delete);
-                    FolderData fd = new FolderData();
+                    repo.Delete(child.ContentLink, true);
                     FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
-                    break;
                 }
+
+                // now delete this folder
+                repo.Delete(new ContentReference(item.entryPointId), true);
+                FolderData.Delete(fd.GetFolder(item.entryPointId));
             }
         }
 

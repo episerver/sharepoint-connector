@@ -124,7 +124,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var folders = new List<ContentFolder>();
             folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
             folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            folders.Add(new ContentFolder() { Name = "FolderToBeDeleted", ContentLink = new ContentReference(42) });
             contentRepo.SetupSequence(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
                 .Returns(folders)
                 .Returns(new List<ContentFolder>());
@@ -135,8 +134,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             dds.Setup(dd => dd.Delete(It.IsAny<FolderData>())).Verifiable();
             FolderData folderData = new FolderData(ddsf.Object);
 
-            // Return an ordered list of nothing...
+            // Return a list
             IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
             processor.DeleteFolder(item);
@@ -145,9 +145,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             // specified in the splistitem
             contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42),
                 It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
-                "Repository Delete needs to be called once with proper Content reference");
-            dds.Verify(dd => dd.Delete(It.IsAny<Identity>()), Times.Once,
-                "Delete dynamic data folder data must be called once.");
+                "Repository Delete needs to be called 1 times with this correct icontent");
+            dds.Verify(dd => dd.Delete(It.IsAny<Identity>()), Times.Exactly(3),
+                "Delete dynamic data folder data must be called three times in this test.");
         }
 
         [TestMethod]
