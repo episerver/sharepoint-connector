@@ -107,35 +107,32 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             foreach (var cmsFolder in cmsFolders)
             {
                 Boolean delete = true;
+                // get the folder from the big table
                 fd = fd.GetFolder(cmsFolder.ContentLink.ID);
-                if (fd.Id.Equals(-1))
+                if (fd.RefId != -1)
                 {
-                    delete = false;
-                }
-
-                // now iterate through the sharepoint list and check to see if its there. 
-                // If its not, it needs to be deleted.
-                foreach (var spItem2 in sharepointListItems)
-                {
-                    fd = fd.GetFolder(cmsFolder.ContentLink.ID);
-
-                    if ( spItem2.GUID.Equals(fd.FolderGuid) )
+                    foreach (var item in sharepointListItems)
                     {
-                        delete = false; // the item is in both lists, we wont delete it. 
-                        break;
-                    }
-                }
-                if (delete == true)
-                {
-                    _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
-                    {
-                        Item = new SPListItem()
+                        if (item.Folder != null && item.GUID == fd.FolderGuid)
                         {
-                            entryPointId = fd.RefId, // id of the folder the item is in
-                            GUID = fd.FolderGuid,
-                            Folder = new SPFolder() { Name = cmsFolder.Name }
-                        },
-                    });
+                            delete = false;
+                            item.entryPointId = folderRef.ID;
+                            break;
+                        }
+                    }
+
+                    if (delete == true)
+                    {
+                        _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                        {
+                            Item = new SPListItem()
+                            {
+                                entryPointId = fd.RefId, // id of the folder the item is in
+                                GUID = fd.FolderGuid,
+                                Folder = new SPFolder() { Name = cmsFolder.Name }
+                            },
+                        });
+                    }
                 }
             }
         }
@@ -429,41 +426,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 // these items could have been marked for delete in previous methods and are still in the queue
                 var repo = _serviceLocator.GetInstance<IContentRepository>();
                 var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
-
                 if (cf != null) // did the item actually exist?
                 {
-                    // walk up the parent list and see if it's the current selected folder, if it's not
-                    // there it means the item is in the delete queue and the user selected a different folder.
-                    // If it is under the current folder, it means the folder needs to be updated becuase it changed
-                    // in sharepoint.
-                    var done = false;
-                    do
+                    _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                    _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
                     {
-                        if (cf.ParentLink.ID == entryPoint.ID)
-                        {
-                            _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
-                            _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
-                            {
-                                Item = item,
-                            });
-                            add = false;
-                            done = true;
-                            contentRef = cf.ContentLink; // Make sure we return the content reference
-                        }
-                        else
-                        {
-                            cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
-                        }
-
-                        if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
-                        {
-                            done = true;
-                        }
-                    } while (!done);
+                        Item = item,
+                    });
+                    add = false;
+                    contentRef = cf.ContentLink; // Make sure we return the content reference
                 }
                 else
                 {
-                    // Remove the folder data, it's invalid.
+                    // Remove the folder data, it's invalid., we will emit the create folder message.
                     FolderData.Delete(foundData);
                 }
             }
