@@ -422,11 +422,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             if (foundData.RefId != -1)
             {
-                // we found it, but it doesn't mean it's the correct one. If the user changed the dest folder
-                // these items could have been marked for delete in previous methods and are still in the queue
                 var repo = _serviceLocator.GetInstance<IContentRepository>();
-                var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
-                if (cf != null) // did the item actually exist?
+                ContentFolder cf;
+                if( repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf) )
                 {
                     _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
                     _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()

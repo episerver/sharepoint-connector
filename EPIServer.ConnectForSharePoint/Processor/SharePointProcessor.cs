@@ -202,8 +202,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 }
 
                 // now delete this folder
-                repo.Delete(new ContentReference(item.entryPointId), true);
-                FolderData.Delete(fd.GetFolder(item.entryPointId));
+                repo.Delete(new ContentReference(folderData.RefId), true);
+                FolderData.Delete(folderData);
             }
         }
 
