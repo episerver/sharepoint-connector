@@ -8,7 +8,6 @@ using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
-using EPiServer.Web;
 using EPiServer.DataAbstraction;
 using System.Diagnostics.CodeAnalysis;
 
@@ -23,6 +22,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
+        private List<SPListItem> _allSharePointFolders = new List<SPListItem>();
 
         [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
@@ -98,6 +98,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
         }
 
+        /// <summary>
+        /// If any subfolders of the specified folderRef exist, that are not in the sharepoint list
+        /// we will fire the delete message.
+        /// </summary>
+        /// <param name="folderRef"></param>
+        /// <param name="sharepointListItems"></param>
         public void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
         {
             IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
@@ -107,35 +113,32 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             foreach (var cmsFolder in cmsFolders)
             {
                 Boolean delete = true;
+                // get the folder from the big table
                 fd = fd.GetFolder(cmsFolder.ContentLink.ID);
-                if (fd.Id.Equals(-1))
+                if (fd.RefId != -1)
                 {
-                    delete = false;
-                }
-
-                // now iterate through the sharepoint list and check to see if its there. 
-                // If its not, it needs to be deleted.
-                foreach (var spItem2 in sharepointListItems)
-                {
-                    fd = fd.GetFolder(cmsFolder.ContentLink.ID);
-
-                    if ( spItem2.GUID.Equals(fd.FolderGuid) )
+                    foreach (var item in sharepointListItems)
                     {
-                        delete = false; // the item is in both lists, we wont delete it. 
-                        break;
-                    }
-                }
-                if (delete == true)
-                {
-                    _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
-                    {
-                        Item = new SPListItem()
+                        if (item.Folder != null && item.GUID == fd.FolderGuid)
                         {
-                            entryPointId = fd.RefId, // id of the folder the item is in
-                            GUID = fd.FolderGuid,
-                            Folder = new SPFolder() { Name = cmsFolder.Name }
-                        },
-                    });
+                            delete = false;
+                            item.entryPointId = folderRef.ID;
+                            break;
+                        }
+                    }
+
+                    if (delete == true)
+                    {
+                        _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                        {
+                            Item = new SPListItem()
+                            {
+                                entryPointId = fd.RefId, // id of the folder the item is in
+                                GUID = fd.FolderGuid,
+                                Folder = new SPFolder() { Name = cmsFolder.Name }
+                            },
+                        });
+                    }
                 }
             }
         }
@@ -227,14 +230,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 {
                     // Add the folder if its not already there
                     var folderRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
-                    if (folderRef != null)
-                    {
-                        // The folder was previously created so we can assume that we have been here before and this is a refresh.
-                        // get the list of items that should be in this folder and call processLists that will 
-                        var subItems = _helper.GetItems(selectedList, selectedView, spItem.Folder);
-                        RemoveSharePointAddedFolders(folderRef, subItems);
+                    if( folderRef != null )
+                    { 
+                        RemoveSharePointAddedFolders(folderRef, _allSharePointFolders);
                     }
 
+                    // now process the sub items
                     var tmplist = ProcessSubItems(spItem.Folder, selectedList, selectedView, spItem);
                     foreach (var item in tmplist)
                     {
@@ -355,6 +356,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var item in selectedLists)
             {
+                _allSharePointFolders.Clear();
+
                 // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(item.Key);
 
@@ -367,16 +370,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
                 var rootFolderItems = _helper.GetItems(selectedList, selectedView, selectedList.RootFolder);
+                _allSharePointFolders.AddRange(_helper.GetAllFolders(selectedList, selectedView));
 
                 // create and/or update our root folder for this list/view
                 SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
                 var folderRef = AddOrUpdateFolder(rootFolder, _settingsHelper.GetEntryPoint());
                 if(folderRef != null ) 
                 {
+                    _allSharePointFolders.Add(rootFolder);
+
                     // if folder exists we need to check to see if anything has changed.
                     // Remove any folders the user may have added in cms or deleted from sharepoint
                     RemoveUserAddedFolders(folderRef);
-                    RemoveSharePointAddedFolders(folderRef, rootFolderItems);
+                    RemoveSharePointAddedFolders(folderRef, _allSharePointFolders);
                 }
 
                 // Make sure the selectedView and parent folder name attribute is set.
@@ -425,45 +431,21 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             if (foundData.RefId != -1)
             {
-                // we found it, but it doesn't mean it's the correct one. If the user changed the dest folder
-                // these items could have been marked for delete in previous methods and are still in the queue
                 var repo = _serviceLocator.GetInstance<IContentRepository>();
-                var cf = repo.Get<ContentFolder>(new ContentReference(foundData.RefId));
-
-                if (cf != null) // did the item actually exist?
+                ContentFolder cf;
+                if( repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf) )
                 {
-                    // walk up the parent list and see if it's the current selected folder, if it's not
-                    // there it means the item is in the delete queue and the user selected a different folder.
-                    // If it is under the current folder, it means the folder needs to be updated becuase it changed
-                    // in sharepoint.
-                    var done = false;
-                    do
+                    _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                    _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
                     {
-                        if (cf.ParentLink.ID == entryPoint.ID)
-                        {
-                            _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
-                            _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
-                            {
-                                Item = item,
-                            });
-                            add = false;
-                            done = true;
-                            contentRef = cf.ContentLink; // Make sure we return the content reference
-                        }
-                        else
-                        {
-                            cf = repo.Get<ContentFolder>(new ContentReference(cf.ParentLink.ID));
-                        }
-
-                        if( cf == null || cf.ParentLink == SiteDefinition.Current.GlobalAssetsRoot)
-                        {
-                            done = true;
-                        }
-                    } while (!done);
+                        Item = item,
+                    });
+                    add = false;
+                    contentRef = cf.ContentLink; // Make sure we return the content reference
                 }
                 else
                 {
-                    // Remove the folder data, it's invalid.
+                    // Remove the folder data, it's invalid., we will emit the create folder message.
                     FolderData.Delete(foundData);
                 }
             }

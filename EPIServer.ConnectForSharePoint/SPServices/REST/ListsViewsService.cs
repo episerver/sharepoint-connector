@@ -71,6 +71,25 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return BuildListItems(SendRequest(restRequest, bodyBuilder.ToString(), null, true), list);
         }
 
+        public IEnumerable<SPListItem> GetAllFolders(SPList list, SPListView view)
+        {
+            var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_GETITEMS_PATH_FORMAT, list.Id), "POST", GetItemExpandQuery(true));
+            var bodyBuilder = new StringBuilder("{ 'query' : {'__metadata': { 'type': 'SP.CamlQuery' }, ");
+
+            bodyBuilder.AppendFormat("'ViewXml': '{0}'", EncodeDataForCAMLQuery(GetListViewXmlWithoutViewFields(view)));
+            bodyBuilder.AppendFormat(",'FolderServerRelativeUrl': '{0}'", EncodeDataForCAMLQuery(list.RootFolder.ServerRelativeUrl));
+
+            bodyBuilder.Append(",'DatesInUtc': 'true'");
+            bodyBuilder.Append(" } }");
+
+            string withQueryString = bodyBuilder.ToString().Replace("<Query>", "<Query><Where><BeginsWith>" +
+                        "<FieldRef Name=\"ContentTypeId\"/><Value Type =\"ContentTypeId\">" + "0x0120" + "</Value>" +
+                        "</BeginsWith></Where>");
+            withQueryString = withQueryString.Replace("<View ", "<View Scope=\"RecursiveAll\" ");           // search sub folders too.
+
+           return BuildListItems(SendRequest(restRequest, withQueryString, null, true), list);
+         }
+
         public IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder)
         {
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_GETITEMS_PATH_FORMAT, list.Id), "POST", GetItemExpandQuery(true));
