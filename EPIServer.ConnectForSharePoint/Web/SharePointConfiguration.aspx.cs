@@ -449,12 +449,17 @@ namespace EPiServer.ConnectForSharePoint.Web
                             SPListItem item = new SPListItem()
                             {
                                 entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                                Folder = new SPFolder() { Name = cmsfolder.Name }
+                                Folder = new SPFolder() { Name = cmsfolder.Name },
+                                GUID = folder.FolderGuid
                             };
                             emmiter.Create().Emit(new SharePointFolderDeleteMessage()
                             {
                                 Item = item
                             });
+                        }
+                        else
+                        {   // Failed to load cms folder, so this dynamic data entry is bad.
+                            FolderData.Delete(folder);
                         }
                     }
                 }
