@@ -443,18 +443,23 @@ namespace EPiServer.ConnectForSharePoint.Web
                     var folders = fd.GetFolders();
                     foreach( var folder in folders )
                     {
-                        var cmsfolder = _contentRepository.Get<ContentFolder>(new ContentReference(folder.RefId));
-                        if( cmsfolder != null )
+                        ContentFolder cmsfolder;
+                        if (  _contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder) )
                         {
                             SPListItem item = new SPListItem()
                             {
                                 entryPointId = SharePointSettings.Current.EntryPoint.ID,
-                                Folder = new SPFolder() { Name = cmsfolder.Name }
+                                Folder = new SPFolder() { Name = cmsfolder.Name },
+                                GUID = folder.FolderGuid
                             };
                             emmiter.Create().Emit(new SharePointFolderDeleteMessage()
                             {
                                 Item = item
                             });
+                        }
+                        else
+                        {   // Failed to load cms folder, so this dynamic data entry is bad.
+                            FolderData.Delete(folder);
                         }
                     }
                 }

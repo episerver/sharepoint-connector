@@ -221,5 +221,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             return SPServicesHub.SPListsViewsService.GetItems(list, view, folder);
         }
+
+        public IEnumerable<SPListItem> GetAllFolders(SPList list, SPListView view)
+        {
+            return SPServicesHub.SPListsViewsService.GetAllFolders(list, view);
+        }
     }
 }

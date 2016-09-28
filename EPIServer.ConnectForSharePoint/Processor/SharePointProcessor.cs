@@ -175,8 +175,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).
                     CreateWritableClone() as ContentFolder;
                 cmsFolder.Name = item.Folder.Name;
-                var savedRef = repo.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
 
+                // figure out if the item has been moved.
+                var parentfd = fd.GetFolder(item.ParentFolderSharePointGuid);
+                if( parentfd.RefId != -1)
+                {
+                    if (cmsFolder.ParentLink.ID != parentfd.RefId)
+                    {
+                        repo.Move(cmsFolder.ContentLink, new ContentReference(parentfd.RefId));
+                    }
+                }
+
+                var savedRef = repo.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
                 fdata.Modified = item.Modified;
                 fdata.Save();
             }
@@ -202,8 +212,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 }
 
                 // now delete this folder
-                repo.Delete(new ContentReference(item.entryPointId), true);
-                FolderData.Delete(fd.GetFolder(item.entryPointId));
+                repo.Delete(new ContentReference(folderData.RefId), true);
+                FolderData.Delete(folderData);
             }
         }
 
@@ -262,6 +272,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             {
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(item.ContentLink).CreateWritableClone() as MediaData;
+                if( media.ParentLink.ID != parentFolder.ID )
+                {
+                    contentRepository.Move(media.ContentLink, parentFolder);
+                }
 
                 if (media is ISharePointItem)
                 {
