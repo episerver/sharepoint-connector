@@ -22,7 +22,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
-        private List<SPListItem> _allSharePointFolders;
+        private List<SPListItem> _allSharePointFolders = new List<SPListItem>();
 
         [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
@@ -34,7 +34,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
             _processorHelper = new SharePointProcessorHelper();
-            _allSharePointFolders = new List<SPListItem>();
         }
 
         internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
