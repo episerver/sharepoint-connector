@@ -310,12 +310,13 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             processinghelper.Setup(ph => ph.GetDocumentStream(It.IsAny<SPListItem>())).Verifiable();
 
-            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
+            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(
                 new SharepointGenericMedia()
                 {
                     Name = "Filename.jpg",
                     ContentLink = new ContentReference(42),
-                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
+                    SharePointTimeLastModified = new DateTime(2014, 1, 1),
+                    ParentLink = new ContentReference(42)
                 }
             );
 
