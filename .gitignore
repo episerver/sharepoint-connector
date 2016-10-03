@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Deployment
+/EPIServer.ConnectForSharePoint/bin
+/EPIServer.ConnectForSharePoint/obj/Debug
+/EPIServer.ConnectForSharePoint.Messaging/bin/Debug
+/EPIServer.ConnectForSharePoint.Messaging/obj/Debug
+/EPIServer.ConnectForSharePoint.Test/bin/Debug
+/EPIServer.ConnectForSharePoint.Test/obj/Debug
+/packages

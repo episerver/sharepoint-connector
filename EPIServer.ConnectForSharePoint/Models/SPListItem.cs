@@ -73,6 +73,11 @@ namespace EPiServer.ConnectForSharePoint.Models
         public string ParentFolderName { get; set; }
 
         /// <summary>
+        ///  The parent folder Guid from sharepoint
+        /// </summary>
+        public Guid ParentFolderSharePointGuid { get; set; }
+
+        /// <summary>
         /// the root cms folder entry id, typicall used as a search point for objects.
         /// </summary>
         public int rootCMSFolderEntryPointID { get; set; }

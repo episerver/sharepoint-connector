@@ -29,13 +29,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _serviceLocator = serviceLocator;
             _contentRepository = serviceLocator.GetInstance<IContentRepository>();
         }
- 
+
         /// <summary>
         /// Recursively searches for specific ContentFolder given a name and a startRef (if null uses SiteDefinition.Current.GlobalAssetsRoot)
         /// </summary>
         /// <param name="name"></param>
         /// <param name="startRef">if null, it will use SiteDefinition.Current.GlobalAssetsRoot as starting ref</param>
         /// <returns></returns>
+        [Obsolete("FindRecursiveFolders is obsolete since it only returns the first folder it finds with the name specified.")]
         public ContentReference FindRecursiveFolders(string name, ContentReference startRef = null)
         {
             if( startRef == null )

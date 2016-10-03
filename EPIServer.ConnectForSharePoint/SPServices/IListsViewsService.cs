@@ -47,6 +47,14 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         SPListItem GetListItem(SPList list, string listItemId);
 
         /// <summary>
+        /// Gets all folders for the specified list and view
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="view"></param>
+        /// <returns></returns>
+        IEnumerable<SPListItem> GetAllFolders(SPList list, SPListView view);
+
+        /// <summary>
         /// Gets the field schema for a particular list.
         /// </summary>
         /// <param name="list"></param>

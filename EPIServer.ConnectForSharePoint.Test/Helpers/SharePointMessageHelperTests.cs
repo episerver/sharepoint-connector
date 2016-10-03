@@ -50,36 +50,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _serviceLocator = new Mock<IServiceLocator>();
             return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
         }
-        [TestMethod]
-        public void ProcessSubItems_Creates_Queue_Emits_Queue_Messages_For_Folders()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            // make sure our dynamic data store returns a ordered list with the folder data required.
-            IList<FolderData> ddslist = new List<FolderData>();
-            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
-            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
-
-            var itemList = new List<SPListItem>();
-            var folderItem = new SPFolder() { Name = "Test Folder" };
-            var item = new SPListItem() { Title = "Test Item One", entryPointId = 123, Folder = folderItem, ParentFolderName = "Test Parent" };
-            itemList.Add(item);
-
-            _helper.SetupSequence(sph => sph.GetItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>()))
-                .Returns(itemList)
-                .Returns(new List<SPListItem>());
-
-            ContentReference test = null;
-            _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(test);
-
-            var pFolder = new SPFolder();
-            var list = new SPList();
-            var listView = new SPListView();
-            var folderName = "Test Folder";
-            messageHelper.ProcessSubItems(pFolder, list, listView, folderName);
-
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(spm => spm.Item.Title == item.Title && spm.Item.ParentFolderName == folderName)), Times.AtLeastOnce, "We didn't call emit or the folder was not the one we expect");
-        }
 
         [TestMethod]
         public void ProcessSubItems_Returns_NonFolders()

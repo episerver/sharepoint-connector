@@ -12,12 +12,6 @@ using EPiServer.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using EPiServer;
-using System.Xml;
-using System.Net;
-using EPiServer.ConnectForSharePoint.Models.ViewModels;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
@@ -80,8 +74,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             // Now check the folder to see if the item already exists. 
@@ -145,10 +140,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Its ok to search for the parent folder by name, its not going to be changing ever during this 
-                // message.
-                cref = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName,
-                    new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                cref = new ContentReference(fdata.RefId);
             }
 
             if (cref != null)
@@ -181,8 +175,18 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).
                     CreateWritableClone() as ContentFolder;
                 cmsFolder.Name = item.Folder.Name;
-                var savedRef = repo.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
 
+                // figure out if the item has been moved.
+                var parentfd = fd.GetFolder(item.ParentFolderSharePointGuid);
+                if( parentfd.RefId != -1)
+                {
+                    if (cmsFolder.ParentLink.ID != parentfd.RefId)
+                    {
+                        repo.Move(cmsFolder.ContentLink, new ContentReference(parentfd.RefId));
+                    }
+                }
+
+                var savedRef = repo.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
                 fdata.Modified = item.Modified;
                 fdata.Save();
             }
@@ -191,23 +195,25 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         public void DeleteFolder(SPListItem item)
         {
             var repo = _serviceLocator.GetInstance<IContentRepository>();
-
-            // Set access level to 'Read' on the SharePoint's root folder and its children
-            ContentReference rootRef = new ContentReference(item.entryPointId);
-
-            var children = repo.GetChildren<ContentFolder>(rootRef);
-            foreach (var child in children)
+            FolderData fd = new FolderData();
+            var folderData = fd.GetFolder(item.GUID);
+            if (folderData.RefId != -1)
             {
-                if (child.Name.Equals(item.Folder.Name, StringComparison.OrdinalIgnoreCase))
+                ContentReference rootRef = new ContentReference(folderData.RefId);
+
+                var children = repo.GetChildren<ContentFolder>(rootRef);
+                foreach (var child in children)
                 {
                     // before we delete this folder, delete all the sub folders
                     DeleteSubFolders(repo, child);
 
-                    repo.Delete(child.ContentLink, true, AccessLevel.Delete);
-                    FolderData fd = new FolderData();
+                    repo.Delete(child.ContentLink, true);
                     FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
-                    break;
                 }
+
+                // now delete this folder
+                repo.Delete(new ContentReference(folderData.RefId), true);
+                FolderData.Delete(folderData);
             }
         }
 
@@ -257,14 +263,19 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             if (item.ContentLink != null)
             {
                 //Get a new empty media object
                 var media = contentRepository.Get<MediaData>(item.ContentLink).CreateWritableClone() as MediaData;
+                if( media.ParentLink.ID != parentFolder.ID )
+                {
+                    contentRepository.Move(media.ContentLink, parentFolder);
+                }
 
                 if (media is ISharePointItem)
                 {
@@ -344,8 +355,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             // Now check the folder to see if the item already exists. 
@@ -402,8 +414,9 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             }
             else
             {
-                // Only search from the entry point down
-                parentFolder = _contentProviderHelper.FindRecursiveFolders(item.ParentFolderName, new ContentReference(item.rootCMSFolderEntryPointID));
+                FolderData fd = new FolderData();
+                var fdata = fd.GetFolder(item.ParentFolderSharePointGuid);
+                parentFolder = new ContentReference(fdata.RefId);
             }
 
             if (item.ContentLink != null)

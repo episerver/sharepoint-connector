@@ -108,49 +108,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 Times.Once, "Save was called with unexpected values");
         }
 
-
-        [TestMethod]
-        public void AddFolder_Processes_AddFolder_Message_And_Calls_CMS_To_Do_Add_With_ParentFolderName()
-        {
-            var processor = GetUnitUnderTest();
-
-            accessRightsHelper.Setup(ch => ch.SetAccessRight(It.IsAny<ContentReference>(), It.IsAny<AccessLevel>())).Verifiable();
-            contentRepo.Setup(cr => cr.GetDefault<ContentFolder>(It.IsAny<ContentReference>())).Returns(new ContentFolder());
-            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Verifiable();
-            contentRepo.Setup(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>())).Returns(new ContentReference(42));
-
-            Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
-            Mock<MyDataStore> dds = new Mock<MyDataStore>();
-            ddsf.Setup(fact => fact.CreateStore(It.IsAny<Type>())).Returns(dds.Object);
-            dds.Setup(dd => dd.Save(It.IsAny<FolderData>())).Verifiable();
-            FolderData folderData = new FolderData(ddsf.Object);
-
-            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
-                It.IsAny<ContentReference>())).Returns(new ContentReference()
-                {
-                    ID = 10,
-                    ProviderName = "Some Provider"
-                });
-
-            var item = new SPListItem()
-            {
-                Folder = new SPFolder() { Name = "My Folder Name" },
-                ParentFolderName = "Parent Folder Name",
-                entryPointId = -1,
-                GUID = new Guid("6178D0E1-4F19-4231-BC58-A433821A941B")
-            };
-            processor.AddFolder(item);
-
-            ddsf.Verify(fact => fact.CreateStore(It.IsAny<Type>()), Times.Once, "Failed to create data store");
-            dds.Verify(dd => dd.Save(It.IsAny<FolderData>()), Times.Once, "Failed to save the folder data");
-
-            // Make sure the find recursive was called and the parent link id was set, and that the proper access control level was set.
-            contentRepo.Verify(cr => cr.Save(It.Is<ContentFolder>(con => con.Name == item.Folder.Name &&
-             con.ParentLink != null),
-                It.Is<SaveAction>(sa => sa == SaveAction.Publish), It.Is<AccessLevel>(al => al == AccessLevel.FullAccess)),
-                Times.Once, "Save was called with unexpected values");
-        }
-
         [TestMethod]
         public void DeleteFolder_Calls_Repository_Delete_When_Item_Is_Found()
         {
@@ -167,7 +124,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             var folders = new List<ContentFolder>();
             folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
             folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            folders.Add(new ContentFolder() { Name = "FolderToBeDeleted", ContentLink = new ContentReference(42) });
             contentRepo.SetupSequence(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
                 .Returns(folders)
                 .Returns(new List<ContentFolder>());
@@ -178,8 +134,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             dds.Setup(dd => dd.Delete(It.IsAny<FolderData>())).Verifiable();
             FolderData folderData = new FolderData(ddsf.Object);
 
-            // Return an ordered list of nothing...
+            // Return a list
             IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
             processor.DeleteFolder(item);
@@ -188,9 +145,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             // specified in the splistitem
             contentRepo.Verify(ch => ch.Delete(It.Is<ContentReference>(cf => cf.ID == 42),
                 It.IsAny<bool>(), It.IsAny<AccessLevel>()), Times.Once,
-                "Repository Delete needs to be called once with proper Content reference");
-            dds.Verify(dd => dd.Delete(It.IsAny<Identity>()), Times.Once,
-                "Delete dynamic data folder data must be called once.");
+                "Repository Delete needs to be called 1 times with this correct icontent");
+            dds.Verify(dd => dd.Delete(It.IsAny<Identity>()), Times.Exactly(3),
+                "Delete dynamic data folder data must be called three times in this test.");
         }
 
         [TestMethod]
@@ -239,6 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 File = new SPFile() { Name = "Filename.jpg" },
                 entryPointId = -1,
                 ParentFolderName = "SomeParentFolder",
+                ParentFolderSharePointGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D"),
                 rootCMSFolderEntryPointID = 4000
             };
 
@@ -260,14 +218,23 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
                 .Returns(new MediaData());
 
+            Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
+            Mock<MyDataStore> dds = new Mock<MyDataStore>();
+            ddsf.Setup(fact => fact.CreateStore(It.IsAny<Type>())).Returns(dds.Object);
+            dds.Setup(dd => dd.Save(It.IsAny<FolderData>())).Verifiable();
+            FolderData folderData = new FolderData(ddsf.Object);
+
+            // make sure our dynamic data store returns a ordered list with the folder data required.
+            IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
+
             processor.AddDocument(item);
 
             contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
             contentRepo.Verify(cr => cr.Save(It.IsAny<IContent>(), It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once, "Save needs to be called once");
             contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
-                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called.");
-            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>(str => str == item.ParentFolderName),
-                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called with proper arguments.");
+                It.IsAny<ContentReference>()), Times.Never, "Find recersive Folders Still being called and shouldnt be");
         }
 
         [TestMethod]
@@ -335,50 +302,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         }
 
         [TestMethod]
-        public void UpdateDocument_Calls_SearchForParentFolder()
-        {
-            var processor = GetUnitUnderTest();
-
-            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Verifiable();
-            contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
-            contentHelper.Setup(ch => ch.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Verifiable();
-
-            var item = new SPListItem()
-            {
-                File = new SPFile() { Name = "Filename.jpg" },
-                entryPointId = -1,
-                ParentFolderName = "SomeParentFolder",
-                rootCMSFolderEntryPointID = 4000
-            };
-
-            var data = new List<MediaData>();
-            data.Add(new MediaData() { Name = "Test 1", ContentLink = new ContentReference(1) });
-            data.Add(new MediaData() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            data.Add(new MediaData() { Name = "Filename.jpg", ContentLink = new ContentReference(42) });
-            contentRepo.Setup(cr => cr.GetChildren<MediaData>(It.IsAny<ContentReference>()))
-                .Returns(data);
-
-            // Return contentfolders list for getchildren
-            var folders = new List<ContentFolder>();
-            folders.Add(new ContentFolder() { Name = "Test 1", ContentLink = new ContentReference(1) });
-            folders.Add(new ContentFolder() { Name = "Test 2", ContentLink = new ContentReference(2) });
-            folders.Add(new ContentFolder() { Name = "SomeParentFolder", ContentLink = new ContentReference(42) });
-            contentRepo.Setup(cr => cr.GetChildren<ContentFolder>(It.IsAny<ContentReference>()))
-                .Returns(folders);
-
-            contentRepo.Setup(cr => cr.GetDefault<MediaData>(It.IsAny<ContentReference>(), It.IsAny<int>()))
-                .Returns(new MediaData());
-
-            processor.UpdateDocument(item);
-
-            contentTypeRepo.Verify(ctr => ctr.Load(It.IsAny<Type>()), Times.Once, "Load Media type must be called once");
-            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.IsAny<string>(),
-                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called.");
-            contentHelper.Verify(ch => ch.FindRecursiveFolders(It.Is<string>(str => str == item.ParentFolderName),
-                It.IsAny<ContentReference>()), Times.Once, "Find recersive Folders failed to be called with proper arguments.");
-        }
-
-        [TestMethod]
         public void UpdateDocument_Calls_GetDocumentStream()
         {
             var processor = GetUnitUnderTest();
@@ -387,12 +310,13 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             contentTypeRepo.Setup(ct => ct.Load(It.IsAny<Type>())).Returns(new ContentType() { ID = 4 });
             processinghelper.Setup(ph => ph.GetDocumentStream(It.IsAny<SPListItem>())).Verifiable();
 
-            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns( 
+            contentRepo.Setup(cr => cr.Get<MediaData>(It.IsAny<ContentReference>())).Returns(
                 new SharepointGenericMedia()
                 {
                     Name = "Filename.jpg",
                     ContentLink = new ContentReference(42),
-                    SharePointTimeLastModified = new DateTime(2014, 1, 1)
+                    SharePointTimeLastModified = new DateTime(2014, 1, 1),
+                    ParentLink = new ContentReference(42)
                 }
             );
 
