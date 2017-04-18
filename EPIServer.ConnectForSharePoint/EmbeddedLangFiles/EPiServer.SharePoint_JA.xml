@@ -2,7 +2,11 @@
 <languages>
     <language name="日本語 (Japanese)" id="ja">
         <sharepoint>
-            <admin>
+          <scheduledjob>
+            <description>Imports new or updated documents, items, and folders from SharePoint into Episerver.</description>
+            <displayname>SharePoint Update</displayname>
+          </scheduledjob>
+          <admin>
                 <ok>Ok</ok>
                 <cancel>Cancel</cancel>
                 <displayname>Connect For SharePoint</displayname>
