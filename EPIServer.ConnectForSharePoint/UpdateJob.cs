@@ -2,17 +2,14 @@
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.PlugIn;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace EPiServer.ConnectForSharePoint
 {
     /// 
     /// CMS Update Job thread - retrieves data from sharepoint when task is triggered from the scheduler.
     ///
-    [ScheduledPlugIn(DisplayName = "SharePoint Update", Description = "")]
+    [ScheduledPlugIn(DisplayName = "SharePoint Update", Description = "", LanguagePath = "/sharepoint/scheduledjob")]
     public class UpdateJob
     {
         private static IServicesHub _hub;

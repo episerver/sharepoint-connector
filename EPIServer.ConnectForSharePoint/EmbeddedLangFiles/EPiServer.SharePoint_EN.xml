@@ -2,6 +2,10 @@
 <languages>
     <language name="English" id="en">
         <sharepoint>
+          <scheduledjob>
+            <description>Imports new or updated documents, items, and folders from SharePoint into Episerver.</description>
+            <displayname>SharePoint Update</displayname>
+          </scheduledjob>
             <admin>
                 <ok>Ok</ok>
                 <cancel>Cancel</cancel>
