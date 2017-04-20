@@ -5,15 +5,55 @@ using Moq;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
 using System.Collections.Generic;
+using EPiServer.ServiceLocation;
+using EPiServer.Core;
+using EPiServer.Framework.Localization;
+using System.Globalization;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
+    public class MyLocalizationService : LocalizationService
+    {
+        public MyLocalizationService(ResourceKeyHandler keyHandler) : base(keyHandler)
+        {
+        }
+
+        public override IEnumerable<CultureInfo> AvailableLocalizations
+        {
+            get {
+                throw new NotImplementedException();
+            }
+        }
+
+        protected override IEnumerable<ResourceItem> GetAllStringsByCulture(string originalKey, string[] normalizedKey, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override string LoadString(string[] normalizedKey, string originalKey, CultureInfo culture)
+        {
+            return originalKey;
+        }
+    }
+
     [TestClass]
     public class UpdateJobTest
     {
         [TestMethod]
         public void Verify_ExecuteMethod_GetsAllLists_And_Calls_BeginsProcessing()
         {
+            Mock<ISharePointSettingsHelper> settings = new Mock<ISharePointSettingsHelper>();
+            settings.Setup(m => m.GetEntryPoint() ).Returns(new ContentReference(42) );
+
+            ContentFolder someContent = new ContentFolder() { Name = "thisone", IsDeleted = false };
+            Mock<IContentRepository> repo = new Mock<IContentRepository>();
+            repo.Setup(call => call.TryGet<ContentFolder>(It.IsAny<ContentReference>(), out someContent)).Returns(true);
+
+            Mock<IServiceLocator> sl = new Mock<IServiceLocator>();
+            ServiceLocator.SetLocator(sl.Object);
+            sl.Setup(m => m.GetInstance<IContentRepository>()).Returns(repo.Object);
+            sl.Setup(m => m.GetInstance<LocalizationService>()).Returns( new MyLocalizationService( new ResourceKeyHandler()) );
+
             Mock<IServicesHub> hub = new Mock<IServicesHub>();
             var itemList = new List<SPListItem>();
             var folderItem = new SPFolder() { Name = "Test Folder" };
@@ -34,8 +74,8 @@ namespace EPiServer.ConnectForSharePoint.Test
             Mock<ISharePointMessageHelper> helper = new Mock<ISharePointMessageHelper>();
             helper.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
 
-            UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids");
-            UpdateJob.Execute();
+            UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids", settings.Object);
+            job.Execute();
 
             hub.Verify(h => h.SPListsViewsService.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");
 
