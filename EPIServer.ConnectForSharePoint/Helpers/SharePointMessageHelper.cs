@@ -411,6 +411,34 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             
             // delete all items (if any) from cms that have been removed from sharepoint
             DeleteDocumentsAndItems(contentItems, AllSPListItems);
+
+            // Delete any root folders (list/view combo) that have been removed from sharepoint
+            var lv = listids.Split(';');
+            foreach( var locallist in lv )
+            {
+                if( !selectedLists.Any(prod => prod.Key == locallist) )
+                {
+                    var fd = new FolderData();
+                    var g = locallist.Split('~');
+                    var foundData = fd.GetFolder( Guid.Parse(g[0]) );
+                    if (foundData.RefId != -1)
+                    {
+                        var repo = _serviceLocator.GetInstance<IContentRepository>();
+                        ContentFolder cf;
+                        if (repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf))
+                        {
+                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
+                            {
+                                Item = new SPListItem()
+                                {
+                                    entryPointId = foundData.RefId, // id of the folder the item is in
+                                    GUID = foundData.FolderGuid,
+                                },
+                            });
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
