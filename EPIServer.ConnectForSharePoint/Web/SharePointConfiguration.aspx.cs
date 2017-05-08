@@ -180,15 +180,17 @@ namespace EPiServer.ConnectForSharePoint.Web
                         ActivateControls(false);
                     }
 
-                    // check to see if current entry point folder has been deleted, if not return as normal
-                    if (ContentReference.EmptyReference != SharePointSettings.Current.EntryPoint)
+                    // show error if destination folder has been deleted in cms
+                    ContentFolder f;
+                    var repo = ServiceLocator.Current.GetInstance<IContentRepository>();
+                    bool loaded = repo.TryGet<ContentFolder>(SharePointSettings.Current.EntryPoint, out f);
+                    if (ContentReference.EmptyReference == SharePointSettings.Current.EntryPoint || 
+                        loaded == false || f.IsDeleted)
                     {
-                        return;
+                        Refresh.Enabled = false;
+                        var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.PreviousEntryPointFolderName);
+                        ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
                     }
-
-                    // if entry point folder has been deleted, pop up error message alerting the user
-                    var message = string.Format(Translate("/sharepoint/admin/message/folderdeleted"), SharePointSettings.Current.PreviousEntryPointFolderName);
-                    ShowMessage(message.ToString().Replace(Environment.NewLine, "<br/>"), true);
                 }
             }
         }
