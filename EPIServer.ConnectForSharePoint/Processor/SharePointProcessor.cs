@@ -234,10 +234,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 var medialist = repo.GetChildren<MediaData>(folder.ContentLink);
                 foreach (var m in medialist)
                 {
-                    repo.Delete(m.ContentLink, true);
-                }
+                    try
+                    {
+                        repo.Delete(m.ContentLink, true);
+                    } catch { } // intentionally empty catch, MAI-933
+                }               
 
-                repo.Delete(f.ContentLink, true, AccessLevel.Delete);
+                try
+                {
+                    repo.Delete(f.ContentLink, true, AccessLevel.Delete);
+                } catch { } // intentionally empty catch, MAI-933
+
                 var fd = new FolderData();
                 FolderData.Delete(fd.GetFolder(f.ContentLink.ID));
             }
