@@ -369,7 +369,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _processorHelper.GetMetaData(selectedList, true);
 
                 var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-                var rootFolderItems = _helper.GetItems(selectedList, selectedView, selectedList.RootFolder);
                 _allSharePointFolders.AddRange(_helper.GetAllFolders(selectedList, selectedView));
 
                 // create and/or update our root folder for this list/view
@@ -383,18 +382,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // Remove any folders the user may have added in cms or deleted from sharepoint
                     RemoveUserAddedFolders(folderRef);
                     RemoveSharePointAddedFolders(folderRef, _allSharePointFolders);
-                }
-
-                // Make sure the selectedView and parent folder name attribute is set.
-                foreach (var spItem in rootFolderItems)
-                {
-                    if (spItem.Folder == null)
-                    {
-                        spItem.selectedView = selectedView;
-                        spItem.ParentFolderName = rootFolder.Folder.Name;
-                    }
-
-                    spItem.ParentFolderSharePointGuid = rootFolder.GUID;
                 }
 
                 // Process the sub items of this folder.
