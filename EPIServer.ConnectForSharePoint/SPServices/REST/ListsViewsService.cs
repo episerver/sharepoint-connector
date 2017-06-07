@@ -164,14 +164,14 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             
             // fields expand to File/Folder fields
             // NOTE: some fields e.g File/UniqueId, Folder/UniqueId are not available on default configuration of a premise SharePoint server
-            selectClause.Append(",File/Name,File/Length,File/Level,File/ServerRelativeUrl,File/TimeCreated,File/TimeLastModified,File/parentFolder");
-            selectClause.Append(",Folder/Name,Folder/ItemCount,Folder/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,Folder/IsRootFolder,Folder/ParentFolderName");
+            selectClause.Append(",File/Name,File/Length,File/Level,File/ServerRelativeUrl,File/TimeCreated,File/TimeLastModified");
+            selectClause.Append(",Folder/Name,Folder/ItemCount,Folder/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified");
 
             // NOTE: our addon Team virtual machine returns no data for TimeCreated, TimeLastModified, haven't known other premise SharePoint environments.
             // NOTE: want using Folder/Properties to get more data from premise SharePoint environment (SPFolder TimeCreated, TimeLastModified),
             // but also have seen that "Folder/Properties" in expand clause ONLY works without select clause 
             // then does NOT include Folder/Properties here
-            var expandClause = "expand=File/Name,Folder/Name,Folder/ParentFolderName";
+            var expandClause = "expand=File/Name,Folder/Name";
 
             if (paged)
             {
