@@ -73,7 +73,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         {
             _logger.Information("Send request, method: {0} - addDigetsIfPOST: {1}", requestInfo.RequestMethod, addDigestIfPOST);
 
-            if (requestInfo.RequestMethod == "POST" && addDigestIfPOST)
+            if ((requestInfo.RequestMethod == "POST" || requestInfo.RequestMethod == "GET") && addDigestIfPOST)
             {
                 headers = headers ?? new NameValueCollection();
                 headers.Add(Consts.REQUESTDIGEST_HEADER_KEY, GetDigestValue(false));

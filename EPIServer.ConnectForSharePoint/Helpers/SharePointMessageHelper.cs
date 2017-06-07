@@ -22,7 +22,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
-        private List<SPListItem> _allSharePointFolders = new List<SPListItem>();
+        internal IList<SPListItem> _listSPFolders = new List<SPListItem>();
+        internal IList<SPListItem> _ListSPItems = new List<SPListItem>();
 
         [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
@@ -36,7 +37,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _processorHelper = new SharePointProcessorHelper();
         }
 
-        internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
+        internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, 
+            IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
         {
             _logger = logger;
             _helper = helper;
@@ -46,6 +48,117 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             _serviceLocator = serviceLocator;
             _processorHelper = _serviceLocator.GetInstance<ISharePointProcessorHelper>();
+        }
+
+        /// <summary>
+        /// Begins the processing of the selected lists, reading all the items in pages and firing insert messages to the message queue
+        /// </summary>
+        /// <param name="listids"></param>
+        /// <param name="splists"></param>
+        public void BeginProcessing(string listids, IEnumerable<SPList> splists)
+        {
+            var selectedLists = _helper.GetSelectedListViewIds(splists);
+            foreach (var list_item in selectedLists)
+            {
+                _listSPFolders.Clear(); // will contain just folders
+                _ListSPItems.Clear();   // will contain just documents and items 
+
+                // The idListAndView is an object that contains two guids, one for the list and one for the view.
+                var idListAndView = _helper.GetListAndViewIds(list_item.Key);
+
+                // split the list and view Guid and get the root folder items for this list
+                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                // Invalidate the metadata cache for this list, this ensures that if the metadata changes
+                // we can fix it when the user hits save, refresh, or the scheduled task runs.
+                _processorHelper.GetMetaData(selectedList, true);
+
+                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
+
+                // create and/or update our root folder for this list/view
+                SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
+                var folderRef = AddOrUpdateFolder(rootFolder);
+                _listSPFolders.Add(rootFolder);
+
+                // now get all the items, paged, and process each item.
+                string nextUri;
+                processItemList(selectedList, rootFolder,
+                    _helper.GetPagedItems(selectedList,
+                    selectedView, rootFolder.Folder, out nextUri));
+
+                // process any more batches, if any
+                while (!String.IsNullOrEmpty(nextUri))
+                {
+                    processItemList(selectedList, rootFolder,
+                        _helper.GetNextPagedItems(selectedList, nextUri, out nextUri));
+                }
+
+                // if the list folder already existed we need to check if anything has 
+                // changed since the last processing loop
+                // i.e. remove any user added folders or any folders removed from sharepoint.
+                if (folderRef != null)
+                {
+                    RemoveUserAddedFolders(folderRef);
+                    RemoveSharePointAddedFolders(folderRef, _listSPFolders);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Processes each item in the items list and fires the appropriate 
+        /// CRUD message for each Share Point item type. 
+        /// </summary>
+        /// <param name="list">The Sharepoint list the items are related to</param>
+        /// <param name="rootFolder">The root folder for the items</param>
+        /// <param name="items">The items to process</param>
+        internal void processItemList(SPList list, SPListItem rootFolder, IEnumerable<SPListItem> items)
+        {
+            // the folder service is used to load the parent folder.
+            var folderService = SharePointHelper.SPServicesHub.SPFilesFoldersService;
+
+            // iterate over all the items
+            foreach (var item in items)
+            {
+                // is the item a folder?
+                if (item.Folder != null)
+                {
+                    item.entryPointId = -1;
+                    var parent = folderService.LoadParentFolder(item.Folder);
+
+                    // if the parents name is the same as the list title
+                    // this means its a root folder
+                    if (parent.Name == list.Title)
+                    {
+                        item.ParentFolderSharePointGuid = rootFolder.GUID;
+                    }
+                    else
+                    {
+                        // We need to find the parent folder in our folder list.
+                        // Note that the message queue might not have processed yet
+                        // but thats ok, we just need the Guid of the parent item
+                        var i = _listSPFolders.FirstOrDefault(x => x.Folder.ServerRelativeUrl == parent.ServerRelativeUrl);
+                        item.ParentFolderSharePointGuid = i.GUID;
+                    }
+
+                    // Determins if we are sending the update or create message. 
+                    AddOrUpdateFolder(item);
+
+                    // Make sure the folder list item gets added to our internal list
+                    // incase we need to find in the next batch.
+                    _listSPFolders.Add(item);
+                }
+                else
+                {
+                    // All items in this sharepoint list get added to this list
+                    _ListSPItems.Add(item);
+
+                    // Todo: 
+                    // Modify the splist item with the proper item data to insert it.
+                    // The only way to figure out its parent folder is to 
+                    // parse its relative url and find the sharepoint folder Guid
+                    // in the _allsharepointfolders list. 
+                }
+            }
         }
 
         private void DeleteDocumentsAndItems(IEnumerable<IContent> cmsListItems, IEnumerable<SPListItem> sharepointListItems)
@@ -104,7 +217,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="folderRef"></param>
         /// <param name="sharepointListItems"></param>
-        public void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
+        private void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems)
         {
             IContentRepository repo = _serviceLocator.GetInstance<IContentRepository>();
             FolderData fd = new FolderData();
@@ -112,6 +225,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var cmsFolders = repo.GetChildren<ContentFolder>(folderRef);
             foreach (var cmsFolder in cmsFolders)
             {
+                // Make sure we check any sub folders that have been removed. 
+                RemoveSharePointAddedFolders(cmsFolder.ContentLink, sharepointListItems);
+
                 Boolean delete = true;
                 // get the folder from the big table
                 fd = fd.GetFolder(cmsFolder.ContentLink.ID);
@@ -193,64 +309,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Adds all the subfolders and subitems for the given parent folder, additionally deletes any removed items in a folder.
-        /// </summary>
-        /// <param name="parentFolder">The parent folder to use as selection criterea items and as a source for the cms folder name</param>
-        /// <param name="selectedList">The list of items associated with all the selected views</param>
-        /// <param name="selectedView">The selected views in the configuration</param>
-        /// <param name="ParentFolderName">An optional parent folder name to use, i.e. in the case of views as a parent folder the name is actually different. </param>
-        public List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, SPListItem ParentFolder = null)
-        {
-            List<SPListItem> nonFolderItems = new List<SPListItem>();
-
-            var items = _helper.GetItems(selectedList, selectedView, parentFolder);
-            foreach( var spItem in items )
-            {
-                spItem.entryPointId = -1; // we cant use the entrypointid, we have to use the parent folder name 
-                spItem.rootCMSFolderEntryPointID = _settingsHelper.GetEntryPoint().ID;
-                if (ParentFolder == null)
-                {
-                    spItem.ParentFolderName = parentFolder.Name;
-                }
-                else
-                {
-                    spItem.ParentFolderName = ParentFolder.Folder.Name;
-                    spItem.ParentFolderSharePointGuid = ParentFolder.GUID;
-                }
-
-                if (spItem.Folder == null)
-                {
-                    spItem.selectedView = selectedView;
-                    nonFolderItems.Add(spItem);
-                }
-                else
-                {
-                    // Add the folder if its not already there
-                    var folderRef = AddOrUpdateFolder(spItem, _settingsHelper.GetEntryPoint());
-                    if( folderRef != null )
-                    { 
-                        RemoveSharePointAddedFolders(folderRef, _allSharePointFolders);
-                    }
-
-                    // now process the sub items
-                    var tmplist = ProcessSubItems(spItem.Folder, selectedList, selectedView, spItem);
-                    foreach (var item in tmplist)
-                    {
-                        // make sure the sharepoint folder Guid is set so we know where to put the item 
-                        // in episerver while we are processing
-                        if (item.ParentFolderSharePointGuid == null || item.ParentFolderSharePointGuid.Equals(Guid.Empty) )
-                        {
-                            item.ParentFolderSharePointGuid = spItem.GUID;
-                        }
-                    }
-
-                    nonFolderItems.AddRange( tmplist );
-                }
-            }
-            return nonFolderItems;
         }
 
         /// <summary>
@@ -345,96 +403,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
-        /// Adds all items to be added (SPFolders and SPItems) to the queue to be added
-        /// </summary>
-        /// <param name="listids"></param>
-        /// <param name="splists"></param>
-        public void BeginProcessing(string listids, IEnumerable<SPList> splists)
-        {
-            List<SPListItem> AllSPListItems = new List<SPListItem>();
-
-            var selectedLists = _helper.GetSelectedListViewIds(splists);
-            foreach (var item in selectedLists)
-            {
-                _allSharePointFolders.Clear();
-
-                // The idListAndView is an object that contains two guids, one for the list and one for the view.
-                var idListAndView = _helper.GetListAndViewIds(item.Key);
-
-                // split the list and view Guid and get the root folder items for this list
-                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-                // Invalidate the metadata cache for this list, this ensures that if the metadata changes
-                // we can fix it when the user hits save, refresh, or the scheduled task runs.
-                _processorHelper.GetMetaData(selectedList, true);
-
-                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-                _allSharePointFolders.AddRange(_helper.GetAllFolders(selectedList, selectedView));
-
-                // create and/or update our root folder for this list/view
-                SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
-                var folderRef = AddOrUpdateFolder(rootFolder, _settingsHelper.GetEntryPoint());
-                if(folderRef != null ) 
-                {
-                    _allSharePointFolders.Add(rootFolder);
-
-                    // if folder exists we need to check to see if anything has changed.
-                    // Remove any folders the user may have added in cms or deleted from sharepoint
-                    RemoveUserAddedFolders(folderRef);
-                    RemoveSharePointAddedFolders(folderRef, _allSharePointFolders);
-                }
-
-                // Process the sub items of this folder.
-                AllSPListItems.AddRange( 
-                    ProcessSubItems(selectedList.RootFolder, selectedList, selectedView, rootFolder) );
-            }
-
-            // get all of our content from cms
-            var contentItems = FindSharePointItems();
-            foreach (var item in AllSPListItems)
-            {
-                AddOrUpdateItem(item, contentItems);
-            }
-            
-            // delete all items (if any) from cms that have been removed from sharepoint
-            DeleteDocumentsAndItems(contentItems, AllSPListItems);
-
-            // Delete any root folders (list/view combo) that have been removed from sharepoint
-            var lv = listids.Split(';');
-            foreach( var locallist in lv )
-            {
-                if( !selectedLists.Any(prod => prod.Key == locallist) )
-                {
-                    var fd = new FolderData();
-                    var g = locallist.Split('~');
-                    var foundData = fd.GetFolder( Guid.Parse(g[0]) );
-                    if (foundData.RefId != -1)
-                    {
-                        var repo = _serviceLocator.GetInstance<IContentRepository>();
-                        ContentFolder cf;
-                        if (repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf))
-                        {
-                            _emitterFactory.Create().Emit(new SharePointFolderDeleteMessage()
-                            {
-                                Item = new SPListItem()
-                                {
-                                    entryPointId = foundData.RefId, // id of the folder the item is in
-                                    GUID = foundData.FolderGuid,
-                                },
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="item"></param>
         /// <param name="entryPoint">The current entry point that is saved in the settings.</param>
         /// <returns>the content reference of the folder if found</returns>
-        private ContentReference AddOrUpdateFolder(SPListItem item, ContentReference entryPoint)
+        private ContentReference AddOrUpdateFolder(SPListItem item)
         {
             var add = true;
             ContentReference contentRef = null;

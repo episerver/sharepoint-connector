@@ -28,6 +28,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<IMessageEmitter> _messageEmitter;
         private Mock<IServiceLocator> _serviceLocator;
         private Mock<MyDataStore> dds;
+        private Mock<ISharePointProcessorHelper> _processorHelper;
 
         private SharePointMessageHelper GetUnitUnderTest()
         {
@@ -48,48 +49,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             FolderData folderData = new FolderData(ddsf.Object);
 
             _serviceLocator = new Mock<IServiceLocator>();
+            _processorHelper = new Mock<ISharePointProcessorHelper>();
+            _serviceLocator.Setup(sl => sl.GetInstance<ISharePointProcessorHelper>()).Returns(_processorHelper.Object);
+
             return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
-        }
 
-        [TestMethod]
-        public void ProcessSubItems_Returns_NonFolders()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            var itemList = new List<SPListItem>();
-            var fileItem = new SPFile() { Name = "Test Folder" };
-            var item = new SPListItem()
-            {
-                Title = "Test Item One",
-                entryPointId = 123,
-                File = fileItem,
-                ParentFolderName = string.Empty
-            };
-            itemList.Add(item);
-            itemList.Add(new SPListItem()
-            {
-                Title = "Test Item One",
-                Folder = new SPFolder(),
-                entryPointId = 123,
-                ParentFolderName = string.Empty
-            });
-            _helper.SetupSequence(sph => sph.GetItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>()))
-                .Returns(itemList)
-                .Returns(new List<SPListItem>());
-
-            IList<FolderData> ddslist = new List<FolderData>();
-            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
-            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
-
-            ContentReference test = null;
-            _contentProviderHelper.Setup(cph => cph.FindRecursiveFolders(It.IsAny<string>(), It.IsAny<ContentReference>())).Returns(test);
-
-            var pFolder = new SPFolder() { Name = "Test Folder Name" };
-            var list = new SPList();
-            var listView = new SPListView();
-            var items = messageHelper.ProcessSubItems(pFolder, list, listView);
-
-            Assert.AreEqual(1, items.Count, "Item count does not match expected count.");
         }
 
         [TestMethod]
@@ -166,8 +130,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             List<IContent> cmsItems = new List<IContent>();
             cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "FindMe", SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242) });
+            cmsItems.Add(new SharepointGenericMedia()
+            {
+                Name = "FindMe",
+                SharePointGUID = itemGuid.ToString(),
+                ContentLink = new ContentReference(4242)
+            });
             cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
 
             SPListItem spItem = new SPListItem() { GUID = itemGuid };
@@ -206,8 +174,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             List<IContent> cmsItems = new List<IContent>();
             cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "FindMe", SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242) });
+            cmsItems.Add(new SharepointGenericMedia()
+            {
+                Name = "FindMe",
+                SharePointGUID = itemGuid.ToString(),
+                ContentLink = new ContentReference(4242)
+            });
             cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
 
             SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
@@ -234,6 +206,101 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentAddMessage>()), Times.Exactly(1),
                 "The item we where looking for should NOT have been found AND emited add message");
+        }
+
+        string _listids;
+        List<KeyValuePair<string, string>> _selectedListsAndViews;
+        List<SPList> _lists;
+        private void initBeginProcessingConditions()
+        {
+            _listids = "edf2847c-cab7-4842-96ee-d104c7da5c9b~16d6e901-152d-414d-aef4-6819abf701d2";
+            _lists = new List<SPList>()
+            {
+                new SPList() { Title = "Test List 1", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
+                    Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } },
+                new SPList() { Title = "Test List 2", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9c"),
+                    Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } },
+                new SPList() { Title = "Test List 3", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9d"),
+                    Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } },
+                new SPList() { Title = "Test List 4", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9e"),
+                    Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } }
+            };
+
+            _selectedListsAndViews = new List<KeyValuePair<string, string>>()
+            {
+                new KeyValuePair<string, string>(_listids, "ddf2847c-cab7-4842-96ee-d104c7da5c9b"),
+                new KeyValuePair<string, string>(_listids, "ddf2847c-cab7-4842-96ee-d104c7da5c9b"),
+                new KeyValuePair<string, string>(_listids, "ddf2847c-cab7-4842-96ee-d104c7da5c9b")
+            };
+            _helper.Setup(m => m.GetSelectedListViewIds(It.IsAny<IEnumerable<SPList>>())).Returns(_selectedListsAndViews);
+            _helper.Setup(m => m.GetListAndViewIds(It.IsAny<string>())).Returns(_listids.Split('~'));
+
+            IList<FolderData> ddslist = new List<FolderData>();
+            ddslist.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
+            dds.Setup(dd => dd.Items<FolderData>()).Returns(ddslist.AsQueryable().OrderBy(fd => fd.Id));
+        }
+
+        [TestMethod]
+        public void BeginProcessing_clears_item_lists_with_each_selected_List()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+            Mock<IList<SPListItem>> folderList = new Mock<IList<SPListItem>>();
+            Mock<IList<SPListItem>> itemList = new Mock<IList<SPListItem>>();
+            messageHelper._listSPFolders = folderList.Object;
+            messageHelper._ListSPItems = itemList.Object;
+
+            string Path = "";
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(
+                new List<SPListItem>());
+
+            messageHelper.BeginProcessing(_listids, _lists);
+
+            // _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
+            folderList.Verify(m => m.Clear(), Times.Exactly(_selectedListsAndViews.Count()), "Failed to clear folderList at start of new list iteration.");
+            itemList.Verify(m => m.Clear(), Times.Exactly(_selectedListsAndViews.Count()), "Failed to clear itemList at start of new list iteration.");
+        }
+
+        [TestMethod]
+        public void BeginProcessing_Calls_GetPagedItems()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            string nextUriPath = "";
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath)).Returns(
+                new List<SPListItem>());
+
+            messageHelper.BeginProcessing(_listids, _lists);
+            _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath), 
+                Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
+            _helper.Verify(m => m.GetNextPagedItems(It.IsAny<SPList>(), It.IsAny<string>(), out nextUriPath),
+                Times.Never, "Unexpected call to GetNextPagedItems, there was no nextUriPath specified." );
+        }
+
+        [TestMethod]
+        public void BeginProcessing_Calls_GetNextPagedItems()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            string nextUriPath = " yo yo yo";
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath))
+                .Callback(() => nextUriPath = "Next Path")
+                .Returns(new List<SPListItem>());
+            string nextUriPath2 = "";
+            _helper.Setup(m => m.GetNextPagedItems(It.IsAny<SPList>(), It.IsAny<string>(), out nextUriPath2))
+                .Callback(() => nextUriPath = null)
+                .Returns(new List<SPListItem>());
+
+            messageHelper.BeginProcessing(_listids, _lists);
+            _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
+                Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
+            _helper.Verify(m => m.GetNextPagedItems(It.IsAny<SPList>(), It.IsAny<string>(), out nextUriPath),
+                Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetNextPagedItems " + _selectedListsAndViews.Count() + " times.");
         }
     }
 }

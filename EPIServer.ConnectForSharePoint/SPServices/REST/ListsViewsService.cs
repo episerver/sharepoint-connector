@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace EPiServer.ConnectForSharePoint.SPServices.REST
 {
@@ -59,6 +60,31 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_ITEMS_PATH_FORMAT, list.Id), "GET", GetItemExpandQuery(false));
 
             return BuildListItems(SendRequest(restRequest, null, null), list);
+        }
+
+        public IEnumerable<SPListItem> GetPagedItems(SPList list, SPListView view, SPFolder folder, out string nextUri)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(view.ListViewXml);
+            var tags = xmlDoc.GetElementsByTagName("RowLimit");
+            int rowcount = 256;
+            if (tags != null && tags.Count > 0 )
+            {
+                Int32.TryParse(tags[0].InnerText, out rowcount); 
+            }
+
+            var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_ITEMS_PATH_FORMAT, list.Id),
+                    "GET", GetItemExpandQuery(false, true));
+
+            return BuildPagedListItems(SendRequest(restRequest, null, null, true), list, out nextUri);
+        }
+
+        public IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri)
+        {
+            var restApiPath = Uri.Substring(Uri.IndexOf("/_api"));
+            var restRequest = new RestJsonRequest(restApiPath);
+
+            return BuildPagedListItems(SendRequest(restRequest, null, null, true), list, out nextUri);
         }
 
         public IEnumerable<SPListItem> GetItems(SPList list, string viewQuery)
@@ -119,7 +145,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         /// <summary>
         /// Return query including File/Folder data for list items
         /// </summary>
-        private static string[] GetItemExpandQuery(bool getVideoInfo)
+        private static string[] GetItemExpandQuery(bool getVideoInfo, bool paged = false, int count = 256)
         {
             // NOTE: could not get EncodedAbsUrl without select clause, but including select clause 
             // we MUST mention explicitly all the fields we need
@@ -138,15 +164,23 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             
             // fields expand to File/Folder fields
             // NOTE: some fields e.g File/UniqueId, Folder/UniqueId are not available on default configuration of a premise SharePoint server
-            selectClause.Append(",File/Name,File/Length,File/Level,File/ServerRelativeUrl,File/TimeCreated,File/TimeLastModified");
-            selectClause.Append(",Folder/Name,Folder/ItemCount,Folder/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified");
+            selectClause.Append(",File/Name,File/Length,File/Level,File/ServerRelativeUrl,File/TimeCreated,File/TimeLastModified,File/parentFolder");
+            selectClause.Append(",Folder/Name,Folder/ItemCount,Folder/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,Folder/IsRootFolder,Folder/ParentFolderName");
 
             // NOTE: our addon Team virtual machine returns no data for TimeCreated, TimeLastModified, haven't known other premise SharePoint environments.
             // NOTE: want using Folder/Properties to get more data from premise SharePoint environment (SPFolder TimeCreated, TimeLastModified),
             // but also have seen that "Folder/Properties" in expand clause ONLY works without select clause 
             // then does NOT include Folder/Properties here
-            var expandClause = "expand=File/Name,Folder/Name";
-            return new string[2] { selectClause.ToString(), expandClause };
+            var expandClause = "expand=File/Name,Folder/Name,Folder/ParentFolderName";
+
+            if (paged)
+            {
+                return new string[] { selectClause.ToString(), expandClause, "skiptoken=Paged=TRUE&$top=" + count };
+            }
+            else
+            {
+                return new string[] { selectClause.ToString(), expandClause };
+            }
         }
 
         /// <summary>
@@ -244,6 +278,20 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return BuildListItems(jsonResult, parentList);
         }
 
+        private IEnumerable<SPListItem> BuildPagedListItems(string responseString, SPList parentList, out string nextUri)
+        {
+            if (string.IsNullOrEmpty(responseString))
+            {
+                nextUri = null;
+                return Enumerable.Empty<SPListItem>();
+            }
+
+            var jsonResult = Deserialize<JsonListItemCollection>(responseString);
+            nextUri = jsonResult.d.__next;
+
+            return BuildListItems(jsonResult, parentList);
+        }
+
         private IEnumerable<SPListItem> BuildListItems(JsonListItemCollection jsonResult, SPList parentList)
         {
             if (jsonResult == null)
@@ -322,7 +370,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
             return list;
         }
-
         #endregion
     }
 }
