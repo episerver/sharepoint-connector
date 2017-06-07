@@ -13,6 +13,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         IEnumerable<SPListItem> GetAllFolders(SPList list, SPListView view);
         string[] GetListAndViewIds(string mappingId);
         IEnumerable<KeyValuePair<string, string>> GetSelectedListViewIds(IEnumerable<SPList> lists);
-        
+        IEnumerable<SPListItem> GetPagedItems(SPList list, SPListView view, SPFolder folder, out string nextUri);
+        IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri);
     }
 }

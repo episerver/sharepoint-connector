@@ -1,18 +1,23 @@
 ﻿using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.Core;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
     public interface ISharePointMessageHelper
     {
-        void QueueRootFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null);
+        /// <summary>
+        /// This is where the main processing begins. 
+        /// </summary>
+        /// <param name="listids"></param>
+        /// <param name="splists"></param>
         void BeginProcessing(string listids, IEnumerable<SPList> splists);
-        List<SPListItem> ProcessSubItems(SPFolder parentFolder, SPList selectedList, SPListView selectedView, SPListItem ParentFolder = null);
-        void RemoveSharePointAddedFolders(ContentReference folderRef, IEnumerable<SPListItem> sharepointListItems);
+
+        /// <summary>
+        /// Called by the UI when lists are removed and the 
+        /// configuration is saved. 
+        /// </summary>
+        /// <param name="splists"></param>
+        /// <param name="listids"></param>
+        void QueueRootFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null);
     }
 }
