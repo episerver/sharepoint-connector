@@ -23,9 +23,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
-        internal IList<SPListItem> _ListSPFolders = new List<SPListItem>();
-        internal IList<SPListItem> _ListSPItems = new List<SPListItem>();
-        internal IEnumerable<IContent> _listSPItemsInCMs;
+        internal IList<SPListItem> _SPFolders = new List<SPListItem>();
+        internal IList<SPListItem> _SPItems = new List<SPListItem>();
+        internal IEnumerable<IContent> _SPItemsInCMs;
         internal IFilesFoldersService _fileFolderService;
 
         [ExcludeFromCodeCoverageAttribute]
@@ -65,9 +65,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var selectedLists = _helper.GetSelectedListViewIds(splists);
             foreach (var list_item in selectedLists)
             {
-                _ListSPFolders.Clear(); // will contain just folders
-                _ListSPItems.Clear();   // will contain just documents and items 
-                _listSPItemsInCMs = FindSharePointItems();
+                _SPFolders.Clear(); // will contain just folders
+                _SPItems.Clear();   // will contain just documents and items 
+                _SPItemsInCMs = FindSharePointItems();
 
                 // The idListAndView is an object that contains two guids, one for the list and one for the view.
                 var idListAndView = _helper.GetListAndViewIds(list_item.Key);
@@ -84,7 +84,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 // create and/or update our root folder for this list/view
                 SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
                 var folderRef = AddOrUpdateFolder(rootFolder);
-                _ListSPFolders.Add(rootFolder);
+                _SPFolders.Add(rootFolder);
 
                 // now get all the items, paged, and process each item.
                 string nextUri;
@@ -105,7 +105,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 if (folderRef != null)
                 {
                     RemoveUserAddedFolders(folderRef);
-                    RemoveSharePointAddedFolders(folderRef, _ListSPFolders);
+                    RemoveSharePointAddedFolders(folderRef, _SPFolders);
                 }
             }
         }
@@ -133,7 +133,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // We need to find the parent folder in our folder list.
                     // Note that the message queue might not have processed yet
                     // but thats ok, we just need the Guid of the parent item
-                    var i = _ListSPFolders.FirstOrDefault(x => x.Folder.ServerRelativeUrl == parent.ServerRelativeUrl);
+                    var i = _SPFolders.FirstOrDefault(x => x.Folder.ServerRelativeUrl == parent.ServerRelativeUrl);
                     if( i != null )
                     { 
                         item.ParentFolderSharePointGuid = i.GUID;
@@ -144,24 +144,24 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                     // Make sure the folder list item gets added to our internal list
                     // incase we need to find in the next batch.
-                    _ListSPFolders.Add(item);
+                    _SPFolders.Add(item);
                 }
                 else
                 {
                     // Check to see if its a different parent folder by parsing out the parent folder url and look for it in the 
                     // folder list.
                     string url = item.File.ServerRelativeUrl.Remove(item.File.ServerRelativeUrl.IndexOf(item.File.Name) - 1);
-                    var i = _ListSPFolders.FirstOrDefault(x => x.Folder.ServerRelativeUrl == url);
+                    var i = _SPFolders.FirstOrDefault(x => x.Folder.ServerRelativeUrl == url);
                     if (i != null)
                     {
                         item.ParentFolderSharePointGuid = i.GUID;
                     }
 
                     // Determins if we are sending the update or create message. 
-                    AddOrUpdateItem(item, _listSPItemsInCMs);
+                    AddOrUpdateItem(item, _SPItemsInCMs);
 
                     // All items in this sharepoint list get added to this list
-                    _ListSPItems.Add(item);
+                    _SPItems.Add(item);
                 }
             }
         }

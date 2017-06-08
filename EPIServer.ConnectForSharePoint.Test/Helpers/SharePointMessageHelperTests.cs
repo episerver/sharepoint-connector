@@ -271,8 +271,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             initBeginProcessingConditions();
             Mock<IList<SPListItem>> folderList = new Mock<IList<SPListItem>>();
             Mock<IList<SPListItem>> itemList = new Mock<IList<SPListItem>>();
-            messageHelper._ListSPFolders = folderList.Object;
-            messageHelper._ListSPItems = itemList.Object;
+            messageHelper._SPFolders = folderList.Object;
+            messageHelper._SPItems = itemList.Object;
 
             string Path = "";
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(
@@ -350,7 +350,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             }, rootFolder, listitems);
 
             _fileFolderService.Verify(m => m.LoadParentFolder(It.IsAny<SPFolder>()), "processItemList did not attempt to load the parent folder");
-            Assert.IsTrue(messageHelper._ListSPFolders.Contains(listitems[0]), "Folder was not added to internal folder list.");
+            Assert.IsTrue(messageHelper._SPFolders.Contains(listitems[0]), "Folder was not added to internal folder list.");
         }
 
         [TestMethod]
@@ -369,7 +369,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             initBeginProcessingConditions();
 
-            messageHelper._listSPItemsInCMs = new List<IContent>();
+            messageHelper._SPItemsInCMs = new List<IContent>();
 
             messageHelper.processItemList(new SPList()
             {
@@ -378,7 +378,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } }
             }, rootFolder, listitems);
 
-            Assert.IsTrue(messageHelper._ListSPItems.Contains(listitems[0]), "Item was not added to internal item list.");
+            Assert.IsTrue(messageHelper._SPItems.Contains(listitems[0]), "Item was not added to internal item list.");
         }
     }
 }
