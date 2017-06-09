@@ -74,7 +74,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             }
 
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_ITEMS_PATH_FORMAT, list.Id),
-                    "GET", GetItemExpandQuery(false, true));
+                    "GET", GetItemExpandQuery(false, true, rowcount));
 
             return BuildPagedListItems(SendRequest(restRequest, null, null, true), list, out nextUri);
         }
