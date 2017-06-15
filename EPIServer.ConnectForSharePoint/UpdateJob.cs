@@ -1,6 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Web;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using EPiServer.PlugIn;
@@ -8,6 +9,7 @@ using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace EPiServer.ConnectForSharePoint
 {
@@ -43,6 +45,13 @@ namespace EPiServer.ConnectForSharePoint
 
         public override string Execute()
         {
+            if (SharePointMessageHelper.IsRunning())
+            {
+                string msg = "Process is currently running.";
+                OnStatusChanged(msg);
+                throw new Exception(msg);
+            }
+
             if (_hub == null)
                 _hub = SharePointHelper.SPServicesHub;
 
@@ -82,7 +91,15 @@ namespace EPiServer.ConnectForSharePoint
                 else
                     _helper.BeginProcessing(_ListIds, supportedLists);
 
-                return "Started";
+                SharePointMessageHelper._processingThread.Join();
+
+                // We dont want users to start new jobs till the queue is empty
+                while(  SharePointMessageHelper.GetQueCount() > 0 )
+                {
+                    Thread.Sleep(2000);
+                }
+
+                return "Completed.";
             }
             else
             {

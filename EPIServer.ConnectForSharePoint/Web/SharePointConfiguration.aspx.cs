@@ -76,9 +76,26 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             get
             {
+                string retval = "0";
+
                 var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
                 var queue = queueStore.Get("sharepointmod");
-                return queue.Count.ToString();
+                if (queue.Count() > 0)
+                {
+                    retval = queue.Count.ToString();
+                }
+                else
+                {
+                    if( SharePointMessageHelper.IsRunning() )
+                    {
+                        // its possible that the thread is running, but we 
+                        // havent added anything to the queue, this allows the 
+                        // ui script to set all the buttons disabled.
+                        retval = "1"; 
+                    }
+                }
+
+                return retval;
             }
         }
 

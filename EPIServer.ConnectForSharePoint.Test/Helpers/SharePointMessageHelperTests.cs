@@ -279,6 +279,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
+            SharePointMessageHelper._processingThread.Join();
 
             // _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
             folderList.Verify(m => m.Clear(), Times.Exactly(_selectedListsAndViews.Count()), "Failed to clear folderList at start of new list iteration.");
@@ -297,6 +298,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
+            SharePointMessageHelper._processingThread.Join();
+
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
             _helper.Verify(m => m.GetNextPagedItems(It.IsAny<SPList>(), It.IsAny<string>(), out nextUriPath),
@@ -320,6 +323,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 .Returns(new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
+            SharePointMessageHelper._processingThread.Join();
 
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");

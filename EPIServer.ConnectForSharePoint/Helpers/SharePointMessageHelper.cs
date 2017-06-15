@@ -11,6 +11,8 @@ using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using EPiServer.DataAbstraction;
 using System.Diagnostics.CodeAnalysis;
 using EPiServer.ConnectForSharePoint.SPServices;
+using System.Threading;
+using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -27,6 +29,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         internal IList<SPListItem> _SPItems = new List<SPListItem>();
         internal IEnumerable<IContent> _SPItemsInCMs;
         internal IFilesFoldersService _fileFolderService;
+
+        static internal Thread _processingThread;
+        static internal string _listids;
+        static internal IEnumerable<SPList> _splists;
+        static Object _lock = new Object();
 
         [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
@@ -56,57 +63,110 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
-        /// Begins the processing of the selected lists, reading all the items in pages and firing insert messages to the message queue
+        /// Starts the processing thread if its not already running
         /// </summary>
         /// <param name="listids"></param>
         /// <param name="splists"></param>
         public void BeginProcessing(string listids, IEnumerable<SPList> splists)
         {
-            var selectedLists = _helper.GetSelectedListViewIds(splists);
-            foreach (var list_item in selectedLists)
+            if (_processingThread == null || !_processingThread.IsAlive)
             {
-                _SPFolders.Clear(); // will contain just folders
-                _SPItems.Clear();   // will contain just documents and items 
-                _SPItemsInCMs = FindSharePointItems();
+                _listids = listids;
+                _splists = splists;
+                _processingThread = new Thread(new ThreadStart(process));
+                _processingThread.Start();
+            }
+        }
 
-                // The idListAndView is an object that contains two guids, one for the list and one for the view.
-                var idListAndView = _helper.GetListAndViewIds(list_item.Key);
+        public static bool IsRunning()
+        {
+            bool retval = true;
+            lock (_lock)
+            {
+                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+                var queue = queueStore.Get("sharepointmod");
 
-                // split the list and view Guid and get the root folder items for this list
-                var selectedList = splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
-
-                // Invalidate the metadata cache for this list, this ensures that if the metadata changes
-                // we can fix it when the user hits save, refresh, or the scheduled task runs.
-                _processorHelper.GetMetaData(selectedList, true);
-
-                var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
-
-                // create and/or update our root folder for this list/view
-                SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
-                var folderRef = AddOrUpdateFolder(rootFolder);
-                _SPFolders.Add(rootFolder);
-
-                // now get all the items, paged, and process each item.
-                string nextUri;
-                processItemList(selectedList, rootFolder,
-                    _helper.GetPagedItems(selectedList,
-                    selectedView, rootFolder.Folder, out nextUri));
-
-                // process any more batches, if any
-                while (!String.IsNullOrEmpty(nextUri))
+                if (_processingThread == null || (!_processingThread.IsAlive && queue.Count() == 0))
                 {
+                    retval = false;
+                }
+            }
+            return retval;
+        }
+
+        public static int GetQueCount()
+        {
+            int retval = 0;
+
+            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+            var queue = queueStore.Get("sharepointmod");
+            if (queue.Count() > 0)
+            {
+                retval = queue.Count;
+            }
+
+            return retval;
+        }
+
+        /// <summary>
+        /// Begins the processing of the selected lists, reading all the items in pages and firing insert messages to the message queue
+        /// </summary>
+        /// <param name="listids"></param>
+        /// <param name="splists"></param>
+        public void process()
+        {
+            try
+            {
+                var selectedLists = _helper.GetSelectedListViewIds(_splists);
+                foreach (var list_item in selectedLists)
+                {
+                    _SPFolders.Clear(); // will contain just folders
+                    _SPItems.Clear();   // will contain just documents and items 
+                    _SPItemsInCMs = FindSharePointItems();
+
+                    // The idListAndView is an object that contains two guids, one for the list and one for the view.
+                    var idListAndView = _helper.GetListAndViewIds(list_item.Key);
+
+                    // split the list and view Guid and get the root folder items for this list
+                    var selectedList = _splists.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[0])));
+
+                    // Invalidate the metadata cache for this list, this ensures that if the metadata changes
+                    // we can fix it when the user hits save, refresh, or the scheduled task runs.
+                    _processorHelper.GetMetaData(selectedList, true);
+
+                    var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
+
+                    // create and/or update our root folder for this list/view
+                    SPListItem rootFolder = CreateParentSPListItem(selectedList, selectedView);
+                    var folderRef = AddOrUpdateFolder(rootFolder);
+                    _SPFolders.Add(rootFolder);
+
+                    // now get all the items, paged, and process each item.
+                    string nextUri;
                     processItemList(selectedList, rootFolder,
-                        _helper.GetNextPagedItems(selectedList, nextUri, out nextUri));
-                }
+                        _helper.GetPagedItems(selectedList,
+                        selectedView, rootFolder.Folder, out nextUri));
 
-                // if the list folder already existed we need to check if anything has 
-                // changed since the last processing loop
-                // i.e. remove any user added folders or any folders removed from sharepoint.
-                if (folderRef != null)
-                {
-                    RemoveUserAddedFolders(folderRef);
-                    RemoveSharePointAddedFolders(folderRef, _SPFolders);
+                    // process any more batches, if any
+                    while (!String.IsNullOrEmpty(nextUri))
+                    {
+                        processItemList(selectedList, rootFolder,
+                            _helper.GetNextPagedItems(selectedList, nextUri, out nextUri));
+                    }
+
+                    // if the list folder already existed we need to check if anything has 
+                    // changed since the last processing loop
+                    // i.e. remove any user added folders or any folders removed from sharepoint.
+                    if (folderRef != null)
+                    {
+                        RemoveUserAddedFolders(folderRef);
+                        RemoveSharePointAddedFolders(folderRef, _SPFolders);
+                    }
                 }
+            }
+            catch ( Exception e)
+            {
+                _logger.Debug("Error running update thread.", e);
             }
         }
 
