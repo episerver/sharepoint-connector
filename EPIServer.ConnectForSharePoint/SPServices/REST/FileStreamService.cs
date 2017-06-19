@@ -127,27 +127,48 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         {
             try
             {
-                var reqInfo = new RestJsonRequest(string.Format(Consts.REST_OPENBINARYSTREAM_FORMAT, fileRelativeUrl));
-                var headers = new NameValueCollection();
-                headers.Add("binaryStringResponseBody", "true");
-
-                var memoryStream = new MemoryStream();
-                // Get binary data from SharePoint
-                using (var stream = GetResponseStream(reqInfo, null, headers))
-                {
-                    stream.CopyTo(memoryStream); // we do this to support seeking
-                    stream.Flush();
-                }
-
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                return memoryStream;
+                return OpenDirectFileWithRetry(fileRelativeUrl);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
                 return null;
             }
+        }
+
+        private MemoryStream OpenDirectFileWithRetry(string fileRelativeUrl)
+        {
+            int retry = 0;
+            int MAX_RETRY = 3;
+            do
+            {
+                try
+                {
+                    var reqInfo = new RestJsonRequest(string.Format(Consts.REST_OPENBINARYSTREAM_FORMAT, fileRelativeUrl));
+                    var headers = new NameValueCollection();
+                    headers.Add("binaryStringResponseBody", "true");
+
+                    var memoryStream = new MemoryStream();
+                    // Get binary data from SharePoint
+                    using (var stream = GetResponseStream(reqInfo, null, headers))
+                    {
+                        stream.CopyTo(memoryStream); // we do this to support seeking
+                        stream.Flush();
+                    }
+
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                    return memoryStream;
+                }
+                catch (Exception ex)
+                {
+                    retry++;
+                    if (retry > MAX_RETRY)
+                    {
+                        _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
+                        throw;
+                    }
+                }
+            } while (true);
         }
 
         /// <summary>

@@ -69,6 +69,28 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             return SendRequest(requestInfo, requestBody, headers, false);
         }
 
+        public virtual string SendRequestWithRetry(IRestRequest requestInfo, string requestBody, NameValueCollection headers, bool addDigestIfPOST = false)
+        {
+            int MAX_RETRYS = 3;
+            int retry = 0;
+            do
+            {
+                try
+                {
+                    return SendRequest(requestInfo, requestBody, headers, addDigestIfPOST);
+                }
+                catch( Exception e)
+                {
+                    retry++;
+                    if (retry > MAX_RETRYS)
+                    {
+                        _logger.Error("Failed with retries to send request " + requestInfo.RestApiPath, e);
+                        throw;
+                    }
+                }
+            } while (true);
+        }
+
         public virtual string SendRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers, bool addDigestIfPOST = false)
         {
             _logger.Information("Send request, method: {0} - addDigetsIfPOST: {1}", requestInfo.RequestMethod, addDigestIfPOST);

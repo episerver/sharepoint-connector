@@ -91,9 +91,14 @@ namespace EPiServer.ConnectForSharePoint
                 else
                     _helper.BeginProcessing(_ListIds, supportedLists);
 
-                SharePointMessageHelper._processingThread.Join();
+                // Join the proccesing thread with the job thread so that the 
+                // status of the job stays busy while its running.
+                if (SharePointMessageHelper._processingThread != null) // fix unit test
+                {
+                    SharePointMessageHelper._processingThread.Join();
+                }
 
-                // We dont want users to start new jobs till the queue is empty
+                // As long as items are in the queue make sure we show we are still running
                 while(  SharePointMessageHelper.GetQueCount() > 0 )
                 {
                     Thread.Sleep(2000);

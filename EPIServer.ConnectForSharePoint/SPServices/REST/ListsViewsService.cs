@@ -76,7 +76,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_ITEMS_PATH_FORMAT, list.Id),
                     "GET", GetItemExpandQuery(false, true, rowcount));
 
-            return BuildPagedListItems(SendRequest(restRequest, null, null, true), list, out nextUri);
+            return BuildPagedListItems(SendRequestWithRetry(restRequest, null, null, true), list, out nextUri);
         }
 
         public IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri)
@@ -84,7 +84,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
             var restApiPath = Uri.Substring(Uri.IndexOf("/_api"));
             var restRequest = new RestJsonRequest(restApiPath);
 
-            return BuildPagedListItems(SendRequest(restRequest, null, null, true), list, out nextUri);
+            return BuildPagedListItems(SendRequestWithRetry(restRequest, null, null, true), list, out nextUri);
         }
 
         public IEnumerable<SPListItem> GetItems(SPList list, string viewQuery)
@@ -137,7 +137,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         public SPListItem GetListItem(SPList list, string listItemId)
         {
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_LISTITEM_PATH_FORMAT, list.Id, listItemId), "GET", GetItemExpandQuery(false));
-            var jsonResult = Deserialize<JsonListItem>(SendRequest(restRequest, null, null));
+            var jsonResult = Deserialize<JsonListItem>(SendRequestWithRetry(restRequest, null, null));
 
             return jsonResult != null ? BuildListItem(jsonResult.d, list) : null;
         }
