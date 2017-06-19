@@ -1,12 +1,9 @@
 ﻿using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Rest.Requests;
-using EPiServer.Core;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -164,9 +161,10 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     retry++;
                     if (retry > MAX_RETRY)
                     {
-                        _logger.Error("Error occurs when reading binary data directly from SharePoint site", ex);
+                        _logger.Error("OpenDirectFileWithRetry - failed after " + MAX_RETRY + " attempts.", ex);
                         throw;
                     }
+                    _logger.Debug("Will retry last request... Retry count = " + retry);
                 }
             } while (true);
         }

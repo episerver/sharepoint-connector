@@ -8,7 +8,6 @@ using EPiServer.Framework.Cache;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
@@ -84,9 +83,10 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     retry++;
                     if (retry > MAX_RETRYS)
                     {
-                        _logger.Error("Failed with retries to send request " + requestInfo.RestApiPath, e);
+                        _logger.Error("SendRequestWithRetry failed after " + MAX_RETRYS + " attempts. Path=" + requestInfo.RestApiPath, e);
                         throw;
                     }
+                    _logger.Debug("Will retry last request... Retry count = " + retry);
                 }
             } while (true);
         }
