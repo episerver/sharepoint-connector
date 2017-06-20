@@ -118,11 +118,16 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             try
             {
                 var selectedLists = _helper.GetSelectedListViewIds(_splists);
+                _SPItemsInCMs = FindSharePointItems();
+
+                _logger.Information("Starting Sharepoint processing.");
+                _logger.Information("Current SP item count in CMS: " + _SPItemsInCMs.Count());
+                _logger.Information("Current SP folders in CMS: " + (new FolderData()).GetFolders().Count() );
+
                 foreach (var list_item in selectedLists)
                 {
                     _SPFolders.Clear(); // will contain just folders
                     _SPItems.Clear();   // will contain just documents and items 
-                    _SPItemsInCMs = FindSharePointItems();
 
                     // The idListAndView is an object that contains two guids, one for the list and one for the view.
                     var idListAndView = _helper.GetListAndViewIds(list_item.Key);
@@ -141,6 +146,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     var folderRef = AddOrUpdateFolder(rootFolder);
                     _SPFolders.Add(rootFolder);
 
+                    _logger.Information("- Processing SharePoint list: " + selectedList.Title + " ItemCount(including folders): " + selectedList.ItemCount);
+
                     // now get all the items, paged, and process each item.
                     string nextUri;
                     processItemList(selectedList, rootFolder,
@@ -150,9 +157,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // process any more batches, if any
                     while (!String.IsNullOrEmpty(nextUri))
                     {
+                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
                         processItemList(selectedList, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri));
                     }
+                    _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
 
                     // if the list folder already existed we need to check if anything has 
                     // changed since the last processing loop
@@ -166,8 +175,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             }
             catch ( Exception e)
             {
-                _logger.Debug("Error running update thread.", e);
+                // Unexpected error condition ending processing thread too soon.
+                _logger.Error("Error running update thread.", e);
             }
+            _logger.Information( GetQueCount() + " Items in the queue.");
         }
 
         /// <summary>
@@ -179,6 +190,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="items">The items to process</param>
         internal void processItemList(SPList list, SPListItem rootFolder, IEnumerable<SPListItem> items)
         {
+            _logger.Information("-- Processing batch: " + items.Count());
+
             // iterate over all the items
             foreach (var item in items)
             {
@@ -206,7 +219,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // incase we need to find in the next batch.
                     _SPFolders.Add(item);
                 }
-                else
+                else if(item.File != null)
                 {
                     // Check to see if its a different parent folder by parsing out the parent folder url and look for it in the 
                     // folder list.
@@ -217,6 +230,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         item.ParentFolderSharePointGuid = i.GUID;
                     }
 
+                    // Determins if we are sending the update or create message. 
+                    AddOrUpdateItem(item, _SPItemsInCMs);
+
+                    // All items in this sharepoint list get added to this list
+                    _SPItems.Add(item);
+                }
+                else
+                {
                     // Determins if we are sending the update or create message. 
                     AddOrUpdateItem(item, _SPItemsInCMs);
 
@@ -350,12 +371,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // if there is reference send Add message
                     if (spItem.ContentLink == null)
                     {
-                        _logger.Information("Adding SharePointContentAddMessage to the queue " + spItem.Title);
+                        _logger.Debug("   queueing doc for add: " + spItem.File.Name);
                         _emitterFactory.Create().Emit(new SharePointContentAddMessage() { Item = spItem });
                     }
                     else // its an update
                     {
-                        _logger.Information("Adding SharePointContentUpdateMessage to the queue " + spItem.Title);
+                        _logger.Debug("   queueing doc item for update: " + spItem.File.Name);
                         _emitterFactory.Create().Emit(new SharePointContentUpdateMessage() { Item = spItem });
                     }
                 }
@@ -364,12 +385,12 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // if there is reference send Add message
                     if (spItem.ContentLink == null)
                     {
-                        _logger.Information("Adding SharePointListItemAddMessage to the queue " + spItem.Title);
+                        _logger.Debug("   queueing list item for add: " + spItem.Title);
                         _emitterFactory.Create().Emit(new SharePointListItemAddMessage() { Item = spItem });
                     }
                     else // its an update
                     {
-                        _logger.Information("Adding SharePointListItemUpdateMessage to the queue " + spItem.Title);
+                        _logger.Debug("   queueing list item for update: " + spItem.Title);
                         _emitterFactory.Create().Emit(new SharePointListItemUpdateMessage() { Item = spItem });
                     }
                 }
@@ -489,7 +510,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 ContentFolder cf;
                 if( repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf) )
                 {
-                    _logger.Information("SharePointFolderUpdateMessage to the queue : " + item.Folder.Name);
+                    _logger.Debug("   queueing folder for update: " + item.Folder.Name);
                     _emitterFactory.Create().Emit(new SharePointFolderUpdateMessage()
                     {
                         Item = item,
@@ -507,7 +528,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             if (add)
             {
                 // Add the view folder.
-                _logger.Information("SharePointFolderAddMessage to the queue : " + item.Folder.Name);
+                _logger.Debug("   queueing folder for add: " + item.Folder.Name);
                 _emitterFactory.Create().Emit(new SharePointFolderAddMessage()
                 {
                     Item = item,

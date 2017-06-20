@@ -86,14 +86,14 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                         _logger.Error("SendRequestWithRetry failed after " + MAX_RETRYS + " attempts. Path=" + requestInfo.RestApiPath, e);
                         throw;
                     }
-                    _logger.Debug("Will retry last request... Retry count = " + retry);
+                    _logger.Warning("Will retry last request... Retry count = " + retry);
                 }
             } while (true);
         }
 
         public virtual string SendRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers, bool addDigestIfPOST = false)
         {
-            _logger.Information("Send request, method: {0} - addDigetsIfPOST: {1}", requestInfo.RequestMethod, addDigestIfPOST);
+            _logger.Debug("Send request, method: {0} - addDigetsIfPOST: {1}", requestInfo.RequestMethod, addDigestIfPOST);
 
             if ((requestInfo.RequestMethod == "POST" || requestInfo.RequestMethod == "GET") && addDigestIfPOST)
             {
@@ -122,24 +122,24 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     // return empty response so that the service call will know the resource has been deleted/changed
                     else if (httpRes != null && (httpRes.StatusCode == HttpStatusCode.BadRequest || httpRes.StatusCode == HttpStatusCode.NotFound))
                     {
-                        _logger.Error("Server returns bad request status code, return empty response.", webException);
+                        _logger.Debug("Server returns bad request status code, return empty response.", webException);
                         throw;
                     }
                     else
                     {
-                        _logger.Error(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), webException);
+                        _logger.Debug(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), webException);
                         throw;
                     }
                 }
                 else
                 {
-                    _logger.Error(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), webException);
+                    _logger.Debug(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), webException);
                     throw;
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), ex);
+                _logger.Debug(string.Format("Cannot send {0} request to SharePoint.", requestInfo.RequestMethod), ex);
                 throw;
             }
 
@@ -158,7 +158,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         protected string GetDigestValue(bool ignoreCache)
         {
-            _logger.Information("GetDigestValue, ignoreCache={0}", ignoreCache);
+            _logger.Debug("GetDigestValue, ignoreCache={0}", ignoreCache);
 
             var digestValue = (string)CacheManager.Get(SharePointHelper.FormDigestValueCacheKey);
 
@@ -167,7 +167,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 var contextInfo = GetContextWebInformation();
                 if (contextInfo != null)
                 {
-                    _logger.Information("Update cache for FormDigestValue, value: {0}", contextInfo.FormDigestValue);
+                    _logger.Debug("Update cache for FormDigestValue, value: {0}", contextInfo.FormDigestValue);
 
                     CacheManager.Insert(SharePointHelper.FormDigestValueCacheKey, contextInfo.FormDigestValue,
                         new CacheEvictionPolicy(TimeSpan.FromSeconds(contextInfo.FormDigestTimeoutSeconds - FormDigestTimeoutSecondsOffset), CacheTimeoutType.Absolute));
@@ -175,7 +175,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 }
             }
 
-            _logger.Information("Return DigestValue: {0}", digestValue);
+            _logger.Debug("Return DigestValue: {0}", digestValue);
             return digestValue;
         }
 

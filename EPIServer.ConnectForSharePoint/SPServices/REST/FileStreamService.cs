@@ -136,6 +136,7 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         {
             int retry = 0;
             int MAX_RETRY = 3;
+
             do
             {
                 try
@@ -162,9 +163,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                     if (retry > MAX_RETRY)
                     {
                         _logger.Error("OpenDirectFileWithRetry - failed after " + MAX_RETRY + " attempts.", ex);
-                        throw;
+                        throw; 
                     }
-                    _logger.Debug("Will retry last request... Retry count = " + retry);
+                    _logger.Warning("Will retry last request... Retry count = " + retry);
                 }
             } while (true);
         }

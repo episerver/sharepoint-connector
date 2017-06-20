@@ -48,7 +48,7 @@ namespace EPiServer.ConnectForSharePoint.Rest
             }
             catch (Exception ex)
             {
-                _logger.Error("Sending '{0}' request, exception: {1}", webRequest.RequestUri.AbsoluteUri, ex);
+                _logger.Debug("Sending '{0}' request, exception: {1}", webRequest.RequestUri.AbsoluteUri, ex);
                 throw;
             }
         }

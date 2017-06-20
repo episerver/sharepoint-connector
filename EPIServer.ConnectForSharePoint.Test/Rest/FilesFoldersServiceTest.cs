@@ -107,19 +107,6 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
-        public void LoadParentFolder_expected_is_null()
-        {
-            var spFolder = new SPFolder
-            {
-                ParentFolder = null,
-                ServerRelativeUrl = "Test"
-            };
-
-            _filesFoldersService.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null)).Returns(string.Empty);
-            Assert.IsNull(_filesFoldersService.Object.LoadParentFolder(spFolder));
-        }
-
-        [TestMethod]
         public void LoadParentFolder_of_folder_then_expected_not_null()
         {
             var spFolder = new SPFolder
