@@ -83,14 +83,13 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         public SPFolder LoadParentFolder(SPFolder currentFolder)
         {
-            _logger.Information("LoadParentFolder from SharePoint");
             if (currentFolder.IsRootFolder)
             {
                 currentFolder.ParentFolder = currentFolder;
             }
 
             var restRequest = new RestJsonRequest(string.Format(Consts.REST_FOLDER_PARENT_PATH_FORMAT, EncodeDataForRESTRequest(currentFolder.ServerRelativeUrl)));
-            var folder = BuildFolder(SendRequest(restRequest, null, null));
+            var folder = BuildFolder(SendRequestWithRetry(restRequest, null, null));
 
             // reference eachother
             if (folder != null)
@@ -98,7 +97,6 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
                 currentFolder.ParentFolder = folder;
             }
 
-            _logger.Information("Compete LoadParentFolder, return folder: {0}", folder != null ? folder.Name : "null");
             return folder;
         }
 
