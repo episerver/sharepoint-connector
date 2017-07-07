@@ -15,6 +15,8 @@
         public class D
         {
             public JsonListItem.D[] results { get; set; }
+            // Next field that ahs the url for the paged items.
+            public string __next { get; set; }
         }
     }
 }

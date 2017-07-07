@@ -56,6 +56,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var blobFactory = _serviceLocator.GetInstance<BlobFactory>();
             var fileName = item.File.Name; //  @"C:\test.jpg";
 
+            _logger.Debug("- Adding doc : " + fileName); 
+
             //Get a suitable MediaData type from extension
             Type typetobuild = typeof(SharepointGenericMedia);
             var mediaType = mediaDataResolver.GetFirstMatching(Path.GetExtension(fileName));
@@ -152,6 +154,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 cmsFolder.Name = item.Folder.Name;
                 cmsFolder.ParentLink = cref;
 
+                _logger.Debug("- Adding folder : " + item.Folder.Name);
+
                 // Save the folder
                 var savedRef = contentRepository.Save(cmsFolder, SaveAction.Publish, AccessLevel.FullAccess);
 
@@ -175,6 +179,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 var cmsFolder = repo.Get<ContentFolder>(new ContentReference(fdata.RefId)).
                     CreateWritableClone() as ContentFolder;
                 cmsFolder.Name = item.Folder.Name;
+
+                _logger.Debug("- Updating folder : " + item.Folder.Name);
 
                 // figure out if the item has been moved.
                 var parentfd = fd.GetFolder(item.ParentFolderSharePointGuid);
@@ -211,6 +217,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     FolderData.Delete(fd.GetFolder(child.ContentLink.ID));
                 }
 
+                _logger.Debug("- Deleting folder : " + item.Folder.Name);
+
                 // now delete this folder
                 repo.Delete(new ContentReference(folderData.RefId), true);
                 FolderData.Delete(folderData);
@@ -234,10 +242,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                 var medialist = repo.GetChildren<MediaData>(folder.ContentLink);
                 foreach (var m in medialist)
                 {
-                    repo.Delete(m.ContentLink, true);
-                }
+                    try
+                    {
+                        repo.Delete(m.ContentLink, true);
+                    } catch { } // intentionally empty catch, MAI-933
+                }               
 
-                repo.Delete(f.ContentLink, true, AccessLevel.Delete);
+                try
+                {
+                    repo.Delete(f.ContentLink, true, AccessLevel.Delete);
+                } catch { } // intentionally empty catch, MAI-933
+
                 var fd = new FolderData();
                 FolderData.Delete(fd.GetFolder(f.ContentLink.ID));
             }
@@ -284,6 +299,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     // Only update if the last modified dates dont match
                     if (item.File.TimeLastModified.CompareTo(mediaEX.SharePointTimeLastModified) != 0)
                     {
+                        _logger.Debug("- Update Document : " + fileName);
+
                         // Set attibutes of the media
                         media.Name = fileName;
                         media.Created = item.File.TimeCreated;
@@ -318,6 +335,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                             // failed to save data in cms
                         }
                     }
+                    else
+                    {
+                        _logger.Debug("- Nothing to Update for Document : " + fileName);
+                    }
                 }
             }
         }
@@ -328,6 +349,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             try
             {
+                _logger.Debug("- Delete Document : " + item.File.Title);
                 contentRepository.Delete(item.ContentLink, true, AccessLevel.Delete);
             }
             catch(Exception e)
@@ -342,6 +364,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var contentTypeRepository = _serviceLocator.GetInstance<IContentTypeRepository>();
             var mediaDataResolver = _serviceLocator.GetInstance<ContentMediaResolver>();
             var fileName = item.DisplayName; //  @"C:\test.jpg";
+
+            _logger.Debug("- Add Custom List item : " + fileName);
 
             //Get a suitable MediaData type from extension
             Type typetobuild = typeof(SharePointBlockData);
@@ -438,6 +462,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                     if (item.Modified.CompareTo(mediaEX.SharePointTimeLastModified) != 0 ||
                         view.Id != Guid.Parse(mediaEX.ViewID) )
                     {
+                        _logger.Debug("- Update Custom List item : " + fileName);
+
                         media.Json = _helper.GetRawListItemData(item); // get the json data from the list item
 
                         // Set attibutes of the media
@@ -459,6 +485,10 @@ namespace EPiServer.ConnectForSharePoint.Messaging
                             _logger.Error("Failed to save to cms", e);
                         }
                     }
+                    else
+                    {
+                        _logger.Debug("- Nothing to Update Custom List item : " + fileName);
+                    }
                 }
             }
         }
@@ -469,6 +499,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
             try
             {
+                _logger.Debug("- Delete Custom List item : " + item.Title);
+
                 contentRepository.Delete(item.ContentLink, true, AccessLevel.Delete);
             }
             catch (Exception e)

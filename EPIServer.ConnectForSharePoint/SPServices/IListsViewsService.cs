@@ -60,5 +60,8 @@ namespace EPiServer.ConnectForSharePoint.SPServices
         /// <param name="list"></param>
         /// <returns>Dictionary key is the internal name</returns>
         Dictionary<string, SPFieldItem> GetFieldItemDictionary(Guid ListID);
+
+        IEnumerable<SPListItem> GetPagedItems(SPList list, SPListView view, SPFolder folder, out string nextUri);
+        IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri);
     }
 }

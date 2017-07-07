@@ -1,12 +1,9 @@
-﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Messaging.Messages;
+﻿using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Processor;
 using EPiServer.Logging;
 using EPiServer.Security;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
-using System.Web;
 
 namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 {
@@ -28,6 +25,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         private string error2 = "* Verify that CmsAdmins role or the role that the CmsAdmins role maps to has full access to " +
             "the folder specified in the \"Connect for Sharepoint\" configuration.";
 
+        internal ProcessingThreadManager _threadManager = new ProcessingThreadManager();
 
         /// <summary>
         /// Default Constructor
@@ -128,19 +126,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentAddMessage message)
         {
-            using (var pp = new PrincipalPreserver())
-            {
-                try
-                {
-                    processor.AddDocument(message.Item);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error("Error AddDocument", e);
-                    if (e is EPiServer.Core.AccessDeniedException)
-                        showErrorHelperMessages();
-                }
-            }
+            _threadManager.AddThread(processor, message);
         }
 
         /// <summary>
@@ -187,19 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
 
         public void Handle(SharePointListItemAddMessage message)
         {
-            using (var pp = new PrincipalPreserver())
-            {
-                try
-                {
-                    processor.AddListItem(message.Item);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error("Error AddListItem", e);
-                    if( e is EPiServer.Core.AccessDeniedException )
-                        showErrorHelperMessages();
-                }
-            }
+            _threadManager.AddThread(processor, message);
         }
 
         public void Handle(SharePointListItemUpdateMessage message)

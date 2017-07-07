@@ -70,6 +70,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
             serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
+            FolderData.clearcache();        // make sure the cache is cleared because when running all tests
+
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, 
                 fileStreamService.Object, listViewService.Object, accessRightsHelper.Object);
@@ -365,6 +367,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 {
                     Name = "SomeFolder",
                     ContentLink = new ContentReference(42),
+                    ContentGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D"),
                 }
             );
 
@@ -387,10 +390,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
-            processor.UpdateFolder(item);
+            processor.UpdateFolder(item); 
 
             // Verify that the code found the specified contentreference that matches the entry point in the entrypoint id
             // specified in the splistitem
+            serviceLocator.Verify(m => m.GetInstance<IContentRepository>(), Times.AtLeast(1), "Didnt call load repo");
             contentRepo.Verify(ch => ch.Save(It.Is<ContentFolder>(cf => cf.ContentLink.ID == 42),
                 It.IsAny<SaveAction>(), It.IsAny<AccessLevel>()), Times.Once,
                 "Repository Save needs to be called once with proper Content reference when updating");
@@ -455,6 +459,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             // We need to return an ordered list of nothing...
             IList<FolderData> list = new List<FolderData>();
+            list.Add(new FolderData() { RefId = 42, FolderGuid = new Guid("6178D0E1-4F19-4231-BC58-A433821A941D") });
             dds.Setup(dd => dd.Items<FolderData>()).Returns(list.AsQueryable().OrderBy(fd => fd.Id));
 
             var item = new SPListItem()

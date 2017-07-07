@@ -283,6 +283,7 @@
     <Compile Include="Models\ViewModels\ListItemViewModel.cs" />
     <Compile Include="Models\ViewModels\VideoViewModel.cs" />
     <Compile Include="Processor\ISharePointProcessor.cs" />
+    <Compile Include="Processor\ProcessingThreadManager.cs" />
     <Compile Include="Processor\SharePointProcessor.cs" />
     <Compile Include="Processor\SharePointProcessorData.cs" />
     <Compile Include="Rest\Models\JsonFieldItem.cs" />
