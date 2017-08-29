@@ -323,8 +323,6 @@
     <Compile Include="Rest\Responses\RestResponse.cs" />
     <Compile Include="Rest\SPRestClient.cs" />
     <Compile Include="Authentication\WcfClientContracts.cs" />
-    <Compile Include="SharePointModule.cs" />
-    <Compile Include="SharePointModuleViewModel.cs" />
     <Compile Include="SPServices\TagsService.cs" />
     <Compile Include="SPServices\REST\EndpointContextService.cs" />
     <Compile Include="SPServices\REST\FilesFoldersService.cs" />
@@ -356,7 +354,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ClientResources\Images\DefaultThumbnail.png" />
-    <Content Include="ClientResources\Scripts\SharePointModule.js" />
     <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DA.xml" />
     <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DE.xml" />
     <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_ES.xml" />
@@ -457,7 +454,9 @@
       <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ClientResources\Scripts\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
