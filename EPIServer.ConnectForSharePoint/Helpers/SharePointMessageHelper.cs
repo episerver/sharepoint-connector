@@ -34,6 +34,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         static internal string _listids;
         static internal IEnumerable<SPList> _splists;
         static Object _lock = new Object();
+        static public Boolean _processingResult = true;
+        static public Exception _processingException;
 
         [ExcludeFromCodeCoverageAttribute]
         public SharePointMessageHelper()
@@ -74,6 +76,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _listids = listids;
                 _splists = splists;
                 _processingThread = new Thread(new ThreadStart(process));
+                _processingResult = true;
+                _processingException = null;
                 _processingThread.Start();
             }
         }
@@ -152,14 +156,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     string nextUri;
                     processItemList(selectedList, rootFolder,
                         _helper.GetPagedItems(selectedList,
-                        selectedView, rootFolder.Folder, out nextUri));
+                        selectedView, rootFolder.Folder, out nextUri), selectedView.Scope);
 
                     // process any more batches, if any
                     while (!String.IsNullOrEmpty(nextUri))
                     {
                         _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
                         processItemList(selectedList, rootFolder,
-                            _helper.GetNextPagedItems(selectedList, nextUri, out nextUri));
+                            _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
                     _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
 
@@ -171,12 +175,16 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         RemoveUserAddedFolders(folderRef);
                         RemoveSharePointAddedFolders(folderRef, _SPFolders);
                     }
+
+                    DeleteDocumentsAndItems(_SPItemsInCMs, _SPItems);
                 }
             }
             catch ( Exception e)
             {
                 // Unexpected error condition ending processing thread too soon.
                 _logger.Error("Error running update thread.", e);
+                _processingResult = false;
+                _processingException = e;
             }
             _logger.Information( GetQueCount() + " Items in the queue.");
         }
@@ -188,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="list">The Sharepoint list the items are related to</param>
         /// <param name="rootFolder">The root folder for the items</param>
         /// <param name="items">The items to process</param>
-        internal void processItemList(SPList list, SPListItem rootFolder, IEnumerable<SPListItem> items)
+        internal void processItemList(SPList list, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope )
         {
             _logger.Information("-- Processing batch: " + items.Count());
 
@@ -199,7 +207,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 item.ParentFolderSharePointGuid = rootFolder.GUID;  // this is the root folder of the view.
 
                 // is the item a folder?
-                if (item.Folder != null)
+                if (item.Folder != null && scope == 0) // if scope is 0 we are adding folders else its a flat list.
                 {
                     var parent = _fileFolderService.LoadParentFolder(item.Folder);
 
@@ -276,6 +284,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             {
                                 Item = new SPListItem()
                                 {
+                                    File = new SPFile() { Name = item.Name },
                                     ContentLink = item.ContentLink, // id of the folder the item is in
                                     GUID = new Guid(mediaItem.SharePointGUID),
                                 },
@@ -287,8 +296,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                             {
                                 Item = new SPListItem()
                                 {
+                                    File = new SPFile() { Name = item.Name },
                                     ContentLink = item.ContentLink, // id of the folder the item is in
-                                    GUID = new Guid(mediaItem.SharePointGUID),
+                                    GUID = new Guid(mediaItem.SharePointGUID)
                                 },
                             });
                         }
