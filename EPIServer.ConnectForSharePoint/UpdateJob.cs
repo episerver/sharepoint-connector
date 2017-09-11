@@ -104,7 +104,14 @@ namespace EPiServer.ConnectForSharePoint
                     Thread.Sleep(2000);
                 }
 
-                return "Completed.";
+                if (SharePointMessageHelper._processingResult != true)
+                {
+                    return ("Failed : " + SharePointMessageHelper._processingException.Message);
+                }
+                else
+                {
+                    return "Completed.";
+                }
             }
             else
             {
