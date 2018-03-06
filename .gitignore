@@ -12,3 +12,7 @@
 /EPIServer.ConnectForSharePoint.Test/obj/Debug
 /packages
 /TestResults
+/DemoSharepointProcessor/obj
+/EPIServer.ConnectForSharePoint/obj/Release
+/EPIServer.ConnectForSharePoint.Messaging/obj/Release
+/EPIServer.ConnectForSharePoint.Test/obj/Release
