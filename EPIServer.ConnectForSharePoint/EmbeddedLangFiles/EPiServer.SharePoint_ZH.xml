@@ -1,61 +1,60 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<languages>
+<?xml version="1.0" encoding="utf-8" ?> <languages>
     <language name="中文 (Chinese)" id="zh-CN">
         <sharepoint>
           <scheduledjob>
-            <description>Imports new or updated documents, items, and folders from SharePoint into Episerver.</description>
-            <displayname>SharePoint Update</displayname>
+            <description>从 SharePoint 向 Episerver 导入新的或更新后的文件、项目和文件夹。</description>
+            <displayname>SharePoint 更新</displayname>
           </scheduledjob>
           <admin>
-                <ok>Ok</ok>
-                <cancel>Cancel</cancel>
-                <displayname>Connect For SharePoint</displayname>
-                <description>SharePoint Site Credentials</description>
-                <queuedescription>Queue Information</queuedescription>
-                <remainingitems>Remaining items</remainingitems>
-                <selectviewdescription>Select one or more lists and corresponding views.</selectviewdescription>
-                <serverurl>Site URL</serverurl>
-                <username>Username</username>
-                <password>Password</password>
-                <connectiontype>Connection type</connectiontype>
-                <online>Online</online>
-                <onpremises>On-premises</onpremises>
-                <save>Save</save>
-                <connect>Test connection</connect>
-                <selectedfolder>Folder</selectedfolder>
-                <selectfolder>Select Folder:</selectfolder>
-                <entrypoint>Connection Entry Point</entrypoint>
-                <entrypointinstructions>Select a folder that will be the entry point location.  In addition, if you would like to create a new sub-folder, use the text box below:</entrypointinstructions>
-                <newsubfolder>Create New Sub-Folder:</newsubfolder>  
-                <expirationtime>Expiration Time</expirationtime>
-                <refreshcache>Refresh</refreshcache>
-                <entrypointrequired>Connection Entry Point is required.</entrypointrequired>
+                <ok>确定</ok>
+                <cancel>取消</cancel>
+                <displayname>为 SharePoint 连接</displayname>
+                <description>SharePoint 站点证书</description>
+                <queuedescription>队列信息</queuedescription>
+                <remainingitems>剩余项目</remainingitems>
+                <selectviewdescription>选择一个或多个列表及相应的视图。</selectviewdescription>
+                <serverurl>网站 URL</serverurl>
+                <username>用户名</username>
+                <password>密码</password>
+                <connectiontype>连接类型</connectiontype>
+                <online>在线</online>
+                <onpremises>本机端</onpremises>
+                <save>保存</save>
+                <connect>测试类型</connect>
+                <selectedfolder>文件夹</selectedfolder>
+                <selectfolder>选择文件夹：</selectfolder>
+                <entrypoint>连接条目点</entrypoint>
+                <entrypointinstructions>选择将成为条目点位置的文件夹。  此外，如果您想新建子文件夹，请使用以下文本框：</entrypointinstructions>
+                <newsubfolder>新建子文件夹：</newsubfolder>  
+                <expirationtime>截止时间</expirationtime>
+                <refreshcache>刷新</refreshcache>
+                <entrypointrequired>要求连接条目点。</entrypointrequired>
                 <message>
-                    <savesuccess>Your configuration has been successfully saved.</savesuccess>
-                    <refreshsuccess>SharePoint data is being updated.</refreshsuccess>
-                    <connectsuccess>Successfully connected to the SharePoint site. Select SharePoint views to get media from.</connectsuccess>
-                    <savesuccesswithnomedia>Your configuration has been saved. Note that since there is no view selected, no Sharepoint media is mapped.</savesuccesswithnomedia>
-                    <saveerror>Error while saving: {0}.</saveerror>
-                    <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
-                    <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
-                    <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
-                    <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any 'Blocks' or media items.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Selected folder cannot be a child of the previously selected folder.  Please select a different folder.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
+                    <savesuccess>已成功保存您的配置。</savesuccess>
+                    <refreshsuccess>正在更新 SharePoint 数据。</refreshsuccess>
+                    <connectsuccess>已成功连接至 SharePoint 站点。 选择 SharePoint 视图以从中获取媒体。</connectsuccess>
+                    <savesuccesswithnomedia>已保存您的配置。 请注意，由于未选择视图，因此未映射 Sharepoint 媒体。</savesuccesswithnomedia>
+                    <saveerror>保存过程中的错误： {0}.</saveerror>
+                    <connecttosharepointerror>连接至 SharePoint 站点时发生错误： {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>未指定 SharePoint URL、用户名或密码。</nourlusernamepasswordspecified>
+                    <unauthorizederror>通过指定用户名和密码授权失败。</unauthorizederror>
+                    <notfounderror>SharePoint URL 错误或您没有访问 URL 中指定站点的权限。</notfounderror>
+                    <listviewnotmatched>视图列表未更新。 重新连接以获取新的 SharePoint 视图。</listviewnotmatched>
+                    <invalidentrypoint>无效连接条目点。</invalidentrypoint>
+                    <entrypointmustbecontentfolder>连接条目点必须为内容文件夹。</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>连接条目点必须为空。  请选择不包含任何“块”或媒体项目的文件夹。</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>所选文件夹不得为之前所选文件夹的子文件夹。  请选择别的文件夹。</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>截止时间必须以分为单位。</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>（大于或等于 3 分钟）</expirationtimegreaterorequalthree>
+                    <folderdeleted>已删除文件夹“{0}”，请选择新的目标。</folderdeleted>
                 </message>
             </admin>
             <plugin>
                 <spcontentindexjob>
-                    <displayname>SharePoint Content Index</displayname>
-                    <description>This job will index media content from SharePoint.</description>
-                    <indexcompleted>Content successfully indexed.</indexcompleted>
-                    <indexfailed>Content indexing failed.</indexfailed>
+                    <displayname>SharePoint 内容索引</displayname>
+                    <description>此任务将指示来自 SharePoint 的媒体内容。</description>
+                    <indexcompleted>已成功指示内容。</indexcompleted>
+                    <indexfailed>内容索引失败。</indexfailed>
                 </spcontentindexjob>
             </plugin>
         </sharepoint>

@@ -1,61 +1,60 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<languages>
+<?xml version="1.0" encoding="utf-8" ?> <languages>
     <language name="dansk" id="da">
         <sharepoint>
           <scheduledjob>
-            <description>Imports new or updated documents, items, and folders from SharePoint into Episerver.</description>
-            <displayname>SharePoint Update</displayname>
+            <description>Importerer nye eller opdaterede dokumenter, elementer og mapper fra SharePoint til Episerver.</description>
+            <displayname>SharePoint-opdatering</displayname>
           </scheduledjob>
           <admin>
                 <ok>Ok</ok>
-                <cancel>Cancel</cancel>
+                <cancel>Annuller</cancel>
                 <displayname>Connect For SharePoint</displayname>
-                <description>SharePoint Site Credentials</description>
-                <queuedescription>Queue Information</queuedescription>
-                <remainingitems>Remaining items</remainingitems>
-                <selectviewdescription>Select one or more lists and corresponding views.</selectviewdescription>
-                <serverurl>Site URL</serverurl>
-                <username>Username</username>
-                <password>Password</password>
-                <connectiontype>Connection type</connectiontype>
+                <description>Legitimationsoplysninger til SharePoint-websted</description>
+                <queuedescription>Køoplysninger</queuedescription>
+                <remainingitems>Resterende elementer</remainingitems>
+                <selectviewdescription>Vælg en eller flere lister og tilhørende visninger.</selectviewdescription>
+                <serverurl>Websteds-URL</serverurl>
+                <username>Brugernavn</username>
+                <password>Adgangskode</password>
+                <connectiontype>Forbindelsestype</connectiontype>
                 <online>Online</online>
-                <onpremises>On-premises</onpremises>
-                <save>Save</save>
-                <connect>Test connection</connect>
-                <selectedfolder>Folder</selectedfolder>
-                <selectfolder>Select Folder:</selectfolder>
-                <entrypoint>Connection Entry Point</entrypoint>
-                <entrypointinstructions>Select a folder that will be the entry point location.  In addition, if you would like to create a new sub-folder, use the text box below:</entrypointinstructions>
-                <newsubfolder>Create New Sub-Folder:</newsubfolder>  
-                <expirationtime>Expiration Time</expirationtime>
-                <refreshcache>Refresh</refreshcache>
-                <entrypointrequired>Connection Entry Point is required.</entrypointrequired>
+                <onpremises>Lokalt</onpremises>
+                <save>Gem</save>
+                <connect>Test forbindelse</connect>
+                <selectedfolder>Mappe</selectedfolder>
+                <selectfolder>Vælg mappe:</selectfolder>
+                <entrypoint>Indgangspunkt for forbindelse</entrypoint>
+                <entrypointinstructions>Vælg en mappe, som bliver placering for indgangspunkt.  Hvis du derudover vil oprette en ny undermappe, skal du bruge tekstboksen nedenfor:</entrypointinstructions>
+                <newsubfolder>Opret ny undermappe:</newsubfolder>  
+                <expirationtime>Udløbstid</expirationtime>
+                <refreshcache>Opdater</refreshcache>
+                <entrypointrequired>Indgangspunkt for forbindelse er påkrævet</entrypointrequired>
                 <message>
-                    <savesuccess>Your configuration has been successfully saved.</savesuccess>
-                    <refreshsuccess>SharePoint data is being updated.</refreshsuccess>
-                    <connectsuccess>Successfully connected to the SharePoint site. Select SharePoint views to get media from.</connectsuccess>
-                    <savesuccesswithnomedia>Your configuration has been saved. Note that since there is no view selected, no Sharepoint media is mapped.</savesuccesswithnomedia>
-                    <saveerror>Error while saving: {0}.</saveerror>
-                    <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
-                    <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
-                    <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
-                    <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any 'Blocks' or media items.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Selected folder cannot be a child of the previously selected folder.  Please select a different folder.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
+                    <savesuccess>Din konfiguration blev gemt.</savesuccess>
+                    <refreshsuccess>SharePoint-data opdateres.</refreshsuccess>
+                    <connectsuccess>Der blev oprettet forbindelse til SharePoint-webstedet. Vælg SharePoint-visninger, hvor der skal hentes medier fra.</connectsuccess>
+                    <savesuccesswithnomedia>Din konfiguration blev gemt. Bemærk, at når der ikke er valgt en visning, tilknyttes der ikke Sharepoint-medier.</savesuccesswithnomedia>
+                    <saveerror>Fejl under lagring: {0}.</saveerror>
+                    <connecttosharepointerror>Fejl ved oprettelse af forbindelse til SharePoint-websted: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>Der er ikke angivet SharePoint-URL, brugernavn eller adgangskode.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Der kunne ikke godkendes med angivne brugernavn og adgangskode.</unauthorizederror>
+                    <notfounderror>SharePoint-URL'en er forkert, eller du har ikke adgang til webstedet, der er angivet af URL'en.</notfounderror>
+                    <listviewnotmatched>Listen over visninger er ikke opdateret. Opret forbindelse igen for at få nye SharePoint-visninger.</listviewnotmatched>
+                    <invalidentrypoint>Ugyldigt indgangspunkt for forbindelse.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>Indgangspunkt for forbindelse skal være en indholdsmappe.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>Indgangspunkt for forbindelse skal være tomt.  Vælg en mappe, der ikke indeholder blokke eller medieelementer.</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>Den valgte mappe kan ikke være en undermappe af den tidligere valgte mappe.  Vælg en anden mappe.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Udløbstiden skal være i minutter.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(større end eller lig med 3 minutter)</expirationtimegreaterorequalthree>
+                    <folderdeleted>Mappen '{0}' er blevet slettet. Vælg en ny destination.</folderdeleted>
                 </message>
             </admin>
             <plugin>
                 <spcontentindexjob>
-                    <displayname>SharePoint Content Index</displayname>
-                    <description>This job will index media content from SharePoint.</description>
-                    <indexcompleted>Content successfully indexed.</indexcompleted>
-                    <indexfailed>Content indexing failed.</indexfailed>
+                    <displayname>Indeks over SharePoint-indhold</displayname>
+                    <description>Dette job vil indeksere medieindhold fra SharePoint.</description>
+                    <indexcompleted>Indholdet blev indekseret.</indexcompleted>
+                    <indexfailed>Indeksering af indhold mislykkedes.</indexfailed>
                 </spcontentindexjob>
             </plugin>
         </sharepoint>
