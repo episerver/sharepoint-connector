@@ -10,17 +10,14 @@
         <description>Integrate EPiServer site with SharePoint</description>
         <copyright>Copyright EPiServer 2015</copyright>
         <releaseNotes>
-			Changes for CMS 9
-				•	Media and Custom list support.
-				•	Asynchronous import of items for large list support.
-				•	Supports SharePoint 2013, SharePoint Foundation 2013, and SharePoint Online (Office 365).
-				•	Developer access to override the default document processor to support custom object creation from SharePoint items.
+		Updated for Episerver CMS 11 support.
         </releaseNotes>
         <tags>EPiServerModulePackage EPiServer SharePoint Connector</tags>
         <dependencies>
-            <dependency id="EPiServer.CMS.Core" version="[9.0.3,12)" />
-			<dependency id="EPiServer.CMS.UI" version="[9.2,12)" />
-			<dependency id="EPiServer.Logging.Log4Net" version="[2,3)" />
+		<dependency id="EPiServer.CMS.Core" version="[9.0.3,12)" />
+		<dependency id="EPiServer.CMS.UI" version="[9.2,12)" />
+		<dependency id="EPiServer.Logging.Log4Net" version="[2,3)" />
+		<dependency id="EPiServer.Packaging" version="[3.4, 4)" />
         </dependencies>
     </metadata>
 </package>
