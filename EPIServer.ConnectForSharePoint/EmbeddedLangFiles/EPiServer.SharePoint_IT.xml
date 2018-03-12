@@ -1,61 +1,60 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<languages>
+<?xml version="1.0" encoding="utf-8" ?> <languages>
     <language name="Italiano" id="it">
         <sharepoint>
           <scheduledjob>
-            <description>Imports new or updated documents, items, and folders from SharePoint into Episerver.</description>
-            <displayname>SharePoint Update</displayname>
+            <description>Importa documenti, elementi e cartelle nuove o aggiornate da SharePoint in Episerver.</description>
+            <displayname>Aggiornamento SharePoint</displayname>
           </scheduledjob>
           <admin>
                 <ok>Ok</ok>
-                <cancel>Cancel</cancel>
-                <displayname>Connect For SharePoint</displayname>
-                <description>SharePoint Site Credentials</description>
-                <queuedescription>Queue Information</queuedescription>
-                <remainingitems>Remaining items</remainingitems>
-                <selectviewdescription>Select one or more lists and corresponding views.</selectviewdescription>
-                <serverurl>Site URL</serverurl>
-                <username>Username</username>
+                <cancel>Annulla</cancel>
+                <displayname>Connettiti a SharePoint</displayname>
+                <description>Credenziali del sito SharePoint</description>
+                <queuedescription>Informazioni sulla coda</queuedescription>
+                <remainingitems>Elementi rimanenti</remainingitems>
+                <selectviewdescription>Seleziona uno o più elenchi e visualizzazioni corrispondenti.</selectviewdescription>
+                <serverurl>URL del sito</serverurl>
+                <username>Nome utente</username>
                 <password>Password</password>
-                <connectiontype>Connection type</connectiontype>
+                <connectiontype>Tipo di collegamento</connectiontype>
                 <online>Online</online>
-                <onpremises>On-premises</onpremises>
-                <save>Save</save>
-                <connect>Test connection</connect>
-                <selectedfolder>Folder</selectedfolder>
-                <selectfolder>Select Folder:</selectfolder>
-                <entrypoint>Connection Entry Point</entrypoint>
-                <entrypointinstructions>Select a folder that will be the entry point location.  In addition, if you would like to create a new sub-folder, use the text box below:</entrypointinstructions>
-                <newsubfolder>Create New Sub-Folder:</newsubfolder>  
-                <expirationtime>Expiration Time</expirationtime>
-                <refreshcache>Refresh</refreshcache>
-                <entrypointrequired>Connection Entry Point is required.</entrypointrequired>
+                <onpremises>On-premise</onpremises>
+                <save>Salva</save>
+                <connect>Test connessione</connect>
+                <selectedfolder>Cartella</selectedfolder>
+                <selectfolder>Seleziona cartella:</selectfolder>
+                <entrypoint>Punto di ingresso connessione</entrypoint>
+                <entrypointinstructions>Seleziona una cartella che sarà la posizione del punto di ingresso.  Inoltre, se desideri creare una nuova sotto-cartella, utilizza la casella di testo qui sotto:</entrypointinstructions>
+                <newsubfolder>Creare nuova sotto-cartella:</newsubfolder>  
+                <expirationtime>Data di scadenza</expirationtime>
+                <refreshcache>Rinfresca</refreshcache>
+                <entrypointrequired>Punto di ingresso connessione richiesto.</entrypointrequired>
                 <message>
-                    <savesuccess>Your configuration has been successfully saved.</savesuccess>
-                    <refreshsuccess>SharePoint data is being updated.</refreshsuccess>
-                    <connectsuccess>Successfully connected to the SharePoint site. Select SharePoint views to get media from.</connectsuccess>
-                    <savesuccesswithnomedia>Your configuration has been saved. Note that since there is no view selected, no Sharepoint media is mapped.</savesuccesswithnomedia>
-                    <saveerror>Error while saving: {0}.</saveerror>
-                    <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
-                    <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
-                    <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
-                    <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any 'Blocks' or media items.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Selected folder cannot be a child of the previously selected folder.  Please select a different folder.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Folder '{0}' has been deleted, please select a new destination.</folderdeleted>
+                    <savesuccess>La tua configurazione è stata salvata correttamente.</savesuccess>
+                    <refreshsuccess>I dati di SharePoint sono stati aggiornati.</refreshsuccess>
+                    <connectsuccess>Collegato correttamente la sito SharePoint. Seleziona visualizzazioni di SharePoint per ottenere i media da.</connectsuccess>
+                    <savesuccesswithnomedia>La tua configurazione è stata salvata. Dato che non vi è alcuna visualizzazione selezionata, nessun media di SharePoint viene mappato.</savesuccesswithnomedia>
+                    <saveerror>Errore durante il salvataggio: {0}.</saveerror>
+                    <connecttosharepointerror>Errore durante la connessione al sito di SharePoint: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>Nessun URL, nome utente o password specificati per SharePoint.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Autorizzazione fallita con password e nome utente specificati.</unauthorizederror>
+                    <notfounderror>URL di SharePoint errato o non hai accesso al sito specificato nel URL.</notfounderror>
+                    <listviewnotmatched>L'elenco delle visualizzazioni non è aggiornato. Ricollegati per ottenere nuove visualizzazioni di SharePoint.</listviewnotmatched>
+                    <invalidentrypoint>Punto di ingresso connessione errato.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>Punto di ingresso di connessione deve essere una cartella del contenuto.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>Punto di ingresso di connessione deve essere vuoto.  Seleziona una cartella che non contiene alcun 'Blocco' o elementi multimediali.</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>Cartella selezionata non può essere una cartella selezionata precedentemente.  Selezionare una cartella diversa.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Tempo di scadenza deve essere in minuti.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(deve essere maggiore o uguale a 3 minuti)</expirationtimegreaterorequalthree>
+                    <folderdeleted>La cartella '{0}' è stata eliminata, seleziona una nuova destinazione.</folderdeleted>
                 </message>
             </admin>
             <plugin>
                 <spcontentindexjob>
-                    <displayname>SharePoint Content Index</displayname>
-                    <description>This job will index media content from SharePoint.</description>
-                    <indexcompleted>Content successfully indexed.</indexcompleted>
-                    <indexfailed>Content indexing failed.</indexfailed>
+                    <displayname>Indice contenuto di SharePoint</displayname>
+                    <description>Questo lavoro permette l'indicizzazione contenuti multimediali da SharePoint.</description>
+                    <indexcompleted>Contenuto indicizzato correttamente.</indexcompleted>
+                    <indexfailed>Indicizzazione contenuto non riuscita.</indexfailed>
                 </spcontentindexjob>
             </plugin>
         </sharepoint>
