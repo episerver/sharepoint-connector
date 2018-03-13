@@ -128,6 +128,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _logger.Information("Current SP item count in CMS: " + _SPItemsInCMs.Count());
                 _logger.Information("Current SP folders in CMS: " + (new FolderData()).GetFolders().Count() );
 
+                List<SPListItem> AllSPListItems = new List<SPListItem>();
+
                 foreach (var list_item in selectedLists)
                 {
                     _SPFolders.Clear(); // will contain just folders
@@ -176,8 +178,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         RemoveSharePointAddedFolders(folderRef, _SPFolders);
                     }
 
-                    DeleteDocumentsAndItems(_SPItemsInCMs, _SPItems);
+                    AllSPListItems.AddRange(_SPItems);
                 }
+
+                DeleteDocumentsAndItems(_SPItemsInCMs, AllSPListItems);
             }
             catch ( Exception e)
             {
