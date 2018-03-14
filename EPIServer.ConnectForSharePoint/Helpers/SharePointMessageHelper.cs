@@ -27,6 +27,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private IServiceLocator _serviceLocator;
         internal IList<SPListItem> _SPFolders = new List<SPListItem>();
         internal IList<SPListItem> _SPItems = new List<SPListItem>();
+        internal List<SPListItem> _AllSPItems = new List<SPListItem>();
+        internal bool _clearAllSPItemsWhenDone = true;
         internal IEnumerable<IContent> _SPItemsInCMs;
         internal IFilesFoldersService _fileFolderService;
 
@@ -128,7 +130,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _logger.Information("Current SP item count in CMS: " + _SPItemsInCMs.Count());
                 _logger.Information("Current SP folders in CMS: " + (new FolderData()).GetFolders().Count() );
 
-                List<SPListItem> AllSPListItems = new List<SPListItem>();
+                _AllSPItems.Clear();
 
                 foreach (var list_item in selectedLists)
                 {
@@ -178,10 +180,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                         RemoveSharePointAddedFolders(folderRef, _SPFolders);
                     }
 
-                    AllSPListItems.AddRange(_SPItems);
+                    _AllSPItems.AddRange(_SPItems);
                 }
 
-                DeleteDocumentsAndItems(_SPItemsInCMs, AllSPListItems);
+                DeleteDocumentsAndItems(_SPItemsInCMs, _AllSPItems);
             }
             catch ( Exception e)
             {
@@ -191,6 +193,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 _processingException = e;
             }
             _logger.Information( GetQueCount() + " Items in the queue.");
+
+            if( _clearAllSPItemsWhenDone )
+            {
+                _AllSPItems.Clear();
+            }
         }
 
         /// <summary>

@@ -426,7 +426,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             };
             _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
 
-            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // lists will return no items.
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() };
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
@@ -470,7 +470,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             };
             _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
 
-            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // lists will return no items.
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() };
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
@@ -479,6 +479,55 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             // make sure we deleted the list item, and it was the expected item.
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointListItemDeleteMessage) && mess.Item.GUID == itemID)),
                 Times.Once, "Expect to emit SharePointListItemDeleteMessage but did not.");
+        }
+
+        [TestMethod]
+        public void Process_calls_DeleteDocumentsAndItems_with_all_spitems_mai_1144()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            // represents existing content in cms 
+            var itemID = Guid.NewGuid();
+            var existingContent = new List<IContent>() {
+                new SharepointListItemTestType() {  Name = "DeleteMe", ContentGuid = Guid.NewGuid(), SharePointGUID = itemID.ToString() }
+            };
+            _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
+
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // Each list will return two items. there are 3 default lists
+            string Path;
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
+
+            messageHelper._clearAllSPItemsWhenDone = false; // dont clear the the list so we can test how many are there. 
+            messageHelper.process();
+
+            // Each list (configured above) will return two items. there are 3 default lists
+            Assert.AreEqual(messageHelper._AllSPItems.Count(), 6, "The number of items in the lists did not match the number of items processed.");
+        }
+
+        [TestMethod]
+        public void Process_calls_DeleteDocumentsAndItems_with_all_spitems_and_clears_list_mai_1144()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            // represents existing content in cms 
+            var itemID = Guid.NewGuid();
+            var existingContent = new List<IContent>() {
+                new SharepointListItemTestType() {  Name = "DeleteMe", ContentGuid = Guid.NewGuid(), SharePointGUID = itemID.ToString() }
+            };
+            _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
+
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // Each list will return two items. there are 3 default lists
+            string Path;
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
+
+            messageHelper.process();
+
+            // Each list (configured above) will return two items. there are 3 default lists
+            Assert.AreEqual(messageHelper._AllSPItems.Count(), 0, "The default behavior should be to clear the list when done processing.");
         }
     }
 }
