@@ -413,7 +413,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         }
 
         [TestMethod]
-        public void Process_deletes_all_items_not_in_splists()
+        public void Process_deletes_all_content_items_not_in_sharepoint()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -457,7 +457,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         }
 
         [TestMethod]
-        public void Process_deletes_all_listitems_not_in_splists()
+        public void Process_deletes_all_custom_listitems_not_in_sharepoint()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -482,7 +482,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         }
 
         [TestMethod]
-        public void Process_calls_DeleteDocumentsAndItems_with_all_spitems_mai_1144()
+        public void Process_calls_DeleteDocumentsAndItems_with_all_sharepointitems_mai_1144()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -499,7 +499,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
-            messageHelper._clearAllSPItemsWhenDone = false; // dont clear the the list so we can test how many are there. 
+            // Override the clearing of the list so we can verify that we processed all the items.
+            messageHelper._clearAllSPItemsWhenDone = false; 
             messageHelper.process();
 
             // Each list (configured above) will return two items. there are 3 default lists
@@ -507,7 +508,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         }
 
         [TestMethod]
-        public void Process_calls_DeleteDocumentsAndItems_with_all_spitems_and_clears_list_mai_1144()
+        public void Process_calls_DeleteDocumentsAndItems_with_all_sharepointitems_and_clears_list_mai_1144()
         {
             var messageHelper = GetUnitUnderTest();
 
@@ -527,6 +528,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             messageHelper.process();
 
             // Each list (configured above) will return two items. there are 3 default lists
+            // however the default behavior is to clear the list when done so make sure its clear
             Assert.AreEqual(messageHelper._AllSPItems.Count(), 0, "The default behavior should be to clear the list when done processing.");
         }
     }
