@@ -15,6 +15,7 @@ using EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific;
 using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ConnectForSharePoint.SPServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
@@ -248,6 +249,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new SPList() { Title = "Test List 4", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9e"),
                     Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } }
             };
+            SharePointMessageHelper._splists = _lists;
 
             _selectedListsAndViews = new List<KeyValuePair<string, string>>()
             {
@@ -394,7 +396,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             };
             var listitems = new List<SPListItem>() {
                     new SPListItem() { Title = "Some Item", GUID = new Guid("ffffffff-cab7-4842-96ee-d104c7da5c9b"),
-                    File = new SPFile() { Name = "Some Item", ServerRelativeUrl = "root/asdf/asdf/Some Item"  }} } ;
+                    File = new SPFile() { Name = "Some Item", ServerRelativeUrl = "root/asdf/asdf/Some Item"  }} };
 
             initBeginProcessingConditions();
 
@@ -408,6 +410,75 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             }, rootFolder, listitems, 1);
 
             Assert.IsTrue(messageHelper._SPItems.Contains(listitems[0]), "Item was not added to internal item list.");
+        }
+
+        [TestMethod]
+        public void Process_deletes_all_items_not_in_splists()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            // represents existing content in cms 
+            var itemID = Guid.NewGuid();
+            var existingContent = new List<IContent>() {
+                new SharepointGenericMedia() { Name = "DeleteMe", ContentGuid = Guid.NewGuid(), SharePointGUID = itemID.ToString() }
+            };
+            _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
+
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // lists will return no items.
+            string Path;
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
+
+            messageHelper.process();
+
+            // make sure we deleted the content item, and it was the expected item.
+            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointContentDeleteMessage) && mess.Item.GUID == itemID)),
+                Times.Once, "Expect to emit SharePointContentDeleteMessage but did not.");
+        }
+
+        /// Special test class to help with the mocking of contentrepo. I.e. we need to simulate a IContent object but they do something special with blocks vs icontent that doesnt match up well. 
+        /// The real issue here was so we could set the Type field to be of type listitem to test firing of the proper message. 
+        public class SharepointListItemTestType : ImageData, ISharePointItem
+        {
+            [Editable(false, AllowInitialValue = true)]
+            public virtual string SharePointGUID { get; set; }
+            [Editable(false, AllowInitialValue = true)]
+            public virtual DateTime SharePointTimeLastModified { get; set; }
+            [Editable(false, AllowInitialValue = true)]
+            public SharePointItemType Type
+            {
+                get { return SharePointItemType.ListItem; }
+            }
+            [Editable(false, AllowInitialValue = true)]
+            public virtual string ListID { get; set; }
+            [Editable(false, AllowInitialValue = true)]
+            public virtual string ViewID { get; set; }
+        }
+
+        [TestMethod]
+        public void Process_deletes_all_listitems_not_in_splists()
+        {
+            var messageHelper = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            // represents existing content in cms 
+            var itemID = Guid.NewGuid();
+            var existingContent = new List<IContent>() {
+                new SharepointListItemTestType() {  Name = "DeleteMe", ContentGuid = Guid.NewGuid(), SharePointGUID = itemID.ToString() }
+            };
+            _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
+
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // lists will return no items.
+            string Path;
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
+
+            messageHelper.process();
+
+            // make sure we deleted the list item, and it was the expected item.
+            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointListItemDeleteMessage) && mess.Item.GUID == itemID)),
+                Times.Once, "Expect to emit SharePointListItemDeleteMessage but did not.");
         }
     }
 }
