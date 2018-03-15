@@ -14,10 +14,15 @@
         </releaseNotes>
         <tags>EPiServerModulePackage EPiServer SharePoint Connector</tags>
         <dependencies>
-		<dependency id="EPiServer.CMS.Core" version="[9.0.3,12)" />
-		<dependency id="EPiServer.CMS.UI" version="[9.2,12)" />
-		<dependency id="EPiServer.Logging.Log4Net" version="[2,3)" />
-		<dependency id="EPiServer.Packaging" version="[3.4, 4)" />
+		      <dependency id="EPiServer.CMS.AspNet" version="[11.3.3,12)" />
+		      <dependency id="EPiServer.CMS.Core" version="[11.3.3,12)" />
+		      <dependency id="EPiServer.CMS.UI" version="[11.1.0,12)" />
+		      <dependency id="EPiServer.CMS.UI.Core" version="[11.1.0,12)" />
+		      <dependency id="EPiServer.Framework" version="[11.3.3,12)" />
+		      <dependency id="EPiServer.Framework.AspNet" version="[11.3.3,12)" />
+		      <dependency id="EPiServer.Logging.Log4Net" version="[2,3)" />
+		      <dependency id="EPiServer.Packaging" version="[3.4.0, 4)" />
+		      <dependency id="EPiServer.ServiceLocation.StructureMap" version="[2.0.0, 3)" />
         </dependencies>
     </metadata>
 </package>
