@@ -158,7 +158,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                     // now get all the items, paged, and process each item.
                     string nextUri;
-                    processItemList(selectedList, rootFolder,
+                    processItemList(selectedList, selectedView, rootFolder,
                         _helper.GetPagedItems(selectedList,
                         selectedView, rootFolder.Folder, out nextUri), selectedView.Scope);
 
@@ -166,7 +166,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     while (!String.IsNullOrEmpty(nextUri))
                     {
                         _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
-                        processItemList(selectedList, rootFolder,
+                        processItemList(selectedList, selectedView, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
                     _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
@@ -207,7 +207,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="list">The Sharepoint list the items are related to</param>
         /// <param name="rootFolder">The root folder for the items</param>
         /// <param name="items">The items to process</param>
-        internal void processItemList(SPList list, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope )
+        internal void processItemList(SPList list, SPListView view, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope )
         {
             _logger.Information("-- Processing batch: " + items.Count());
 
@@ -216,6 +216,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 item.entryPointId = -1;
                 item.ParentFolderSharePointGuid = rootFolder.GUID;  // this is the root folder of the view.
+                item.selectedView = view;
 
                 // is the item a folder?
                 if (item.Folder != null && scope == 0) // if scope is 0 we are adding folders else its a flat list.
