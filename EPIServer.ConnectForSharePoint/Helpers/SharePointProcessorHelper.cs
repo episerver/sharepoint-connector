@@ -145,30 +145,34 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     if (obj["d"]["results"].HasValues == true)
                     {
                         var data2 = obj["d"]["results"][0][prop.Name].Value<JObject>();
-                        foreach (var prop2 in data2.Properties())
+                        if (data2 != null)
                         {
-                            string property2 = prop2.Name;
-                            string propvalue2 = prop2.Value.ToString();
+                            foreach (var prop2 in data2.Properties())
+                            {
+                                string property2 = prop2.Name;
+                                string propvalue2 = prop2.Value.ToString();
 
-                            if (string.Equals(property2, "Url", StringComparison.OrdinalIgnoreCase))
-                            {
-                                url = propvalue2;
-                            }
-                            if (string.Equals(property2, "Description", StringComparison.OrdinalIgnoreCase))
-                            {
-                                description = propvalue2;
-                                propvalue = description;
-                            }
-                            if (string.Equals(property2, "__deferred", StringComparison.OrdinalIgnoreCase))
-                            { // Dont add these things they are urls to objects in sharepoint for the folder, file etc.
-                                addToList = false;
+                                if (string.Equals(property2, "Url", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    url = propvalue2;
+                                }
+                                if (string.Equals(property2, "Description", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    description = propvalue2;
+                                    propvalue = description;
+                                }
+                                if (string.Equals(property2, "__deferred", StringComparison.OrdinalIgnoreCase))
+                                { // Dont add these things they are urls to objects in sharepoint for the folder, file etc.
+                                    addToList = false;
+                                }
                             }
                         }
                     }
                 }
                 catch
                 {
-
+                    // Unknown why we have an empty catch here. 
+                    // I.e. some document types do not return the expected data in the results field maybe? 
                 }
 
                 // More nodes we dont want to add, these actually come back by default with the view
