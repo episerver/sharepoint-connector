@@ -353,7 +353,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
                 Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } }
-            }, rootFolder, listitems, 1);
+            }, null, rootFolder, listitems, 1);
 
             _fileFolderService.Verify(m => m.LoadParentFolder(It.IsAny<SPFolder>()), Times.Never, "processItemList did not attempt to load the parent folder");
             Assert.IsFalse(messageHelper._SPFolders.Contains(listitems[0]), "Folder was added to internal folder list.");
@@ -378,14 +378,14 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
                 Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } }
-            }, rootFolder, listitems, 0);
+            }, null, rootFolder, listitems, 0);
 
             _fileFolderService.Verify(m => m.LoadParentFolder(It.IsAny<SPFolder>()), "processItemList did not attempt to load the parent folder");
             Assert.IsTrue(messageHelper._SPFolders.Contains(listitems[0]), "Folder was not added to internal folder list.");
         }
 
         [TestMethod]
-        public void processItemList_Adds_Item_To_ItemList()
+        public void processItemList_Adds_Item_To_ItemList_With_View_Set()
         {
             var messageHelper = GetUnitUnderTest();
             var rootFolder = new SPListItem()
@@ -402,14 +402,17 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             messageHelper._SPItemsInCMs = new List<IContent>();
 
+            SPListView view = new SPListView() { Id = Guid.NewGuid() };
+
             messageHelper.processItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
                 Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } }
-            }, rootFolder, listitems, 1);
+            }, view, rootFolder, listitems, 1);
 
             Assert.IsTrue(messageHelper._SPItems.Contains(listitems[0]), "Item was not added to internal item list.");
+            Assert.IsTrue(messageHelper._SPItems[0].selectedView.Id == view.Id, "Item.selectedView was not set."); // MAI-1482
         }
 
         [TestMethod]
