@@ -23,6 +23,7 @@
 		      <dependency id="EPiServer.Logging.Log4Net" version="[2,3)" />
 		      <dependency id="EPiServer.Packaging" version="[3.4.0, 4)" />
 		      <dependency id="EPiServer.ServiceLocation.StructureMap" version="[2.0.0, 3)" />
+		      <dependency id="Microsoft.SharePoint.Client.Runtime.dll" version="[15.0.0, 16)" />
         </dependencies>
     </metadata>
 </package>
