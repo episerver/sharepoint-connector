@@ -34,6 +34,7 @@
     <OldToolsVersion>4.0</OldToolsVersion>
     <UseGlobalApplicationHostFile />
     <TargetFrameworkProfile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -163,9 +164,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SharePoint.Client.Runtime.dll.15.0.4859.1000\lib\Microsoft.SharePoint.Client.Runtime\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -548,7 +548,6 @@ mkdir "$(SolutionDir)Deployment\lib"
 del $(SolutionDir)Deployment\*.nupkg
 xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
-xcopy "$(TargetDir)"\Microsoft.SharePoint.Client.Runtime.dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
 
 IF exist "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" ( rmdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" /s /q )
 mkdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint"
@@ -572,7 +571,7 @@ mkdir "$(SolutionDir)Deployment\temp"
 "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" powershell -ExecutionPolicy ByPass -File "$(SolutionDir)\buildzip.ps1" "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint" "$(SolutionDir)Deployment\temp\EPiServer.ConnectForSharePoint.zip"
 "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" Unblock-File "$(SolutionDir)Deployment\temp\EPiServer.ConnectForSharePoint.zip"
 
-for /d %%i in ("$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\*") do rd /s /q "%%i"
+for /d %25%25i in ("$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\*") do rd /s /q "%25%25i"
 del /q "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\*.*"
 
 xcopy "$(SolutionDir)Deployment\temp\*.zip" "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\"  /I /F /R /Y
