@@ -70,8 +70,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             serviceLocator.Setup(sl => sl.GetInstance<ContentMediaResolver>()).Returns(new MyContentMediaResolver());
             serviceLocator.Setup(sl => sl.GetInstance<ILogger>()).Returns(logger.Object);
 
-            FolderData.clearcache();        // make sure the cache is cleared because when running all tests
-
             contentHelper = new Mock<IContentProviderHelper>();
             return new SharePointProcessor(serviceLocator.Object, contentHelper.Object, 
                 fileStreamService.Object, listViewService.Object, accessRightsHelper.Object);
