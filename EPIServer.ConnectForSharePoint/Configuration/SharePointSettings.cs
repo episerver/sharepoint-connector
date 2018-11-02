@@ -1,6 +1,7 @@
 ﻿using EPiServer.Core;
 using EPiServer.Data;
 using EPiServer.Data.Dynamic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EPiServer.ConnectForSharePoint.Configuration
@@ -8,6 +9,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
     /// <summary>
     /// Settings class to be stored in the DDS
     /// </summary>
+    [ExcludeFromCodeCoverage]
     [EPiServerDataStore(AutomaticallyCreateStore = true, AutomaticallyRemapStore = true)]
     public class SharePointSettings : IDynamicData
     {
@@ -68,7 +70,10 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// <value>
         public ThumbnailOptions ThumbnailOption { get; set; }
 
-        private static SharePointSettings _currentSettings;
+        /// <summary>
+        /// Internal static instance of the connector settings. 
+        /// </summary>
+        internal static SharePointSettings _currentSettings;
 
         /// <summary>
         /// Gets the current instance of <see cref="EPiServer.ConnectForSharePoint.Configuration.SharePointSettings"/>
