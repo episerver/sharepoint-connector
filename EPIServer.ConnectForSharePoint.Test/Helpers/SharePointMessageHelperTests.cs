@@ -77,7 +77,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _fileFolderService.Setup(m => m.LoadParentFolder(It.IsAny<SPFolder>())).Returns(new SPFolder() { Name = "Some Loaded Folder", ServerRelativeUrl = "root/ServerRelativeUrl" });
             _serviceLocator.Setup(sl => sl.GetInstance<IFilesFoldersService>()).Returns(_fileFolderService.Object);
 
-            SharePointSettings.Current = new SharePointSettings();
+            SharePointSettings._currentSettings = new SharePointSettings();
 
             return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
 
