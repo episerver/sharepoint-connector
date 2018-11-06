@@ -95,10 +95,7 @@ namespace EPiServer.ConnectForSharePoint.Models
         {
             // Get data store for FolderData
             var store = ddsf.CreateStore(typeof(FolderData));
-            List<FolderData> data = new List<FolderData>();
-            data.AddRange(store.Items<FolderData>());
-
-            return data;
+            return store.Items<FolderData>();
         }
     }
 }
