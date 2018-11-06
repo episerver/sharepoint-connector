@@ -16,6 +16,7 @@ using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.ComponentModel.DataAnnotations;
+using EPiServer.ConnectForSharePoint.Configuration;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
@@ -76,160 +77,10 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _fileFolderService.Setup(m => m.LoadParentFolder(It.IsAny<SPFolder>())).Returns(new SPFolder() { Name = "Some Loaded Folder", ServerRelativeUrl = "root/ServerRelativeUrl" });
             _serviceLocator.Setup(sl => sl.GetInstance<IFilesFoldersService>()).Returns(_fileFolderService.Object);
 
+            SharePointSettings.Current = new SharePointSettings();
+
             return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
 
-        }
-
-        [TestMethod]
-        public void QueueFoldersForDelete_Emits_Delete_Messages_For_Folders()
-        {
-            var messageHelper = GetUnitUnderTest();
-            var selectedListIds = new List<KeyValuePair<string, string>>();
-
-            var viewKey = Guid.NewGuid().ToString();
-            var listKey = Guid.NewGuid().ToString();
-            selectedListIds.Add(new KeyValuePair<string, string>(viewKey, listKey));
-            _helper.Setup(h => h.GetSelectedListViewIds(It.IsAny<IEnumerable<SPList>>())).Returns(selectedListIds);
-            _helper.Setup(h => h.GetListAndViewIds(It.IsAny<string>())).Returns(new string[2] { listKey, viewKey });
-
-            var testSPList = new SPList()
-            {
-                Id = new Guid(listKey),
-                Title = "Test SPList",
-                Views = new List<SPListView> { new SPListView() { Id = new Guid(viewKey), Title = "Test SPListView" } }
-            };
-
-            var lists = new List<SPList>() { testSPList };
-            messageHelper.QueueRootFoldersForDelete(lists);
-
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
-        }
-
-        [TestMethod]
-        public void QueueFoldersForDelete_Does_Not_Call_Emit_For_Folders_Specified_As_Excluded()
-        {
-            var messageHelper = GetUnitUnderTest();
-            var selectedListIds = new List<KeyValuePair<string, string>>();
-
-            var viewKey = Guid.NewGuid().ToString();
-            var listKey = Guid.NewGuid().ToString();
-            selectedListIds.Add(new KeyValuePair<string, string>(viewKey, listKey));
-            _helper.Setup(h => h.GetSelectedListViewIds(It.IsAny<IEnumerable<SPList>>())).Returns(selectedListIds);
-            _helper.Setup(h => h.GetListAndViewIds(It.IsAny<string>())).Returns(new string[2] { listKey, viewKey });
-
-            var testSPList = new SPList()
-            {
-                Id = new Guid(listKey),
-                Title = "Test SPList",
-                Views = new List<SPListView> { new SPListView() { Id = new Guid(viewKey), Title = "Test SPListView" } }
-            };
-
-            var lists = new List<SPList>() { testSPList };
-            var excludeList = new List<string>() { listKey + "~" + viewKey };
-            messageHelper.QueueRootFoldersForDelete(lists, excludeList);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointMessage>()), Times.Never, "Emit should not be called when we exclude the list-view combo returned");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_DoesntProcess_FolderItem()
-        {
-            var messageHelper = GetUnitUnderTest();
-            Mock<IEnumerable<IContent>> cmsItems = new Mock<IEnumerable<IContent>>();
-            cmsItems.Setup(e => e.GetEnumerator()).Verifiable();
-
-            SPListItem spItem = new SPListItem() { Folder = new SPFolder() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems.Object);
-
-            cmsItems.Verify(e => e.GetEnumerator(), Times.Never, "Item is not a folder item, we should not be iterating");
-
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_UpdateItemMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia()
-            {
-                Name = "FindMe",
-                SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242)
-            });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemUpdateMessage>()), Times.Exactly(1),
-                "The item we where looking for should have been found AND emited update message");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_AddItemMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "2" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemAddMessage>()), Times.Exactly(1),
-                "The item we where looking for should NOT have been found AND emited add message");
-        }
-
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_UpdateContentMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia()
-            {
-                Name = "FindMe",
-                SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242)
-            });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentUpdateMessage>()), Times.Exactly(1),
-                "The item we where looking for should have been found AND emited update message");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_AddContentMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "2" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentAddMessage>()), Times.Exactly(1),
-                "The item we where looking for should NOT have been found AND emited add message");
         }
 
         string _listids;

@@ -40,7 +40,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static bool _createNewEntryPointFolder = false;
         private static string _newFolderName;
-
+        
         /// <summary>
         /// Called by web page during data bind operation
         /// </summary>
@@ -460,10 +460,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                     // Delete all the folders we created under the current entry point.
                     FolderData fd = new FolderData();
                     var folders = fd.GetFolders();
-                    foreach( var folder in folders )
+                    foreach (var folder in folders)
                     {
                         ContentFolder cmsfolder;
-                        if (  _contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder) )
+                        if (_contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder))
                         {
                             SPListItem item = new SPListItem()
                             {
@@ -483,7 +483,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                     }
                 }
                 else // else we only delete folders that have been deselected
-                    messageHelper.QueueRootFoldersForDelete(lists, selectedListViewIds);
+                {
+                    var utils = new SharepointToCmsUtilities(ServiceLocator.Current);
+                    var emFactory = new SharePointMessageEmitterFactory();
+                    utils.QueueRootFoldersForDelete(emFactory, lists, selectedListViewIds);
+                }
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
