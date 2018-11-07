@@ -86,7 +86,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else
                 {
-                    if( SharePointMessageHelper.IsRunning() )
+                    if( MainProcessor.IsRunning() )
                     {
                         // its possible that the thread is running, but we 
                         // havent added anything to the queue, this allows the 
@@ -448,7 +448,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the previous Lists-View Ids (the one was saved before this time)
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
-                var messageHelper = new SharePointMessageHelper();
+                var messageHelper = new MainProcessor();
 
                 // if the entry point is different or the url is differnt or 
                 // we need to queue all the current folders for delete
@@ -555,7 +555,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             
             if (lists != null && lists.Any())
             {
-            var messageHelper = new SharePointMessageHelper();
+            var messageHelper = new MainProcessor();
             // Put all the add folder messages on the queue
             messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
 

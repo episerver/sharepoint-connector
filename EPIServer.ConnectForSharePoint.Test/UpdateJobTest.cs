@@ -71,7 +71,7 @@ namespace EPiServer.ConnectForSharePoint.Test
                 .Returns( new List<SPList>() )
                 .Returns(new List<SPList>());
 
-            Mock<ISharePointMessageHelper> helper = new Mock<ISharePointMessageHelper>();
+            Mock<IMainProcessor> helper = new Mock<IMainProcessor>();
             helper.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
 
             UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids", settings.Object);

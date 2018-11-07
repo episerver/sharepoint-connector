@@ -20,7 +20,7 @@ namespace EPiServer.ConnectForSharePoint
     public class UpdateJob : ScheduledJobBase
     {
         private static IServicesHub _hub;
-        private static ISharePointMessageHelper _helper;
+        private static IMainProcessor _helper;
         protected static string _ListIds;
         protected static ISharePointSettingsHelper _settings;
         protected static LocalizationService _localization;
@@ -35,7 +35,7 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="hub"></param>
         /// <param name="helper"></param>
         /// <param name="ListIds"></param>
-        internal UpdateJob(IServicesHub hub, ISharePointMessageHelper helper, string ListIds, ISharePointSettingsHelper settings )
+        internal UpdateJob(IServicesHub hub, IMainProcessor helper, string ListIds, ISharePointSettingsHelper settings )
         {
             _hub = hub;
             _helper = helper;
@@ -45,7 +45,7 @@ namespace EPiServer.ConnectForSharePoint
 
         public override string Execute()
         {
-            if (SharePointMessageHelper.IsRunning())
+            if (MainProcessor.IsRunning())
             {
                 string msg = "Process is currently running.";
                 OnStatusChanged(msg);
@@ -56,7 +56,7 @@ namespace EPiServer.ConnectForSharePoint
                 _hub = SharePointHelper.SPServicesHub;
 
             if (_helper == null)
-                _helper = new SharePointMessageHelper();
+                _helper = new MainProcessor();
 
             if (_localization == null)
                 _localization = LocalizationService.Current;
@@ -93,20 +93,20 @@ namespace EPiServer.ConnectForSharePoint
 
                 // Join the proccesing thread with the job thread so that the 
                 // status of the job stays busy while its running.
-                if (SharePointMessageHelper._processingThread != null) // fix unit test
+                if (MainProcessor._processingThread != null) // fix unit test
                 {
-                    SharePointMessageHelper._processingThread.Join();
+                    MainProcessor._processingThread.Join();
                 }
 
                 // As long as items are in the queue make sure we show we are still running
-                while(  SharePointMessageHelper.GetQueCount() > 0 )
+                while(  MainProcessor.GetQueCount() > 0 )
                 {
                     Thread.Sleep(2000);
                 }
 
-                if (SharePointMessageHelper._processingResult != true)
+                if (MainProcessor._processingResult != true)
                 {
-                    return ("Failed : " + SharePointMessageHelper._processingException.Message);
+                    return ("Failed : " + MainProcessor._processingException.Message);
                 }
                 else
                 {

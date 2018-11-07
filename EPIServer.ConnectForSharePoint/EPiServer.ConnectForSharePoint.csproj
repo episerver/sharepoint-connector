@@ -282,11 +282,11 @@
     <Compile Include="Helpers\IAccessRightsHelper.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
-    <Compile Include="Helpers\ISharePointMessageHelper.cs" />
+    <Compile Include="Helpers\IMainProcessor.cs" />
     <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
     <Compile Include="Helpers\ISharePointSettingsHelper.cs" />
     <Compile Include="Helpers\ISharepointToCmsUtilities.cs" />
-    <Compile Include="Helpers\SharePointMessageHelper.cs" />
+    <Compile Include="Helpers\MainProcessor.cs" />
     <Compile Include="Helpers\SharePointProcessorHelper.cs" />
     <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Helpers\SharepointToCmsUtilities.cs" />

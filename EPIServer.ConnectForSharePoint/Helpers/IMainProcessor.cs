@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
-    public interface ISharePointMessageHelper
+    public interface IMainProcessor
     {
         /// <summary>
         /// This is where the main processing begins. 

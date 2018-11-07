@@ -15,7 +15,7 @@ using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
-    public class SharePointMessageHelper : ISharePointMessageHelper
+    public class MainProcessor : IMainProcessor
     {
         private ILogger _logger;
         private ISharePointHelper _helper;
@@ -42,7 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         static public Exception _processingException;
 
         [ExcludeFromCodeCoverageAttribute]
-        public SharePointMessageHelper()
+        public MainProcessor()
         {
             _logger = LogManager.GetLogger();
             _helper = new SharePointHelper();
@@ -56,7 +56,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             SharepointToCmsUtils = new SharepointToCmsUtilities(ServiceLocator.Current);
         }
 
-        internal SharePointMessageHelper(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, 
+        internal MainProcessor(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, 
             IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
         {
             _logger = logger;
@@ -83,7 +83,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 _listids = listids;
                 _splists = splists;
-                _processingThread = new Thread(new ThreadStart(process));
+                _processingThread = new Thread(new ThreadStart(Process));
                 _processingResult = true;
                 _processingException = null;
                 _processingThread.Start();
@@ -125,7 +125,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="listids"></param>
         /// <param name="splists"></param>
-        public void process()
+        public void Process()
         {
             try
             {
