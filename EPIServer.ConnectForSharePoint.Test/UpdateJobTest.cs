@@ -9,6 +9,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using System.Globalization;
+using EPiServer.ConnectForSharePoint.Configuration;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
@@ -42,8 +43,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         [TestMethod]
         public void Verify_ExecuteMethod_GetsAllLists_And_Calls_BeginsProcessing()
         {
-            Mock<ISharePointSettingsHelper> settings = new Mock<ISharePointSettingsHelper>();
-            settings.Setup(m => m.GetEntryPoint() ).Returns(new ContentReference(42) );
+            SharePointSettings._currentSettings = new SharePointSettings() {  EntryPoint = new ContentReference(42) };
 
             ContentFolder someContent = new ContentFolder() { Name = "thisone", IsDeleted = false };
             Mock<IContentRepository> repo = new Mock<IContentRepository>();
@@ -74,7 +74,7 @@ namespace EPiServer.ConnectForSharePoint.Test
             Mock<IMainProcessor> helper = new Mock<IMainProcessor>();
             helper.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
 
-            UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids", settings.Object);
+            UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids");
             job.Execute();
 
             hub.Verify(h => h.SPListsViewsService.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");

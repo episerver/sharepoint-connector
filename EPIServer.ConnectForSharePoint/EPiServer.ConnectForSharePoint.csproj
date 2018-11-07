@@ -284,11 +284,9 @@
     <Compile Include="Helpers\ISharePointHelper.cs" />
     <Compile Include="Helpers\IMainProcessor.cs" />
     <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
-    <Compile Include="Helpers\ISharePointSettingsHelper.cs" />
     <Compile Include="Helpers\ISharepointToCmsUtilities.cs" />
     <Compile Include="Helpers\MainProcessor.cs" />
     <Compile Include="Helpers\SharePointProcessorHelper.cs" />
-    <Compile Include="Helpers\SharePointSettingsHelper.cs" />
     <Compile Include="Helpers\SharepointToCmsUtilities.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\SPFieldItemMapper.cs" />

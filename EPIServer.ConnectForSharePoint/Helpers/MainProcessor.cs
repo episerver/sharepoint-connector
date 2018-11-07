@@ -21,7 +21,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private ISharePointHelper _helper;
         private ISharePointProcessorHelper _processorHelper;
         private IContentProviderHelper _contentProviderHelper;
-        private ISharePointSettingsHelper _settingsHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
 
@@ -47,7 +46,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _logger = LogManager.GetLogger();
             _helper = new SharePointHelper();
             _contentProviderHelper = new ContentProviderHelper();
-            _settingsHelper = new SharePointSettingsHelper();
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
             _processorHelper = new SharePointProcessorHelper();
@@ -56,13 +54,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             SharepointToCmsUtils = new SharepointToCmsUtilities(ServiceLocator.Current);
         }
 
-        internal MainProcessor(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, ISharePointSettingsHelper settings, 
-            IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
+        internal MainProcessor(ILogger logger, ISharePointHelper helper, IContentProviderHelper contentHelper, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
         {
             _logger = logger;
             _helper = helper;
             _contentProviderHelper = contentHelper;
-            _settingsHelper = settings;
             _emitterFactory = emitter;
 
             _serviceLocator = serviceLocator;

@@ -22,7 +22,6 @@ namespace EPiServer.ConnectForSharePoint
         private static IServicesHub _hub;
         private static IMainProcessor _helper;
         protected static string _ListIds;
-        protected static ISharePointSettingsHelper _settings;
         protected static LocalizationService _localization;
 
         public UpdateJob()
@@ -35,12 +34,11 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="hub"></param>
         /// <param name="helper"></param>
         /// <param name="ListIds"></param>
-        internal UpdateJob(IServicesHub hub, IMainProcessor helper, string ListIds, ISharePointSettingsHelper settings )
+        internal UpdateJob(IServicesHub hub, IMainProcessor helper, string ListIds )
         {
             _hub = hub;
             _helper = helper;
             _ListIds = ListIds;
-            _settings = settings;
         }
 
         public override string Execute()
@@ -65,13 +63,9 @@ namespace EPiServer.ConnectForSharePoint
 
             ContentReference destfolderRef;
             string foldername = "";
-            if (_settings == null)
-            {
-                destfolderRef = SharePointSettings.Current.EntryPoint;
-                foldername = SharePointSettings.Current.EntryPointFolderName;
-            }
-            else
-                destfolderRef = _settings.GetEntryPoint();
+
+            destfolderRef = SharePointSettings.Current.EntryPoint;
+            foldername = SharePointSettings.Current.EntryPointFolderName;
 
             // Concatinate the document and custom lists.
             var documentLists = _hub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
