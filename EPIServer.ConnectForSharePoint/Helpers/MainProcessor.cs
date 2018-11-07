@@ -4,10 +4,8 @@ using System.Linq;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Logging;
 using EPiServer.ConnectForSharePoint.Messaging;
-using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.Core;
 using EPiServer.ServiceLocation;
-using EPiServer.ConnectForSharePoint.Models.FileTypes;
 using System.Diagnostics.CodeAnalysis;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.Threading;
@@ -26,19 +24,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         private ISharepointToCmsUtilities SharepointToCmsUtils { get; set; }
 
-        internal IList<SPListItem> _SPFolders = new List<SPListItem>();
-        internal IList<SPListItem> _SPItems = new List<SPListItem>();
-        internal List<SPListItem> _AllSPItems = new List<SPListItem>();
-        internal bool _clearAllSPItemsWhenDone = true;
-        internal IEnumerable<IContent> _SPItemsInCMs;
-        internal IFilesFoldersService _fileFolderService;
-
         static internal Thread _processingThread;
         static internal string _listids;
         static internal IEnumerable<SPList> _splists;
         static Object _lock = new Object();
         static public Boolean _processingResult = true;
         static public Exception _processingException;
+
+        // TODO : The following variables are used by the unit tests to verify behavior, needs to be examined and possible refactored out.
+        internal bool _clearAllSPItemsWhenDone = true;
+        internal IList<SPListItem> _SPFolders = new List<SPListItem>();
+        internal IList<SPListItem> _SPItems = new List<SPListItem>();
+        internal List<SPListItem> _AllSPItems = new List<SPListItem>();
+        internal IEnumerable<IContent> _SPItemsInCMs;
 
         [ExcludeFromCodeCoverageAttribute]
         public MainProcessor()
@@ -49,7 +47,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
             _processorHelper = new SharePointProcessorHelper();
-            _fileFolderService = SharePointHelper.SPServicesHub.SPFilesFoldersService;
 
             SharepointToCmsUtils = new SharepointToCmsUtilities(ServiceLocator.Current);
         }
@@ -63,7 +60,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
             _serviceLocator = serviceLocator;
             _processorHelper = _serviceLocator.GetInstance<ISharePointProcessorHelper>();
-            _fileFolderService = _serviceLocator.GetInstance<IFilesFoldersService>();
 
             SharepointToCmsUtils = new SharepointToCmsUtilities(_serviceLocator);
         }
@@ -121,7 +117,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="listids"></param>
         /// <param name="splists"></param>
-        public void Process()
+        internal void Process()
         {
             try
             {
@@ -160,7 +156,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                     // now get all the items, paged, and process each item.
                     string nextUri;
-                    processItemList(selectedList, selectedView, rootFolder,
+                    ProcessItemList(selectedList, selectedView, rootFolder,
                         _helper.GetPagedItems(selectedList,
                         selectedView, rootFolder.Folder, out nextUri), selectedView.Scope);
 
@@ -168,7 +164,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     while (!String.IsNullOrEmpty(nextUri))
                     {
                         _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
-                        processItemList(selectedList, selectedView, rootFolder,
+                        ProcessItemList(selectedList, selectedView, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
                     _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
@@ -209,9 +205,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="list">The Sharepoint list the items are related to</param>
         /// <param name="rootFolder">The root folder for the items</param>
         /// <param name="items">The items to process</param>
-        internal void processItemList(SPList list, SPListView view, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope)
+        internal void ProcessItemList(SPList list, SPListView view, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope)
         {
             _logger.Information("-- Processing batch: " + items.Count());
+            var fileFolderService = _serviceLocator.GetInstance<IFilesFoldersService>();
 
             // iterate over all the items
             foreach (var item in items)
@@ -223,7 +220,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 // is the item a folder?
                 if (item.Folder != null && scope == 0) // if scope is 0 we are adding folders else its a flat list.
                 {
-                    var parent = _fileFolderService.LoadParentFolder(item.Folder);
+                    var parent = fileFolderService.LoadParentFolder(item.Folder);
 
                     // We need to find the parent folder in our folder list.
                     // Note that the message queue might not have processed yet

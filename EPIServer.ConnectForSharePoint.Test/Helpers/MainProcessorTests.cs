@@ -197,7 +197,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             initBeginProcessingConditions();
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
@@ -222,7 +222,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             initBeginProcessingConditions();
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
@@ -253,7 +253,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             SPListView view = new SPListView() { Id = Guid.NewGuid() };
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
