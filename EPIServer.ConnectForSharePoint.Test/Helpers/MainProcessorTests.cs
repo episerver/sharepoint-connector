@@ -26,7 +26,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
         private Mock<ILogger> _logger;
         private Mock<ISharePointHelper> _helper;
-        private Mock<IContentProviderHelper> _contentProviderHelper;
         private Mock<IMessageEmitterFactory> _emitterFactory;
         private Mock<IMessageEmitter> _messageEmitter;
         private Mock<IServiceLocator> _serviceLocator;
@@ -42,7 +41,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         {
             _logger = new Mock<ILogger>();
             _helper = new Mock<ISharePointHelper>();
-            _contentProviderHelper = new Mock<IContentProviderHelper>();
             SharePointSettings._currentSettings = new SharePointSettings();
             _messageEmitter = new Mock<IMessageEmitter>();
             _messageEmitter.Setup(me => me.Emit(It.IsAny<SharePointMessage>()));
@@ -77,7 +75,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             SharePointSettings._currentSettings = new SharePointSettings();
 
-            return new MainProcessor(_logger.Object, _helper.Object, _contentProviderHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
+            return new MainProcessor(_logger.Object, _helper.Object, _emitterFactory.Object, _serviceLocator.Object);
 
         }
 
