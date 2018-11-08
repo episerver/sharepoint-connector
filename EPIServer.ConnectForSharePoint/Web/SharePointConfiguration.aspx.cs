@@ -22,6 +22,7 @@ using EPiServer.Web;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.DataAbstraction;
+using EPiServer.ConnectForSharePoint.SPServices;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -616,10 +617,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else
                 {
                     // Concatinate the document and custom lists.
-                    var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                        .GetLists((int)ListBaseType.DocumentLibrary);
-                    var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                        .GetLists((int)ListBaseType.GenericList);
+                    var listViewsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
+                    var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+                    var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
                     var supportedLists = documentLists.Concat(customLists);
 
                     return supportedLists;

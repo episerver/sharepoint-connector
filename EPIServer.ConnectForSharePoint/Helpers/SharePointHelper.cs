@@ -21,44 +21,21 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     /// </summary>
     public class SharePointHelper : ISharePointHelper
     {
+        IServiceLocator _serviceLocator;
+
         public SharePointHelper()
         {
-
+            _serviceLocator = ServiceLocator.Current;
         }
 
-        internal SharePointHelper(IServicesHub serviceHub)
+        internal SharePointHelper(IServiceLocator locator)
         {
-            _spServicesHub = serviceHub;
+            _serviceLocator = locator;
         }
-
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
         private const int CookieContainerCacheOffsetSeconds = 5 * 60; // 5 minutes
-
-        private static IServicesHub _spServicesHub;
-        public static IServicesHub SPServicesHub
-        {
-            get
-            {
-                if (_spServicesHub == null)
-                {
-                    try
-                    {
-                        ServiceLocator.Current.TryGetExistingInstance<IServicesHub>(out _spServicesHub);
-                    }
-                    catch { }
-
-                    if (_spServicesHub == null)
-                    {
-                        _spServicesHub = new ServicesHub();
-
-                        ServiceLocator.Current.Buildup(_spServicesHub);
-                    }
-                }
-                return _spServicesHub;
-            }
-        }
 
         /// <summary>
         /// The cache key for form digest value
@@ -217,21 +194,15 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             return regex.IsMatch(username);
         }
 
-        public IEnumerable<SPListItem> GetItems(SPList list, SPListView view, SPFolder folder)
-        {
-            return SPServicesHub.SPListsViewsService.GetItems(list, view, folder);
-        }
-        public IEnumerable<SPListItem> GetAllFolders(SPList list, SPListView view)
-        {
-            return SPServicesHub.SPListsViewsService.GetAllFolders(list, view);
-        }
         public IEnumerable<SPListItem> GetPagedItems(SPList list, SPListView view, SPFolder folder, out string nextUri)
         {
-            return SPServicesHub.SPListsViewsService.GetPagedItems(list, view, folder, out nextUri);
+            var service = _serviceLocator.GetInstance<IListsViewsService>();
+            return service.GetPagedItems(list, view, folder, out nextUri);
         }
         public IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri)
         {
-            return SPServicesHub.SPListsViewsService.GetNextPagedItems(list, Uri, out nextUri);
+            var service = _serviceLocator.GetInstance<IListsViewsService>();
+            return service.GetNextPagedItems(list, Uri, out nextUri);
         }
     }
 }

@@ -19,13 +19,14 @@ namespace EPiServer.ConnectForSharePoint
     [ScheduledPlugIn(DisplayName = "SharePoint Update", Description = "", LanguagePath = "/sharepoint/scheduledjob")]
     public class UpdateJob : ScheduledJobBase
     {
-        private static IServicesHub _hub;
         private static IMetaDataProcessor _helper;
         protected static string _ListIds;
         protected static LocalizationService _localization;
+        private IServiceLocator _serviceLocator;
 
         public UpdateJob()
         {
+            _serviceLocator = ServiceLocator.Current;
         }
 
         /// <summary>
@@ -34,11 +35,11 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="hub"></param>
         /// <param name="helper"></param>
         /// <param name="ListIds"></param>
-        internal UpdateJob(IServicesHub hub, IMetaDataProcessor helper, string ListIds )
+        internal UpdateJob(IServiceLocator locator, IMetaDataProcessor helper, string ListIds )
         {
-            _hub = hub;
             _helper = helper;
             _ListIds = ListIds;
+            _serviceLocator = locator;
         }
 
         public override string Execute()
@@ -49,9 +50,6 @@ namespace EPiServer.ConnectForSharePoint
                 OnStatusChanged(msg);
                 throw new Exception(msg);
             }
-
-            if (_hub == null)
-                _hub = SharePointHelper.SPServicesHub;
 
             if (_helper == null)
                 _helper = new MetaDataProcessor();
@@ -68,8 +66,9 @@ namespace EPiServer.ConnectForSharePoint
             foldername = SharePointSettings.Current.EntryPointFolderName;
 
             // Concatinate the document and custom lists.
-            var documentLists = _hub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
-            var customLists = _hub.SPListsViewsService.GetLists((int)ListBaseType.GenericList);
+            var listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
+            var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
             var supportedLists = documentLists.Concat(customLists);
 
             // show error if destination folder has been deleted in cms

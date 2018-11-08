@@ -14,12 +14,13 @@ namespace EPiServer.ConnectForSharePoint.SPServices
     public class TagsService : RESTServiceBase, ITagsService
     {
         private static readonly ILogger _logger = LogManager.GetLogger();
-        private CategoryRepository _categoryRepository = ServiceLocator.Current.GetInstance<CategoryRepository>();
+        private CategoryRepository _categoryRepository;
 
         private SocialDataService _socialDataService;
 
         public TagsService()
         {
+            _categoryRepository = ServiceLocator.Current.GetInstance<CategoryRepository>();
             InitSocialDataService();
         }
 

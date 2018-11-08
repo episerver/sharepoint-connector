@@ -14,32 +14,22 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
     [ServiceConfiguration(ServiceType = typeof(IListsViewsService))]
     public class ListsViewsService : RESTServiceBase, IListsViewsService
     {
-        private IMapper<JsonListItem.D, SPListItem> _itemMapper;
-        private IMapper<JsonList.D, SPList> _listMapper;
-        private IMapper<JsonView.D, SPListView> _viewMapper;
-        private IMapper<JsonFolder.D, SPFolder> _folderMapper;
-        private IMapper<JsonFile.D, SPFile> _fileMapper;
-        private IMapper<JsonFieldItem.D, SPFieldItem> _fieldMapper;
+        internal IMapper<JsonListItem.D, SPListItem> _itemMapper;
+        internal IMapper<JsonList.D, SPList> _listMapper;
+        internal IMapper<JsonView.D, SPListView> _viewMapper;
+        internal IMapper<JsonFolder.D, SPFolder> _folderMapper;
+        internal IMapper<JsonFile.D, SPFile> _fileMapper;
+        internal IMapper<JsonFieldItem.D, SPFieldItem> _fieldMapper;
 
-        public ListsViewsService() : this(new SPListMapper(), new SPViewMapper(), new SPFolderMapper(), 
-            new SPFileMapper(), new SPListItemMapper(), new SPFieldItemMapper() ){ }
-
-        public ListsViewsService(
-            IMapper<JsonList.D, SPList> listMapper,
-            IMapper<JsonView.D, SPListView> viewMapper,            
-            IMapper<JsonFolder.D, SPFolder> folderMapper,
-            IMapper<JsonFile.D, SPFile> fileMapper,
-            IMapper<JsonListItem.D, SPListItem> itemMapper,
-            IMapper<JsonFieldItem.D, SPFieldItem> fieldMapper )
+        public ListsViewsService() 
         {
-            _listMapper = listMapper;
-            _viewMapper = viewMapper;
-            _folderMapper = folderMapper;
-            _fileMapper = fileMapper;
-            _itemMapper = itemMapper;
-            _fieldMapper = fieldMapper;
+            _listMapper = new SPListMapper();
+            _viewMapper = new SPViewMapper();
+            _folderMapper = new SPFolderMapper();
+            _fileMapper = new SPFileMapper();
+            _itemMapper = new SPListItemMapper();
+            _fieldMapper = new SPFieldItemMapper();
         }
-
         public IEnumerable<SPList> GetLists(int baseType)
         {
             var restRequest = new RestJsonRequest(Consts.REST_LISTS_PATH, "GET", GetListExpandQuery(), string.Format("filter=BaseType eq {0} and Hidden eq false", baseType));
