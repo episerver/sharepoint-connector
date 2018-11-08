@@ -20,7 +20,7 @@ namespace EPiServer.ConnectForSharePoint
     public class UpdateJob : ScheduledJobBase
     {
         private static IServicesHub _hub;
-        private static IMainProcessor _helper;
+        private static IMetaDataProcessor _helper;
         protected static string _ListIds;
         protected static LocalizationService _localization;
 
@@ -34,7 +34,7 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="hub"></param>
         /// <param name="helper"></param>
         /// <param name="ListIds"></param>
-        internal UpdateJob(IServicesHub hub, IMainProcessor helper, string ListIds )
+        internal UpdateJob(IServicesHub hub, IMetaDataProcessor helper, string ListIds )
         {
             _hub = hub;
             _helper = helper;
@@ -43,7 +43,7 @@ namespace EPiServer.ConnectForSharePoint
 
         public override string Execute()
         {
-            if (MainProcessor.IsRunning())
+            if (MetaDataProcessor.IsRunning())
             {
                 string msg = "Process is currently running.";
                 OnStatusChanged(msg);
@@ -54,7 +54,7 @@ namespace EPiServer.ConnectForSharePoint
                 _hub = SharePointHelper.SPServicesHub;
 
             if (_helper == null)
-                _helper = new MainProcessor();
+                _helper = new MetaDataProcessor();
 
             if (_localization == null)
                 _localization = LocalizationService.Current;
@@ -87,20 +87,20 @@ namespace EPiServer.ConnectForSharePoint
 
                 // Join the proccesing thread with the job thread so that the 
                 // status of the job stays busy while its running.
-                if (MainProcessor._processingThread != null) // fix unit test
+                if (MetaDataProcessor._processingThread != null) // fix unit test
                 {
-                    MainProcessor._processingThread.Join();
+                    MetaDataProcessor._processingThread.Join();
                 }
 
                 // As long as items are in the queue make sure we show we are still running
-                while(  MainProcessor.GetQueCount() > 0 )
+                while(  MetaDataProcessor.GetQueCount() > 0 )
                 {
                     Thread.Sleep(2000);
                 }
 
-                if (MainProcessor._processingResult != true)
+                if (MetaDataProcessor._processingResult != true)
                 {
-                    return ("Failed : " + MainProcessor._processingException.Message);
+                    return ("Failed : " + MetaDataProcessor._processingException.Message);
                 }
                 else
                 {

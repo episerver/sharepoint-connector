@@ -21,7 +21,7 @@ using EPiServer.ConnectForSharePoint.Configuration;
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
     [TestClass]
-    public class MainProcessorTests
+    public class MetaDataProcessorTests
     {
 
         private Mock<ILogger> _logger;
@@ -37,7 +37,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<IContentRepository> _contentRepo;
         private Mock<IFilesFoldersService> _fileFolderService;
 
-        private MainProcessor GetUnitUnderTest()
+        private MetaDataProcessor GetUnitUnderTest()
         {
             _logger = new Mock<ILogger>();
             _helper = new Mock<ISharePointHelper>();
@@ -75,7 +75,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             SharePointSettings._currentSettings = new SharePointSettings();
 
-            return new MainProcessor(_logger.Object, _helper.Object, _emitterFactory.Object, _serviceLocator.Object);
+            return new MetaDataProcessor(_logger.Object, _helper.Object, _emitterFactory.Object, _serviceLocator.Object);
 
         }
 
@@ -96,7 +96,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new SPList() { Title = "Test List 4", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9e"),
                     Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } }
             };
-            MainProcessor._splists = _lists;
+            MetaDataProcessor._splists = _lists;
 
             _selectedListsAndViews = new List<KeyValuePair<string, string>>()
             {
@@ -128,7 +128,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            MainProcessor._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             // _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
             folderList.Verify(m => m.Clear(), Times.Exactly(_selectedListsAndViews.Count()), "Failed to clear folderList at start of new list iteration.");
@@ -147,7 +147,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            MainProcessor._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
@@ -172,7 +172,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 .Returns(new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            MainProcessor._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");

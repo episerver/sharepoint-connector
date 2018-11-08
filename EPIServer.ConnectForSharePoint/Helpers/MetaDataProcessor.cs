@@ -13,7 +13,7 @@ using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
-    public class MainProcessor : IMainProcessor
+    public class MetaDataProcessor : IMetaDataProcessor
     {
         private ILogger _logger;
         private ISharePointHelper _helper;
@@ -38,7 +38,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         internal IEnumerable<IContent> _SPItemsInCMs;
 
         [ExcludeFromCodeCoverageAttribute]
-        public MainProcessor()
+        public MetaDataProcessor()
         {
             _logger = LogManager.GetLogger();
             _helper = new SharePointHelper();
@@ -49,7 +49,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             SharepointToCmsUtils = new SharepointToCmsUtilities(ServiceLocator.Current);
         }
 
-        internal MainProcessor(ILogger logger, ISharePointHelper helper, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
+        internal MetaDataProcessor(ILogger logger, ISharePointHelper helper, IMessageEmitterFactory emitter, IServiceLocator serviceLocator)
         {
             _logger = logger;
             _helper = helper;

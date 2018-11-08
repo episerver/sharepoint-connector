@@ -246,7 +246,7 @@
   <ItemGroup>
     <Compile Include="Controller\SharePointControllerTests.cs" />
     <Compile Include="Helpers\ContentProviderHelperTests.cs" />
-    <Compile Include="Helpers\MainProcessorTests.cs" />
+    <Compile Include="Helpers\MetaDataProcessorTests.cs" />
     <Compile Include="Helpers\AccessRightsHelperTests.cs" />
     <Compile Include="Helpers\SharePointProcessorHelperTests.cs" />
     <Compile Include="Helpers\SharepointToCmsUtilitiesTests.cs" />
