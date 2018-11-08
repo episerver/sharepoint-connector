@@ -14,7 +14,7 @@ using EPiServer.ConnectForSharePoint.Helpers;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
-    internal class MetaDataProcessor : IMetaDataProcessor
+    public class MetaDataProcessor : IMetaDataProcessor
     {
         private ILogger _logger;
         private ISharePointHelper _helper;

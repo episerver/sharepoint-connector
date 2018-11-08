@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
-    internal interface IMetaDataProcessor
+    public interface IMetaDataProcessor
     {
         /// <summary>
         /// This is where the main processing begins. 
