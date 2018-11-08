@@ -1,9 +1,9 @@
 ﻿using EPiServer.ConnectForSharePoint.Models;
 using System.Collections.Generic;
 
-namespace EPiServer.ConnectForSharePoint.Helpers
+namespace EPiServer.ConnectForSharePoint.Processor
 {
-    public interface IMetaDataProcessor
+    internal interface IMetaDataProcessor
     {
         /// <summary>
         /// This is where the main processing begins. 

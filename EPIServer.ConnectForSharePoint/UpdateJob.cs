@@ -1,7 +1,6 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Processor;
 using EPiServer.ConnectForSharePoint.SPServices;
-using EPiServer.ConnectForSharePoint.Web;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using EPiServer.PlugIn;

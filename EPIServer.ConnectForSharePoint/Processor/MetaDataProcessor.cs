@@ -10,10 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.Threading;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Helpers;
 
-namespace EPiServer.ConnectForSharePoint.Helpers
+namespace EPiServer.ConnectForSharePoint.Processor
 {
-    public class MetaDataProcessor : IMetaDataProcessor
+    internal class MetaDataProcessor : IMetaDataProcessor
     {
         private ILogger _logger;
         private ISharePointHelper _helper;

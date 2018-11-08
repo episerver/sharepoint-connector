@@ -17,6 +17,7 @@ using EPiServer.DataAbstraction;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.ComponentModel.DataAnnotations;
 using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {

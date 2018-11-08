@@ -10,6 +10,7 @@ using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using System.Globalization;
 using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {

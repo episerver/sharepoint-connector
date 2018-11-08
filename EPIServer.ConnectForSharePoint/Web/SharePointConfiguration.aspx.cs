@@ -23,6 +23,7 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.DataAbstraction;
 using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
