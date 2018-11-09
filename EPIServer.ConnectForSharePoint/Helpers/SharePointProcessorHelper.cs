@@ -26,8 +26,8 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         public SharePointProcessorHelper()
         {
             _serviceLocator = ServiceLocator.Current;
-            _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
-            _listViewsService = SharePointHelper.SPServicesHub.SPListsViewsService;
+            _fileStreamService = _serviceLocator.GetInstance<IFileStreamService>();
+            _listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
         }
 
         internal SharePointProcessorHelper(IServiceLocator serviceLocator)

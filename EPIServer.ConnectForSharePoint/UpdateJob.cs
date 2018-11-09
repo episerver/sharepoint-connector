@@ -1,7 +1,6 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
-using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Processor;
 using EPiServer.ConnectForSharePoint.SPServices;
-using EPiServer.ConnectForSharePoint.Web;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using EPiServer.PlugIn;
@@ -19,14 +18,14 @@ namespace EPiServer.ConnectForSharePoint
     [ScheduledPlugIn(DisplayName = "SharePoint Update", Description = "", LanguagePath = "/sharepoint/scheduledjob")]
     public class UpdateJob : ScheduledJobBase
     {
-        private static IServicesHub _hub;
-        private static ISharePointMessageHelper _helper;
+        private static IMetaDataProcessor _helper;
         protected static string _ListIds;
-        protected static ISharePointSettingsHelper _settings;
         protected static LocalizationService _localization;
+        private IServiceLocator _serviceLocator;
 
         public UpdateJob()
         {
+            _serviceLocator = ServiceLocator.Current;
         }
 
         /// <summary>
@@ -35,28 +34,24 @@ namespace EPiServer.ConnectForSharePoint
         /// <param name="hub"></param>
         /// <param name="helper"></param>
         /// <param name="ListIds"></param>
-        internal UpdateJob(IServicesHub hub, ISharePointMessageHelper helper, string ListIds, ISharePointSettingsHelper settings )
+        internal UpdateJob(IServiceLocator locator, IMetaDataProcessor helper, string ListIds )
         {
-            _hub = hub;
             _helper = helper;
             _ListIds = ListIds;
-            _settings = settings;
+            _serviceLocator = locator;
         }
 
         public override string Execute()
         {
-            if (SharePointMessageHelper.IsRunning())
+            if (MetaDataProcessor.IsRunning())
             {
                 string msg = "Process is currently running.";
                 OnStatusChanged(msg);
                 throw new Exception(msg);
             }
 
-            if (_hub == null)
-                _hub = SharePointHelper.SPServicesHub;
-
             if (_helper == null)
-                _helper = new SharePointMessageHelper();
+                _helper = new MetaDataProcessor();
 
             if (_localization == null)
                 _localization = LocalizationService.Current;
@@ -65,17 +60,14 @@ namespace EPiServer.ConnectForSharePoint
 
             ContentReference destfolderRef;
             string foldername = "";
-            if (_settings == null)
-            {
-                destfolderRef = SharePointSettings.Current.EntryPoint;
-                foldername = SharePointSettings.Current.EntryPointFolderName;
-            }
-            else
-                destfolderRef = _settings.GetEntryPoint();
+
+            destfolderRef = SharePointSettings.Current.EntryPoint;
+            foldername = SharePointSettings.Current.EntryPointFolderName;
 
             // Concatinate the document and custom lists.
-            var documentLists = _hub.SPListsViewsService.GetLists((int)ListBaseType.DocumentLibrary);
-            var customLists = _hub.SPListsViewsService.GetLists((int)ListBaseType.GenericList);
+            var listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
+            var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+            var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
             var supportedLists = documentLists.Concat(customLists);
 
             // show error if destination folder has been deleted in cms
@@ -93,20 +85,20 @@ namespace EPiServer.ConnectForSharePoint
 
                 // Join the proccesing thread with the job thread so that the 
                 // status of the job stays busy while its running.
-                if (SharePointMessageHelper._processingThread != null) // fix unit test
+                if (MetaDataProcessor._processingThread != null) // fix unit test
                 {
-                    SharePointMessageHelper._processingThread.Join();
+                    MetaDataProcessor._processingThread.Join();
                 }
 
                 // As long as items are in the queue make sure we show we are still running
-                while(  SharePointMessageHelper.GetQueCount() > 0 )
+                while(  MetaDataProcessor.GetQueCount() > 0 )
                 {
                     Thread.Sleep(2000);
                 }
 
-                if (SharePointMessageHelper._processingResult != true)
+                if (MetaDataProcessor._processingResult != true)
                 {
-                    return ("Failed : " + SharePointMessageHelper._processingException.Message);
+                    return ("Failed : " + MetaDataProcessor._processingException.Message);
                 }
                 else
                 {

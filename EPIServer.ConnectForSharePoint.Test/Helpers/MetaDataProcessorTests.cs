@@ -16,17 +16,17 @@ using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.ComponentModel.DataAnnotations;
+using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Test.Helpers
 {
     [TestClass]
-    public class SharePointMessageHelperTests
+    public class MetaDataProcessorTests
     {
 
         private Mock<ILogger> _logger;
         private Mock<ISharePointHelper> _helper;
-        private Mock<IContentProviderHelper> _contentProviderHelper;
-        private Mock<ISharePointSettingsHelper> _settingsHelper;
         private Mock<IMessageEmitterFactory> _emitterFactory;
         private Mock<IMessageEmitter> _messageEmitter;
         private Mock<IServiceLocator> _serviceLocator;
@@ -38,13 +38,11 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<IContentRepository> _contentRepo;
         private Mock<IFilesFoldersService> _fileFolderService;
 
-        private SharePointMessageHelper GetUnitUnderTest()
+        private MetaDataProcessor GetUnitUnderTest()
         {
             _logger = new Mock<ILogger>();
             _helper = new Mock<ISharePointHelper>();
-            _contentProviderHelper = new Mock<IContentProviderHelper>();
-            _settingsHelper = new Mock<ISharePointSettingsHelper>();
-            _settingsHelper.Setup(sh => sh.GetEntryPoint()).Returns(new ContentReference() { ID = 123 });
+            SharePointSettings._currentSettings = new SharePointSettings();
             _messageEmitter = new Mock<IMessageEmitter>();
             _messageEmitter.Setup(me => me.Emit(It.IsAny<SharePointMessage>()));
             _emitterFactory = new Mock<IMessageEmitterFactory>();
@@ -76,160 +74,10 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _fileFolderService.Setup(m => m.LoadParentFolder(It.IsAny<SPFolder>())).Returns(new SPFolder() { Name = "Some Loaded Folder", ServerRelativeUrl = "root/ServerRelativeUrl" });
             _serviceLocator.Setup(sl => sl.GetInstance<IFilesFoldersService>()).Returns(_fileFolderService.Object);
 
-            return new SharePointMessageHelper(_logger.Object, _helper.Object, _contentProviderHelper.Object, _settingsHelper.Object, _emitterFactory.Object, _serviceLocator.Object);
+            SharePointSettings._currentSettings = new SharePointSettings();
 
-        }
+            return new MetaDataProcessor(_logger.Object, _helper.Object, _emitterFactory.Object, _serviceLocator.Object);
 
-        [TestMethod]
-        public void QueueFoldersForDelete_Emits_Delete_Messages_For_Folders()
-        {
-            var messageHelper = GetUnitUnderTest();
-            var selectedListIds = new List<KeyValuePair<string, string>>();
-
-            var viewKey = Guid.NewGuid().ToString();
-            var listKey = Guid.NewGuid().ToString();
-            selectedListIds.Add(new KeyValuePair<string, string>(viewKey, listKey));
-            _helper.Setup(h => h.GetSelectedListViewIds(It.IsAny<IEnumerable<SPList>>())).Returns(selectedListIds);
-            _helper.Setup(h => h.GetListAndViewIds(It.IsAny<string>())).Returns(new string[2] { listKey, viewKey });
-
-            var testSPList = new SPList()
-            {
-                Id = new Guid(listKey),
-                Title = "Test SPList",
-                Views = new List<SPListView> { new SPListView() { Id = new Guid(viewKey), Title = "Test SPListView" } }
-            };
-
-            var lists = new List<SPList>() { testSPList };
-            messageHelper.QueueRootFoldersForDelete(lists);
-
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
-        }
-
-        [TestMethod]
-        public void QueueFoldersForDelete_Does_Not_Call_Emit_For_Folders_Specified_As_Excluded()
-        {
-            var messageHelper = GetUnitUnderTest();
-            var selectedListIds = new List<KeyValuePair<string, string>>();
-
-            var viewKey = Guid.NewGuid().ToString();
-            var listKey = Guid.NewGuid().ToString();
-            selectedListIds.Add(new KeyValuePair<string, string>(viewKey, listKey));
-            _helper.Setup(h => h.GetSelectedListViewIds(It.IsAny<IEnumerable<SPList>>())).Returns(selectedListIds);
-            _helper.Setup(h => h.GetListAndViewIds(It.IsAny<string>())).Returns(new string[2] { listKey, viewKey });
-
-            var testSPList = new SPList()
-            {
-                Id = new Guid(listKey),
-                Title = "Test SPList",
-                Views = new List<SPListView> { new SPListView() { Id = new Guid(viewKey), Title = "Test SPListView" } }
-            };
-
-            var lists = new List<SPList>() { testSPList };
-            var excludeList = new List<string>() { listKey + "~" + viewKey };
-            messageHelper.QueueRootFoldersForDelete(lists, excludeList);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointMessage>()), Times.Never, "Emit should not be called when we exclude the list-view combo returned");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_DoesntProcess_FolderItem()
-        {
-            var messageHelper = GetUnitUnderTest();
-            Mock<IEnumerable<IContent>> cmsItems = new Mock<IEnumerable<IContent>>();
-            cmsItems.Setup(e => e.GetEnumerator()).Verifiable();
-
-            SPListItem spItem = new SPListItem() { Folder = new SPFolder() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems.Object);
-
-            cmsItems.Verify(e => e.GetEnumerator(), Times.Never, "Item is not a folder item, we should not be iterating");
-
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_UpdateItemMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia()
-            {
-                Name = "FindMe",
-                SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242)
-            });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemUpdateMessage>()), Times.Exactly(1),
-                "The item we where looking for should have been found AND emited update message");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_AddItemMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "2" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemAddMessage>()), Times.Exactly(1),
-                "The item we where looking for should NOT have been found AND emited add message");
-        }
-
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_UpdateContentMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia()
-            {
-                Name = "FindMe",
-                SharePointGUID = itemGuid.ToString(),
-                ContentLink = new ContentReference(4242)
-            });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentUpdateMessage>()), Times.Exactly(1),
-                "The item we where looking for should have been found AND emited update message");
-        }
-
-        [TestMethod]
-        public void AddOrUpdateItem_Finds_Items_AddContentMessage()
-        {
-            var messageHelper = GetUnitUnderTest();
-
-            Guid itemGuid = new Guid("9A7961C7-4823-4B6B-9B37-829F85DC95CE");
-
-            List<IContent> cmsItems = new List<IContent>();
-            cmsItems.Add(new SharepointGenericMedia() { Name = "1" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "2" });
-            cmsItems.Add(new SharepointGenericMedia() { Name = "3" });
-
-            SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
-            messageHelper.AddOrUpdateItem(spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentAddMessage>()), Times.Exactly(1),
-                "The item we where looking for should NOT have been found AND emited add message");
         }
 
         string _listids;
@@ -249,7 +97,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new SPList() { Title = "Test List 4", Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9e"),
                     Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } } }
             };
-            SharePointMessageHelper._splists = _lists;
+            MetaDataProcessor._splists = _lists;
 
             _selectedListsAndViews = new List<KeyValuePair<string, string>>()
             {
@@ -281,7 +129,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            SharePointMessageHelper._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             // _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointFolderDeleteMessage))), Times.AtLeastOnce, "Emit was not called enough times with the expected message type");
             folderList.Verify(m => m.Clear(), Times.Exactly(_selectedListsAndViews.Count()), "Failed to clear folderList at start of new list iteration.");
@@ -300,7 +148,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            SharePointMessageHelper._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
@@ -325,7 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
                 .Returns(new List<SPListItem>());
 
             messageHelper.BeginProcessing(_listids, _lists);
-            SharePointMessageHelper._processingThread.Join();
+            MetaDataProcessor._processingThread.Join();
 
             _helper.Verify(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out nextUriPath),
                 Times.Exactly(_selectedListsAndViews.Count()), "Failed to call GetPagedItems " + _selectedListsAndViews.Count() + " times.");
@@ -348,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             initBeginProcessingConditions();
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
@@ -373,7 +221,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             initBeginProcessingConditions();
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
@@ -404,7 +252,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             SPListView view = new SPListView() { Id = Guid.NewGuid() };
 
-            messageHelper.processItemList(new SPList()
+            messageHelper.ProcessItemList(new SPList()
             {
                 Title = "Test List 1",
                 Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
@@ -433,7 +281,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
-            messageHelper.process();
+            messageHelper.Process();
 
             // make sure we deleted the content item, and it was the expected item.
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointContentDeleteMessage) && mess.Item.GUID == itemID)),
@@ -477,7 +325,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
-            messageHelper.process();
+            messageHelper.Process();
 
             // make sure we deleted the list item, and it was the expected item.
             _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointListItemDeleteMessage) && mess.Item.GUID == itemID)),
@@ -504,7 +352,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             // Override the clearing of the list so we can verify that we processed all the items.
             messageHelper._clearAllSPItemsWhenDone = false; 
-            messageHelper.process();
+            messageHelper.Process();
 
             // Each list (configured above) will return two items. there are 3 default lists
             Assert.AreEqual(messageHelper._AllSPItems.Count(), 6, "The number of items in the lists did not match the number of items processed.");
@@ -528,7 +376,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             string Path;
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
-            messageHelper.process();
+            messageHelper.Process();
 
             // Each list (configured above) will return two items. there are 3 default lists
             // however the default behavior is to clear the list when done so make sure its clear

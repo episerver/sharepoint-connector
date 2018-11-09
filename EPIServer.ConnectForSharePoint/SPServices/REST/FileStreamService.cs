@@ -21,18 +21,9 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
         private static object _lock = new object();
 
         public FileStreamService()
-            : this(
-                SharePointHelper.SPServicesHub.SPListsViewsService,
-                SharePointHelper.SPServicesHub.SPFilesFoldersService)
         {
-        }
-
-        public FileStreamService(
-            IListsViewsService spListsService,
-            IFilesFoldersService spFilesFoldersService)
-        {
-            _spListsService = spListsService;
-            _spFilesFoldersService = spFilesFoldersService;
+            _spListsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
+            _spFilesFoldersService = ServiceLocator.Current.GetInstance<IFilesFoldersService>();
         }
 
         public Stream GetFileSteam(string relativeUrl)
