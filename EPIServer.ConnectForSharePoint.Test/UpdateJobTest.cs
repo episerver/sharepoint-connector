@@ -11,6 +11,10 @@ using EPiServer.Framework.Localization;
 using System.Globalization;
 using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Processor;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Messaging.Handlers;
+using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
@@ -74,16 +78,21 @@ namespace EPiServer.ConnectForSharePoint.Test
                 .Returns(new List<SPList>());
             locator.Setup(m => m.GetInstance<IListsViewsService>()).Returns(listService.Object);
 
-            Mock<IMetaDataProcessor> helper = new Mock<IMetaDataProcessor>();
-            helper.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
-
-            UpdateJob job = new UpdateJob(locator.Object, helper.Object, "some list ids");
+            Mock<IMetaDataProcessor> processor = new Mock<IMetaDataProcessor>();
+            processor.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
+           
+            UpdateJob job = new UpdateJob(locator.Object, processor.Object, "some list ids");
+            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+            while(queueStore.Get(SharePointMessageEmitterFactory.QueueName).Count > 0)
+            {
+                queueStore.Get(SharePointMessageEmitterFactory.QueueName).Take();
+            }
             job.Execute();
 
             listService.Verify(h => h.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");
             listService.Verify(h => h.GetLists(It.Is<int>(i => i == (int)ListBaseType.DocumentLibrary )), Times.AtLeastOnce, "Never called with DocumentLibrary");
             listService.Verify(h => h.GetLists(It.Is<int>(i => i == (int)ListBaseType.GenericList)), Times.AtLeastOnce, "Never called with GenericList");
-            helper.Verify(h => h.BeginProcessing(It.IsAny<string>(), It.IsAny<IEnumerable<SPList>>()), Times.Exactly(1), "Begin processing should be called once.");
+            processor.Verify(h => h.BeginProcessing(It.IsAny<string>(), It.IsAny<IEnumerable<SPList>>()), Times.Exactly(1), "Begin processing should be called once.");
         }
     }
 }
