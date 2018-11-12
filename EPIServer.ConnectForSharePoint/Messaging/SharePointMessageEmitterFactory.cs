@@ -1,10 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
-namespace EPiServer.ConnectForSharePoint.Messaging 
+namespace EPiServer.ConnectForSharePoint.Messaging
 {
     /// <summary>
     /// The SharePointMessageEmitterFactory ecapuusates the "sharepointmod" queue, it also 
@@ -14,6 +11,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
     public class SharePointMessageEmitterFactory : IMessageEmitterFactory
     {
         private readonly InMemoryQueueStore queueStore;
+        internal const string QueueName = "sharepointmod";
 
         public SharePointMessageEmitterFactory()
         {
@@ -22,7 +20,27 @@ namespace EPiServer.ConnectForSharePoint.Messaging
 
         public IMessageEmitter Create()
         {
-            return new InMemoryMessageEmitter(this.queueStore.Get("sharepointmod"));
+            return new InMemoryMessageEmitter(this.queueStore.Get(QueueName));
+        }
+
+        public int QueCount
+        {
+            get
+            {
+                 return queueStore.Get(SharePointMessageEmitterFactory.QueueName).Count;
+            }
+        }
+
+        public void Initialize(MessageHandlerRegistry registry)
+        {
+            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+            var queue = queueStore.Get(SharePointMessageEmitterFactory.QueueName);
+            var messageDispatcher = new FanOutMessageDispatcher(registry);
+            var messageReceiver = new InMemoryMessageReceiver(messageDispatcher, queue);
+
+            var appBuilder = new MessagingApplicationBuilder();
+            appBuilder.Add(messageReceiver);
+            appBuilder.App.Start();
         }
     }
 }

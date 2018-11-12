@@ -12,17 +12,29 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         public void Create_ReturnsAnInMemoryEmitterTargetingTheIndexingQueue()
         {
             // Get the que based on the name that should match in SharePointMessageEmitterFactory
-            var queue = new InMemoryQueueStore(AppDomain.CurrentDomain).Get("sharepointmod");
+            var queue = new InMemoryQueueStore(AppDomain.CurrentDomain).Get(SharePointMessageEmitterFactory.QueueName);
 
             // Get our SharePointMessageEmitterFactory factory and create an emmitter
             var factory = new SharePointMessageEmitterFactory();
             var emitter = factory.Create();
 
-            // emit a message
+            // emit a message.
             emitter.Emit<string>("message");
 
             // check the queue instance we have and verify that hte message we emmited is there
             Assert.AreEqual("message", (string)queue.Take(), "Indexing queue contains the expected message");
+        }
+
+        [TestMethod]
+        public void QueueCount_Returns_Expected_Count()
+        {
+            var factory = new SharePointMessageEmitterFactory();
+            var emitter = factory.Create();
+
+            // emit a message.
+            emitter.Emit<string>("message"); emitter.Emit<string>("message"); emitter.Emit<string>("message");
+
+            Assert.AreEqual(factory.QueCount, 3);
         }
     }
 }

@@ -1,7 +1,5 @@
-﻿using EPiServer.ConnectForSharePoint.Helpers;
-using EPiServer.ConnectForSharePoint.Messaging;
+﻿using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Handlers;
-using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.Core;
@@ -10,7 +8,6 @@ using EPiServer.Logging;
 using EPiServer.Packaging;
 using EPiServer.ServiceLocation;
 using System;
-using System.Collections.Concurrent;
 using EPiServer.ConnectForSharePoint.Configuration;
 
 namespace EPiServer.ConnectForSharePoint
@@ -131,25 +128,8 @@ namespace EPiServer.ConnectForSharePoint
             registry.Register<SharePointListItemUpdateMessage>(handler);
             registry.Register<SharePointListItemDeleteMessage>(handler);
 
-            // Initialize message queue and the message dispatcher
-            var messageDispatcher = new FanOutMessageDispatcher(registry);
-            var queue = GetQueue("sharepointmod"); // Queue name has to match what is in SharePointMessageEmitterFactory
-            var messageReceiver = new InMemoryMessageReceiver(messageDispatcher, queue);
-
-            // Initialize the message application builder
-            appBuilder = new MessagingApplicationBuilder();
-            appBuilder.Add(messageReceiver);
-            appBuilder.App.Start();
-        }
-
-        private BlockingCollection<object> GetQueue(string queueName)
-        {
-            _logger.Information("GetQueue [" + queueName + "]");
-
-            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-            var queue = queueStore.Get(queueName);
-
-            return queue;
+            var factory = new SharePointMessageEmitterFactory();
+            factory.Initialize(registry);
         }
 
         /// <summary>

@@ -80,11 +80,10 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 string retval = "0";
 
-                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-                var queue = queueStore.Get("sharepointmod");
-                if (queue.Count() > 0)
+                var emmiter = new SharePointMessageEmitterFactory();
+                if (emmiter.QueCount > 0)
                 {
-                    retval = queue.Count.ToString();
+                    retval = emmiter.QueCount.ToString();
                 }
                 else
                 {
