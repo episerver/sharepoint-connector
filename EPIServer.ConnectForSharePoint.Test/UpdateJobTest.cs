@@ -83,6 +83,7 @@ namespace EPiServer.ConnectForSharePoint.Test
            
             UpdateJob job = new UpdateJob(locator.Object, processor.Object, "some list ids");
             var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
+            // Make sure the queue is empty before we start, it appears there are tests that leave stuff in the queue becuase there are no valid handlers.
             while(queueStore.Get(SharePointMessageEmitterFactory.QueueName).Count > 0)
             {
                 queueStore.Get(SharePointMessageEmitterFactory.QueueName).Take();
