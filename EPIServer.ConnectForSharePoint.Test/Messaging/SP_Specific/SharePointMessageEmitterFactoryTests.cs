@@ -42,7 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
                 emitter.Emit<string>("message");
                 emitter.Emit<string>("message");
 
-                Assert.AreEqual(factory.QueCount, 3);
+                Assert.AreEqual(factory.QueueCount, 3);
             }
         }
 
@@ -63,7 +63,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
                 factory.Clear();
 
-                Assert.AreEqual(factory.QueCount, 0);
+                Assert.AreEqual(factory.QueueCount, 0);
             }
         }
     }

@@ -86,7 +86,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
             lock (_lock)
             {
                 var emmiter = new SharePointMessageEmitterFactory();
-                if (_processingThread == null || (!_processingThread.IsAlive && emmiter.QueCount == 0))
+                if (_processingThread == null || (!_processingThread.IsAlive && emmiter.QueueCount == 0))
                 {
                     retval = false;
                 }

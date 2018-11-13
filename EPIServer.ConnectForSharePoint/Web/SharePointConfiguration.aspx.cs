@@ -81,9 +81,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 string retval = "0";
 
                 var emmiter = new SharePointMessageEmitterFactory();
-                if (emmiter.QueCount > 0)
+                if (emmiter.QueueCount > 0)
                 {
-                    retval = emmiter.QueCount.ToString();
+                    retval = emmiter.QueueCount.ToString();
                 }
                 else
                 {

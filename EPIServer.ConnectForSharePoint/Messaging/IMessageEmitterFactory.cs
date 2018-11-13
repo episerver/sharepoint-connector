@@ -5,7 +5,7 @@
         /// <summary>
         /// Gets the current number of items in the queue
         /// </summary>
-        int QueCount { get; }
+        int QueueCount { get; }
 
         /// <summary>
         /// Creates an IMessageEmmiter which can then be used to create messages.

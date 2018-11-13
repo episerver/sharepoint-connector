@@ -23,7 +23,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             return new InMemoryMessageEmitter(this.queueStore.Get(QueueName));
         }
 
-        public int QueCount
+        public int QueueCount
         {
             get
             {
