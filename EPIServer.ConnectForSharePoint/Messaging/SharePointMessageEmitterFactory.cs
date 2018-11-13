@@ -1,4 +1,6 @@
 ﻿using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Models;
 using System;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
@@ -10,17 +12,14 @@ namespace EPiServer.ConnectForSharePoint.Messaging
     /// </summary>
     public class SharePointMessageEmitterFactory : IMessageEmitterFactory
     {
-        private readonly InMemoryQueueStore queueStore;
         internal const string QueueName = "sharepointmod";
+
+        private readonly InMemoryQueueStore queueStore;
+        private InMemoryMessageEmitter messageEmmiter;
 
         public SharePointMessageEmitterFactory()
         {
             this.queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-        }
-
-        public IMessageEmitter Create()
-        {
-            return new InMemoryMessageEmitter(this.queueStore.Get(QueueName));
         }
 
         public int QueueCount
@@ -48,6 +47,17 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             var queue = queueStore.Get(SharePointMessageEmitterFactory.QueueName);
             object item;
             while (queue.TryTake(out item, 100)) ;
+        }
+
+        public void Emit<T>(SPListItem item) where T : ISharePointMessage, new()
+        {
+            var message = new T();
+            message.Item = item;
+            if( messageEmmiter == null )
+            {
+                messageEmmiter = new InMemoryMessageEmitter(this.queueStore.Get(QueueName));
+            }
+            messageEmmiter.Emit(message);
         }
     }
 }

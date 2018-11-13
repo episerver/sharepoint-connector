@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Models;
 
 namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 {
@@ -18,13 +20,14 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
 
             // Get our SharePointMessageEmitterFactory factory and create an emmitter
             var factory = new SharePointMessageEmitterFactory();
-            var emitter = factory.Create();
 
             // emit a message.
-            emitter.Emit<string>("message");
+            var item = new SPListItem() { Title = "SomeGreatItem!" };
+
+            factory.Emit<SharePointFolderDeleteMessage>(item);
 
             // check the queue instance we have and verify that hte message we emmited is there
-            Assert.AreEqual("message", (string)queue.Take(), "Indexing queue contains the expected message");
+            Assert.AreEqual(item.Title, ((SharePointFolderDeleteMessage)queue.Take()).Item.Title, "Indexing queue contains the expected message");
         }
 
         [TestMethod]
@@ -33,14 +36,13 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             lock (_MessagingLock)
             {
                 var factory = new SharePointMessageEmitterFactory();
-                var emitter = factory.Create();
 
                 factory.Clear();
 
                 // emit 3 messages
-                emitter.Emit<string>("message");
-                emitter.Emit<string>("message");
-                emitter.Emit<string>("message");
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
 
                 Assert.AreEqual(factory.QueueCount, 3);
             }
@@ -52,14 +54,13 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             lock (_MessagingLock)
             {
                 var factory = new SharePointMessageEmitterFactory();
-                var emitter = factory.Create();
 
                 factory.Clear();
 
                 // emit 3 messages
-                emitter.Emit<string>("message");
-                emitter.Emit<string>("message");
-                emitter.Emit<string>("message");
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
+                factory.Emit<SharePointFolderDeleteMessage>(new SPListItem());
 
                 factory.Clear();
 

@@ -65,13 +65,10 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 fd = fd.GetFolder(folder.ContentLink.ID);
                 if (fd.RefId == -1)
                 {
-                    emmiter.Create().Emit(new SharePointFolderDeleteMessage()
+                    emmiter.Emit<SharePointFolderDeleteMessage>( new SPListItem()
                     {
-                        Item = new SPListItem()
-                        {
-                            entryPointId = folderContentReference.ID, // id of the folder the item is in
-                            Folder = new SPFolder() { Name = folder.Name }
-                        },
+                        entryPointId = folderContentReference.ID, // id of the folder the item is in
+                        Folder = new SPFolder() { Name = folder.Name }
                     });
                 }
             }
@@ -106,14 +103,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
                     if (delete == true)
                     {
-                        emmiter.Create().Emit(new SharePointFolderDeleteMessage()
+                        emmiter.Emit<SharePointFolderDeleteMessage>(new SPListItem()
                         {
-                            Item = new SPListItem()
-                            {
-                                entryPointId = fd.RefId, // id of the folder the item is in
-                                GUID = fd.FolderGuid,
-                                Folder = new SPFolder() { Name = cmsFolder.Name }
-                            },
+                            entryPointId = fd.RefId, // id of the folder the item is in
+                            GUID = fd.FolderGuid,
+                            Folder = new SPFolder() { Name = cmsFolder.Name }
                         });
                     }
                 }
@@ -142,11 +136,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // if there is reference send Add message
                     if (spItem.ContentLink == null)
                     {
-                        emmiter.Create().Emit(new SharePointContentAddMessage() { Item = spItem });
+                        emmiter.Emit<SharePointContentAddMessage>(spItem);
                     }
                     else // its an update
                     {
-                        emmiter.Create().Emit(new SharePointContentUpdateMessage() { Item = spItem });
+                        emmiter.Emit<SharePointContentUpdateMessage>(spItem);
                     }
                 }
                 else // it is a list item
@@ -154,11 +148,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // if there is reference send Add message
                     if (spItem.ContentLink == null)
                     {
-                        emmiter.Create().Emit(new SharePointListItemAddMessage() { Item = spItem });
+                        emmiter.Emit<SharePointListItemAddMessage>(spItem);
                     }
                     else // its an update
                     {
-                        emmiter.Create().Emit(new SharePointListItemUpdateMessage() { Item = spItem });
+                        emmiter.Emit<SharePointListItemUpdateMessage>(spItem);
                     }
                 }
             }
@@ -181,10 +175,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 ContentFolder cf;
                 if (repo.TryGet<ContentFolder>(new ContentReference(foundData.RefId), out cf))
                 {
-                    emmiter.Create().Emit(new SharePointFolderUpdateMessage()
-                    {
-                        Item = item,
-                    });
+                    emmiter.Emit<SharePointFolderUpdateMessage>(item);
                     add = false;
                     contentRef = cf.ContentLink; // Make sure we return the content reference
                 }
@@ -198,10 +189,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             if (add)
             {
                 // Add the view folder.
-                emmiter.Create().Emit(new SharePointFolderAddMessage()
-                {
-                    Item = item,
-                });
+                emmiter.Emit<SharePointFolderAddMessage>(item);
             }
             return contentRef;
         }
@@ -218,26 +206,20 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // if its a list item, delete it
                     if (mediaItem.Type == SharePointItemType.ListItem)
                     {
-                        emmiter.Create().Emit(new SharePointListItemDeleteMessage()
-                        {
-                            Item = new SPListItem()
+                        emmiter.Emit<SharePointListItemDeleteMessage>(new SPListItem()
                             {
                                 File = new SPFile() { Name = item.Name },
                                 ContentLink = item.ContentLink, // id of the folder the item is in
                                 GUID = new Guid(mediaItem.SharePointGUID),
-                            },
-                        });
+                            });
                     }
                     else if (mediaItem.Type == SharePointItemType.LibraryItem)
                     {
-                        emmiter.Create().Emit(new SharePointContentDeleteMessage()
+                        emmiter.Emit<SharePointContentDeleteMessage>( new SPListItem()
                         {
-                            Item = new SPListItem()
-                            {
-                                File = new SPFile() { Name = item.Name },
-                                ContentLink = item.ContentLink, // id of the folder the item is in
-                                GUID = new Guid(mediaItem.SharePointGUID)
-                            },
+                            File = new SPFile() { Name = item.Name },
+                            ContentLink = item.ContentLink, // id of the folder the item is in
+                            GUID = new Guid(mediaItem.SharePointGUID)
                         });
                     }
                 }
@@ -303,10 +285,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     // The message on the queue will be SPListItem
                     // Because we have only a list (like "documents") and a view (like "all documents") we need to create a SPListItem
                     // that contains some aspects of both.
-                    emmiter.Create().Emit(new SharePointFolderDeleteMessage()
-                    {
-                        Item = CreateParentSPListItem(selectedList, selectedView)
-                    });
+                    emmiter.Emit<SharePointFolderDeleteMessage>(CreateParentSPListItem(selectedList, selectedView));
                 }
             }
         }
