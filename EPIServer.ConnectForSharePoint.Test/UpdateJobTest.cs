@@ -15,6 +15,7 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Messaging.Handlers;
 using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
@@ -82,13 +83,11 @@ namespace EPiServer.ConnectForSharePoint.Test
             processor.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
            
             UpdateJob job = new UpdateJob(locator.Object, processor.Object, "some list ids");
-            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-            // Make sure the queue is empty before we start, it appears there are tests that leave stuff in the queue becuase there are no valid handlers.
-            while(queueStore.Get(SharePointMessageEmitterFactory.QueueName).Count > 0)
+            lock( SharePointMessageEmitterFactoryTests._MessagingLock )
             {
-                queueStore.Get(SharePointMessageEmitterFactory.QueueName).Take();
+                new SharePointMessageEmitterFactory().Clear();
+                job.Execute();
             }
-            job.Execute();
 
             listService.Verify(h => h.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");
             listService.Verify(h => h.GetLists(It.Is<int>(i => i == (int)ListBaseType.DocumentLibrary )), Times.AtLeastOnce, "Never called with DocumentLibrary");

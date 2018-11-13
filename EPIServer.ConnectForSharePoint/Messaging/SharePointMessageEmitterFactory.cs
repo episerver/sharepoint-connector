@@ -42,5 +42,12 @@ namespace EPiServer.ConnectForSharePoint.Messaging
             appBuilder.Add(messageReceiver);
             appBuilder.App.Start();
         }
+
+        public void Clear()
+        {
+            var queue = queueStore.Get(SharePointMessageEmitterFactory.QueueName);
+            object item;
+            while (queue.TryTake(out item, 100)) ;
+        }
     }
 }

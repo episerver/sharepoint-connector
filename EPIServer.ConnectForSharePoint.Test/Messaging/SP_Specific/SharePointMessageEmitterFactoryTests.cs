@@ -8,6 +8,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
     [TestClass]
     public class SharePointMessageEmitterFactoryTests
     {
+        static public object _MessagingLock = new Object();
+
         [TestMethod]
         public void Create_ReturnsAnInMemoryEmitterTargetingTheIndexingQueue()
         {
@@ -28,13 +30,41 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
         [TestMethod]
         public void QueueCount_Returns_Expected_Count()
         {
-            var factory = new SharePointMessageEmitterFactory();
-            var emitter = factory.Create();
+            lock (_MessagingLock)
+            {
+                var factory = new SharePointMessageEmitterFactory();
+                var emitter = factory.Create();
 
-            // emit a message.
-            emitter.Emit<string>("message"); emitter.Emit<string>("message"); emitter.Emit<string>("message");
+                factory.Clear();
 
-            Assert.AreEqual(factory.QueCount, 3);
+                // emit 3 messages
+                emitter.Emit<string>("message");
+                emitter.Emit<string>("message");
+                emitter.Emit<string>("message");
+
+                Assert.AreEqual(factory.QueCount, 3);
+            }
+        }
+
+        [TestMethod]
+        public void Clear_EmptiesQueue()
+        {
+            lock (_MessagingLock)
+            {
+                var factory = new SharePointMessageEmitterFactory();
+                var emitter = factory.Create();
+
+                factory.Clear();
+
+                // emit 3 messages
+                emitter.Emit<string>("message");
+                emitter.Emit<string>("message");
+                emitter.Emit<string>("message");
+
+                factory.Clear();
+
+                Assert.AreEqual(factory.QueCount, 0);
+            }
         }
     }
 }
