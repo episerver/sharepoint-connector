@@ -38,6 +38,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
         internal List<SPListItem> _AllSPItems = new List<SPListItem>();
         internal IEnumerable<IContent> _SPItemsInCMs;
 
+        internal bool _stopSignaled;
+
         [ExcludeFromCodeCoverageAttribute]
         public MetaDataProcessor()
         {
@@ -76,6 +78,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 _processingThread = new Thread(new ThreadStart(Process));
                 _processingResult = true;
                 _processingException = null;
+                _stopSignaled = false;
                 _processingThread.Start();
             }
         }
@@ -94,18 +97,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
             return retval;
         }
 
-        public static int GetQueCount()
+        public void Stop()
         {
-            int retval = 0;
+            _stopSignaled = true;
 
-            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-            var queue = queueStore.Get("sharepointmod");
-            if (queue.Count() > 0)
+            var emitter = new SharePointMessageEmitterFactory();
+            while ( IsRunning() )
             {
-                retval = queue.Count;
+                emitter.Clear();
+                Thread.Sleep(100);
             }
-
-            return retval;
         }
 
         /// <summary>
@@ -128,6 +129,10 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
                 foreach (var list_item in selectedLists)
                 {
+                    if (_stopSignaled)
+                    {
+                        break;
+                    }
                     _SPFolders.Clear(); // will contain just folders
                     _SPItems.Clear();   // will contain just documents and items 
 
@@ -177,7 +182,12 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     _AllSPItems.AddRange(_SPItems);
                 }
 
-                SharepointToCmsUtils.DeleteDocumentsAndItems(_emitterFactory, _SPItemsInCMs, _AllSPItems);
+                // If we are stopped in the middle of processing dont call this method else we will delete all items that 
+                // may have been there previously.
+                if (!_stopSignaled)
+                {
+                    SharepointToCmsUtils.DeleteDocumentsAndItems(_emitterFactory, _SPItemsInCMs, _AllSPItems);
+                }
             }
             catch ( Exception e)
             {
@@ -186,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 _processingResult = false;
                 _processingException = e;
             }
-            _logger.Information( GetQueCount() + " Items in the queue.");
+            _logger.Information( _emitterFactory.QueueCount + " Items in the queue.");
 
             if( _clearAllSPItemsWhenDone )
             {
@@ -209,6 +219,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
             // iterate over all the items
             foreach (var item in items)
             {
+                if (_stopSignaled) break;
+
                 item.entryPointId = -1;
                 item.ParentFolderSharePointGuid = rootFolder.GUID;  // this is the root folder of the view.
                 item.selectedView = view;
