@@ -28,7 +28,6 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<ILogger> _logger;
         private Mock<ISharePointHelper> _helper;
         private Mock<IMessageEmitterFactory> _emitterFactory;
-        private Mock<IMessageEmitter> _messageEmitter;
         private Mock<IServiceLocator> _serviceLocator;
         private Mock<MyDataStore> dds;
         private Mock<ISharePointProcessorHelper> _processorHelper;
@@ -43,10 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _logger = new Mock<ILogger>();
             _helper = new Mock<ISharePointHelper>();
             SharePointSettings._currentSettings = new SharePointSettings();
-            _messageEmitter = new Mock<IMessageEmitter>();
-            _messageEmitter.Setup(me => me.Emit(It.IsAny<SharePointMessage>()));
             _emitterFactory = new Mock<IMessageEmitterFactory>();
-            _emitterFactory.Setup(ef => ef.Create()).Returns(_messageEmitter.Object);
 
             Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
             dds = new Mock<MyDataStore>();
@@ -282,9 +278,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
 
             messageHelper.Process();
-
-            // make sure we deleted the content item, and it was the expected item.
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointContentDeleteMessage) && mess.Item.GUID == itemID)),
+            _emitterFactory.Verify(me => me.Emit<SharePointContentDeleteMessage>(It.Is<SPListItem>( item => item.GUID == itemID)),
                 Times.Once, "Expect to emit SharePointContentDeleteMessage but did not.");
         }
 
@@ -328,7 +322,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             messageHelper.Process();
 
             // make sure we deleted the list item, and it was the expected item.
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointMessage>(mess => mess.GetType() == typeof(SharePointListItemDeleteMessage) && mess.Item.GUID == itemID)),
+            _emitterFactory.Verify(me => me.Emit<SharePointListItemDeleteMessage>(It.Is<SPListItem>(item => item.GUID == itemID)),
                 Times.Once, "Expect to emit SharePointListItemDeleteMessage but did not.");
         }
 

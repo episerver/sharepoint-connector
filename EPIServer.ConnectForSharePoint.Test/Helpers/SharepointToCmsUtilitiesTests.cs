@@ -25,15 +25,12 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
         private Mock<IServiceLocator> _serviceLocator;
 
         private Mock<IMessageEmitterFactory> _messageEmitterFactory;
-        private Mock<IMessageEmitter> _messageEmitter;
         private Mock<MyDataStore> _dds;
 
         private SharepointToCmsUtilities GetUnitUnderTest()
         {
             _serviceLocator = new Mock<IServiceLocator>();
             _messageEmitterFactory = new Mock<IMessageEmitterFactory>();
-            _messageEmitter = new Mock<IMessageEmitter>();
-            _messageEmitterFactory.Setup(m => m.Create()).Returns(_messageEmitter.Object);
 
             Mock<DynamicDataStoreFactory> ddsf = new Mock<DynamicDataStoreFactory>();
             _dds = new Mock<MyDataStore>();
@@ -100,7 +97,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             SPListItem spItem = new SPListItem() { GUID = itemGuid };
             messageHelper.AddOrUpdateItem(_messageEmitterFactory.Object, spItem, cmsItems);
 
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemUpdateMessage>()), Times.Exactly(1),
+            _messageEmitterFactory.Verify( mf => mf.Emit<SharePointListItemUpdateMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The item we where looking for should have been found AND emited update message");
         }
 
@@ -118,8 +115,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             SPListItem spItem = new SPListItem() { GUID = itemGuid };
             messageHelper.AddOrUpdateItem(_messageEmitterFactory.Object, spItem, cmsItems);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointListItemAddMessage>()), Times.Exactly(1),
+            
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointListItemAddMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The item we where looking for should NOT have been found AND emited add message");
         }
 
@@ -144,7 +141,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
             messageHelper.AddOrUpdateItem(_messageEmitterFactory.Object, spItem, cmsItems);
 
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentUpdateMessage>()), Times.Exactly(1),
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointContentUpdateMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The item we where looking for should have been found AND emited update message");
         }
 
@@ -163,7 +160,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             SPListItem spItem = new SPListItem() { GUID = itemGuid, File = new SPFile() };
             messageHelper.AddOrUpdateItem(_messageEmitterFactory.Object, spItem, cmsItems);
 
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointContentAddMessage>()), Times.Exactly(1),
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointContentAddMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The item we where looking for should NOT have been found AND emited add message");
         }
 
@@ -190,7 +187,8 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
 
             messageHelper.QueueRootFoldersForDelete(_messageEmitterFactory.Object, lists, excludeList);
 
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointMessage>()), Times.Never, "Emit should not be called when we exclude the list-view combo returned");
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointMessage>(It.IsAny<SPListItem>()), 
+                Times.Never, "Emit should not be called when we exclude the list-view combo returned");
         }
 
         [TestMethod]
@@ -224,8 +222,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             _serviceLocator.Setup(m => m.GetInstance<IContentRepository>()).Returns(repo.Object);
 
             messageHelper.RemoveUserAddedFolders(_messageEmitterFactory.Object, startingFolderReference);
-
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointFolderDeleteMessage>()), Times.Exactly(1),
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointFolderDeleteMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The folder did not exist in the cms folder mapping store to sharepoint so it should have been deleted.");
         }
 
@@ -237,9 +234,9 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             var itemGuid = Guid.NewGuid();
             messageHelper.AddOrUpdateFolder(_messageEmitterFactory.Object, new SPListItem() { GUID = itemGuid });
 
-            _messageEmitter.Verify(me => me.Emit(It.IsAny<SharePointFolderAddMessage>()), Times.Exactly(1),
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointFolderAddMessage>(It.IsAny<SPListItem>()), Times.Exactly(1),
                 "The folder did not exist in the cms folder mapping store so we will create it.");
-            _messageEmitter.Verify(me => me.Emit(It.Is<SharePointFolderAddMessage>(m => m.Item.GUID == itemGuid)),
+            _messageEmitterFactory.Verify(mf => mf.Emit<SharePointFolderAddMessage>(It.Is<SPListItem>( item => item.GUID == itemGuid)),
                 "The message did not contain the same item");
         }
 

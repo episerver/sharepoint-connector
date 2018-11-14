@@ -80,11 +80,10 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 string retval = "0";
 
-                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-                var queue = queueStore.Get("sharepointmod");
-                if (queue.Count() > 0)
+                var emmiter = new SharePointMessageEmitterFactory();
+                if (emmiter.QueueCount > 0)
                 {
-                    retval = queue.Count.ToString();
+                    retval = emmiter.QueueCount.ToString();
                 }
                 else
                 {
@@ -467,15 +466,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                         ContentFolder cmsfolder;
                         if (_contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder))
                         {
-                            SPListItem item = new SPListItem()
+                            emmiter.Emit<SharePointFolderDeleteMessage>(new SPListItem()
                             {
                                 entryPointId = SharePointSettings.Current.EntryPoint.ID,
                                 Folder = new SPFolder() { Name = cmsfolder.Name },
                                 GUID = folder.FolderGuid
-                            };
-                            emmiter.Create().Emit(new SharePointFolderDeleteMessage()
-                            {
-                                Item = item
                             });
                         }
                         else

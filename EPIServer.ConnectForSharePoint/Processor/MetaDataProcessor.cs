@@ -85,10 +85,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
             bool retval = true;
             lock (_lock)
             {
-                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-                var queue = queueStore.Get("sharepointmod");
-
-                if (_processingThread == null || (!_processingThread.IsAlive && queue.Count() == 0))
+                var emmiter = new SharePointMessageEmitterFactory();
+                if (_processingThread == null || (!_processingThread.IsAlive && emmiter.QueueCount == 0))
                 {
                     retval = false;
                 }
