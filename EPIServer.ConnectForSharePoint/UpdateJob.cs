@@ -115,7 +115,7 @@ namespace EPiServer.ConnectForSharePoint
             var emitter = new SharePointMessageEmitterFactory();
             while (MetaDataProcessor.IsRunning())
             {
-                OnStatusChanged($"Processing {emitter.QueueCount} items.");
+                OnStatusChanged( String.Format( "Processing {0} items.", emitter.QueueCount) );
                 if (_stopSignaled)
                 {
                     _metaDataProcessor.Stop();
@@ -126,7 +126,7 @@ namespace EPiServer.ConnectForSharePoint
             // As long as items are in the queue make sure we show we are still running
             while (emitter.QueueCount > 0)
             {
-                OnStatusChanged($"Processing {emitter.QueueCount} items.");
+                OnStatusChanged(String.Format("Processing {0} items.", emitter.QueueCount));
                 if (_stopSignaled)
                 {
                     emitter.Clear();
