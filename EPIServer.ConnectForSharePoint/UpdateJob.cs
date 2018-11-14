@@ -55,16 +55,15 @@ namespace EPiServer.ConnectForSharePoint
 
         public override string Execute()
         {
-            if (MetaDataProcessor.IsRunning())
+            if (_metaDataProcessor == null)
             {
-                string msg = "Process is currently running.";
-                OnStatusChanged(msg);
-
-                return WaitForDone();
+                _metaDataProcessor = _serviceLocator.GetInstance<IMetaDataProcessor>();
             }
 
-            if (_metaDataProcessor == null)
-                _metaDataProcessor = new MetaDataProcessor();
+            if (_metaDataProcessor.IsRunning())
+            {
+                return WaitForDone();
+            }
 
             if (_localization == null)
                 _localization = LocalizationService.Current;
@@ -113,7 +112,7 @@ namespace EPiServer.ConnectForSharePoint
         public string WaitForDone()
         {
             var emitter = new SharePointMessageEmitterFactory();
-            while (MetaDataProcessor.IsRunning())
+            while (_metaDataProcessor.IsRunning())
             {
                 OnStatusChanged( String.Format( "Processing {0} items.", emitter.QueueCount) );
                 if (_stopSignaled)
@@ -131,7 +130,7 @@ namespace EPiServer.ConnectForSharePoint
                 {
                     emitter.Clear();
                 }
-                Thread.Sleep(2000);
+                Thread.Sleep(250);
             }
 
             if (MetaDataProcessor._processingResult != true)

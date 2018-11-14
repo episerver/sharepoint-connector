@@ -16,5 +16,11 @@ namespace EPiServer.ConnectForSharePoint.Processor
         /// Call to stop the processing of the metadata
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// REturns true if the processor is running
+        /// </summary>
+        /// <returns></returns>
+        bool IsRunning();
     }
 }

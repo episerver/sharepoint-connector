@@ -9,11 +9,11 @@ using EPiServer.ServiceLocation;
 using System.Diagnostics.CodeAnalysis;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.Threading;
-using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Helpers;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
+    [ServiceConfiguration(ServiceType = typeof(IMetaDataProcessor), Lifecycle = ServiceInstanceScope.Singleton)]
     public class MetaDataProcessor : IMetaDataProcessor
     {
         private ILogger _logger;
@@ -83,7 +83,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
             }
         }
 
-        public static bool IsRunning()
+        public bool IsRunning()
         {
             bool retval = true;
             lock (_lock)
@@ -105,7 +105,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
             while ( IsRunning() )
             {
                 emitter.Clear();
-                Thread.Sleep(100);
+                Thread.Sleep(250);
             }
         }
 
@@ -162,9 +162,9 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         selectedView, rootFolder.Folder, out nextUri), selectedView.Scope);
 
                     // process any more batches, if any
-                    while (!String.IsNullOrEmpty(nextUri))
+                    while (!String.IsNullOrEmpty(nextUri) && !_stopSignaled)
                     {
-                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
+                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
                         ProcessItemList(selectedList, selectedView, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
@@ -173,7 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     // if the list folder already existed we need to check if anything has 
                     // changed since the last processing loop
                     // i.e. remove any user added folders or any folders removed from sharepoint.
-                    if (folderRef != null)
+                    if (folderRef != null && !_stopSignaled)
                     {
                         SharepointToCmsUtils.RemoveUserAddedFolders(_emitterFactory, folderRef);
                         SharepointToCmsUtils.RemoveSharePointAddedFolders(_emitterFactory, folderRef, _SPFolders);
