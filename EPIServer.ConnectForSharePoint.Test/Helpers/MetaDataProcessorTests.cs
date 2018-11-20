@@ -376,5 +376,55 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             // however the default behavior is to clear the list when done so make sure its clear
             Assert.AreEqual(messageHelper._AllSPItems.Count(), 0, "The default behavior should be to clear the list when done processing.");
         }
+
+        [TestMethod]
+        public void Process_stops_processing_lists_if_stopped()
+        {
+            var processor = GetUnitUnderTest();
+
+            initBeginProcessingConditions();
+
+            // represents existing content in cms 
+            var itemID = Guid.NewGuid();
+            var existingContent = new List<IContent>() {
+                new SharepointListItemTestType() {  Name = "DeleteMe", ContentGuid = Guid.NewGuid(), SharePointGUID = itemID.ToString() }
+            };
+            _contentRepo.Setup(m => m.GetItems(It.IsAny<IEnumerable<ContentReference>>(), It.IsAny<LoaderOptions>())).Returns(existingContent);
+
+            var defaultListItems = new List<SPListItem>() { new SPListItem(), new SPListItem() }; // Each list will return two items. there are 3 default lists
+            string Path;
+            _helper.Setup(m => m.GetPagedItems(It.IsAny<SPList>(), It.IsAny<SPListView>(), It.IsAny<SPFolder>(), out Path)).Returns(defaultListItems);
+
+            processor._stopSignaled = true;
+            processor.Process();
+
+            _helper.Verify(m => m.GetListAndViewIds(It.IsAny<string>()), Times.Never, "Process failed to stop!");
+        }
+
+        [TestMethod]
+        public void ProcessItemList_stops_processing_if_stopped()
+        {
+            var processor = GetUnitUnderTest();
+            var rootFolder = new SPListItem()
+            {
+                Title = "Root Folder",
+                GUID = new Guid("eeeeeeee-cab7-4842-96ee-d104c7da5c9b"),
+                Folder = new SPFolder() { Name = "Root Folder" }
+            };
+            var listitems = new List<SPListItem>() { new SPListItem() { Title = "Sub Folder", GUID = new Guid("ffffffff-cab7-4842-96ee-d104c7da5c9b"),
+                    Folder = new SPFolder() { Name = "Sub Folder"  } } };
+
+            initBeginProcessingConditions();
+
+            processor._stopSignaled = true;
+            processor.ProcessItemList(new SPList()
+            {
+                Title = "Test List 1",
+                Id = new Guid("edf2847c-cab7-4842-96ee-d104c7da5c9b"),
+                Views = new List<SPListView>() { new SPListView() { Title = "ViewTitle", Id = new Guid("16d6e901-152d-414d-aef4-6819abf701d2") } }
+            }, null, rootFolder, listitems, 0);
+
+            _fileFolderService.Verify(m => m.LoadParentFolder(It.IsAny<SPFolder>()), Times.Never, "processItemList did not attempt to load the parent folder");
+        }
     }
 }

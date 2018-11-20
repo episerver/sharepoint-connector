@@ -36,9 +36,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
         {
             if(eventList.Count == MAX_THREADS)
             {
-                // Wait for them all to end. 
-                WaitHandle.WaitAll(eventList.ToArray());
-                eventList.Clear();
+                int i = WaitHandle.WaitAny(eventList.ToArray());
+                eventList.Remove(eventList[i]);
             }
             AutoResetEvent rs = new AutoResetEvent(false);
             eventList.Add( rs );

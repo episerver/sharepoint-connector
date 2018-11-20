@@ -87,7 +87,8 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else
                 {
-                    if( MetaDataProcessor.IsRunning() )
+                    var processor = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
+                    if (processor.IsRunning() )
                     {
                         // its possible that the thread is running, but we 
                         // havent added anything to the queue, this allows the 
@@ -449,7 +450,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the previous Lists-View Ids (the one was saved before this time)
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
-                var messageHelper = new MetaDataProcessor();
+                var messageHelper = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
 
                 // if the entry point is different or the url is differnt or 
                 // we need to queue all the current folders for delete
@@ -552,14 +553,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             
             if (lists != null && lists.Any())
             {
-            var messageHelper = new MetaDataProcessor();
-            // Put all the add folder messages on the queue
-            messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+                var messageHelper = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
 
-            ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
-            QueueCountTB.Text = QueueCount;
-            Connect.Enabled = false;
-            ActivateControls(false);
+                // Put all the add folder messages on the queue
+                messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+
+                ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
+                QueueCountTB.Text = QueueCount;
+                Connect.Enabled = false;
+                ActivateControls(false);
                 BindListViewData(SharePointHelper.GetListViewPairsData(lists));
             }
         }

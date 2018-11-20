@@ -11,5 +11,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
         /// <param name="listids"></param>
         /// <param name="splists"></param>
         void BeginProcessing(string listids, IEnumerable<SPList> splists);
+
+        /// <summary>
+        /// Call to stop the processing of the metadata
+        /// </summary>
+        void Stop();
+
+        /// <summary>
+        /// REturns true if the processor is running
+        /// </summary>
+        /// <returns></returns>
+        bool IsRunning();
     }
 }

@@ -9,11 +9,11 @@ using EPiServer.ServiceLocation;
 using System.Diagnostics.CodeAnalysis;
 using EPiServer.ConnectForSharePoint.SPServices;
 using System.Threading;
-using EPiServer.ConnectForSharePoint.Messaging.InMemory;
 using EPiServer.ConnectForSharePoint.Helpers;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
+    [ServiceConfiguration(ServiceType = typeof(IMetaDataProcessor), Lifecycle = ServiceInstanceScope.Singleton)]
     public class MetaDataProcessor : IMetaDataProcessor
     {
         private ILogger _logger;
@@ -37,6 +37,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
         internal IList<SPListItem> _SPItems = new List<SPListItem>();
         internal List<SPListItem> _AllSPItems = new List<SPListItem>();
         internal IEnumerable<IContent> _SPItemsInCMs;
+
+        internal bool _stopSignaled;
 
         [ExcludeFromCodeCoverageAttribute]
         public MetaDataProcessor()
@@ -76,11 +78,12 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 _processingThread = new Thread(new ThreadStart(Process));
                 _processingResult = true;
                 _processingException = null;
+                _stopSignaled = false;
                 _processingThread.Start();
             }
         }
 
-        public static bool IsRunning()
+        public bool IsRunning()
         {
             bool retval = true;
             lock (_lock)
@@ -94,18 +97,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
             return retval;
         }
 
-        public static int GetQueCount()
+        public void Stop()
         {
-            int retval = 0;
+            _stopSignaled = true;
 
-            var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-            var queue = queueStore.Get("sharepointmod");
-            if (queue.Count() > 0)
+            var emitter = new SharePointMessageEmitterFactory();
+            while ( IsRunning() )
             {
-                retval = queue.Count;
+                emitter.Clear();
+                Thread.Sleep(250);
             }
-
-            return retval;
         }
 
         /// <summary>
@@ -128,6 +129,10 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
                 foreach (var list_item in selectedLists)
                 {
+                    if (_stopSignaled)
+                    {
+                        break;
+                    }
                     _SPFolders.Clear(); // will contain just folders
                     _SPItems.Clear();   // will contain just documents and items 
 
@@ -157,9 +162,9 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         selectedView, rootFolder.Folder, out nextUri), selectedView.Scope);
 
                     // process any more batches, if any
-                    while (!String.IsNullOrEmpty(nextUri))
+                    while (!String.IsNullOrEmpty(nextUri) && !_stopSignaled)
                     {
-                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count() );
+                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
                         ProcessItemList(selectedList, selectedView, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
@@ -168,7 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     // if the list folder already existed we need to check if anything has 
                     // changed since the last processing loop
                     // i.e. remove any user added folders or any folders removed from sharepoint.
-                    if (folderRef != null)
+                    if (folderRef != null && !_stopSignaled)
                     {
                         SharepointToCmsUtils.RemoveUserAddedFolders(_emitterFactory, folderRef);
                         SharepointToCmsUtils.RemoveSharePointAddedFolders(_emitterFactory, folderRef, _SPFolders);
@@ -177,7 +182,12 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     _AllSPItems.AddRange(_SPItems);
                 }
 
-                SharepointToCmsUtils.DeleteDocumentsAndItems(_emitterFactory, _SPItemsInCMs, _AllSPItems);
+                // If we are stopped in the middle of processing dont call this method else we will delete all items that 
+                // may have been there previously.
+                if (!_stopSignaled)
+                {
+                    SharepointToCmsUtils.DeleteDocumentsAndItems(_emitterFactory, _SPItemsInCMs, _AllSPItems);
+                }
             }
             catch ( Exception e)
             {
@@ -186,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 _processingResult = false;
                 _processingException = e;
             }
-            _logger.Information( GetQueCount() + " Items in the queue.");
+            _logger.Information( _emitterFactory.QueueCount + " Items in the queue.");
 
             if( _clearAllSPItemsWhenDone )
             {
@@ -209,6 +219,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
             // iterate over all the items
             foreach (var item in items)
             {
+                if (_stopSignaled) break;
+
                 item.entryPointId = -1;
                 item.ParentFolderSharePointGuid = rootFolder.GUID;  // this is the root folder of the view.
                 item.selectedView = view;
