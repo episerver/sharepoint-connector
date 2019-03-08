@@ -13,26 +13,17 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
     public class FilesFoldersService : RESTServiceBase, IFilesFoldersService
     {
         private static readonly ILogger _logger = LogManager.GetLogger();
-        private readonly IMapper<JsonFile.D, SPFile> _fileMapper;
-        private readonly IMapper<JsonFolder.D, SPFolder> _folderMapper;
-        private readonly IMapper<JsonUser.D, SPUser> _userMapper;
-        private readonly IMapper<JsonListItem.D, SPListItem> _itemMapper;
+        internal IMapper<JsonFile.D, SPFile> _fileMapper;
+        internal IMapper<JsonFolder.D, SPFolder> _folderMapper;
+        internal IMapper<JsonUser.D, SPUser> _userMapper;
+        internal IMapper<JsonListItem.D, SPListItem> _itemMapper;
 
         public FilesFoldersService()
-            : this(new SPFileMapper(), new SPFolderMapper(), new SPUserMapper(), new SPListItemMapper())
-        {
-        }
-
-        public FilesFoldersService(
-            IMapper<JsonFile.D, SPFile> fileMapper,
-            IMapper<JsonFolder.D, SPFolder> folderMapper,
-            IMapper<JsonUser.D, SPUser> userMapper,
-            IMapper<JsonListItem.D, SPListItem> itemMapper)
-        {
-            _fileMapper = fileMapper;
-            _folderMapper = folderMapper;
-            _userMapper = userMapper;
-            _itemMapper = itemMapper;
+        { 
+            _fileMapper = new SPFileMapper();
+            _folderMapper = new SPFolderMapper();
+            _userMapper = new SPUserMapper();
+            _itemMapper = new SPListItemMapper();
         }
 
         public SPFolder LoadFolder(SPListItem listItem)

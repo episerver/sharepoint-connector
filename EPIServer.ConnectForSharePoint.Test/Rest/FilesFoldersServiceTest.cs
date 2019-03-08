@@ -57,7 +57,12 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             // Mock for SendRequest method of base class            
             var jsonString = "Mock";
-            _filesFoldersService = new Mock<FilesFoldersService>(_fileMapper.Object, _folderMapper.Object, _userMapper.Object, _itemMapper.Object) { CallBase = true };
+            _filesFoldersService = new Mock<FilesFoldersService>() { CallBase = true };
+            _filesFoldersService.Object._folderMapper = _folderMapper.Object;
+            _filesFoldersService.Object._fileMapper = _fileMapper.Object;
+            _filesFoldersService.Object._userMapper = _userMapper.Object;
+            _filesFoldersService.Object._itemMapper = _itemMapper.Object;
+
             _filesFoldersService.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null)).Returns(jsonString);
             _filesFoldersService.Setup(x => x.SendRequest(It.IsAny<IRestRequest>(), null, null, false)).Returns(jsonString);
             _filesFoldersService.Setup(x => x.Deserialize<JsonFolder>(It.IsAny<string>())).Returns(new JsonFolder());

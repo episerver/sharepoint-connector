@@ -43,7 +43,7 @@
                     <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
                     <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>
                     <entrypointmustbecontentfolder>Connection Entry Point must be a content folder.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any 'Blocks' or media items.</entrypointmustnothavechildren>
+                    <entrypointmustnothavechildren>Connection Entry Point must be empty.  Please select a folder that does not contain any items.</entrypointmustnothavechildren>
                     <entrypointcannotbechildofprevious>Selected folder cannot be a child of the previously selected folder.  Please select a different folder.</entrypointcannotbechildofprevious>
                   <expirationtimemustbeminutes>Expiration time must be in minutes.</expirationtimemustbeminutes>                   
                     <expirationtimegreaterorequalthree>(greater than or equal to 3 minutes)</expirationtimegreaterorequalthree>

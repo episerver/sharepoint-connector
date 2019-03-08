@@ -9,6 +9,13 @@ using EPiServer.ServiceLocation;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using System.Globalization;
+using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Processor;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
+using EPiServer.ConnectForSharePoint.Messaging.Handlers;
+using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
@@ -42,8 +49,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         [TestMethod]
         public void Verify_ExecuteMethod_GetsAllLists_And_Calls_BeginsProcessing()
         {
-            Mock<ISharePointSettingsHelper> settings = new Mock<ISharePointSettingsHelper>();
-            settings.Setup(m => m.GetEntryPoint() ).Returns(new ContentReference(42) );
+            SharePointSettings._currentSettings = new SharePointSettings() {  EntryPoint = new ContentReference(42) };
 
             ContentFolder someContent = new ContentFolder() { Name = "thisone", IsDeleted = false };
             Mock<IContentRepository> repo = new Mock<IContentRepository>();
@@ -54,7 +60,7 @@ namespace EPiServer.ConnectForSharePoint.Test
             sl.Setup(m => m.GetInstance<IContentRepository>()).Returns(repo.Object);
             sl.Setup(m => m.GetInstance<LocalizationService>()).Returns( new MyLocalizationService( new ResourceKeyHandler()) );
 
-            Mock<IServicesHub> hub = new Mock<IServicesHub>();
+            Mock<IServiceLocator> locator = new Mock<IServiceLocator>();
             var itemList = new List<SPListItem>();
             var folderItem = new SPFolder() { Name = "Test Folder" };
             itemList.Add(new SPListItem() { Title = "Test Item 1", entryPointId = 123, Folder = folderItem, ParentFolderName = "Test Parent" });
@@ -66,22 +72,27 @@ namespace EPiServer.ConnectForSharePoint.Test
             itemList2.Add(new SPListItem() { Title = "Test Item 5", entryPointId = 123, Folder = folderItem, ParentFolderName = "Test Parent" });
             itemList2.Add(new SPListItem() { Title = "Test Item 6", entryPointId = 123, Folder = folderItem, ParentFolderName = "Test Parent" });
 
-            hub.Setup(sph => sph.SPListsViewsService.GetLists(It.IsAny<int>())).Verifiable();
-            hub.SetupSequence(sph => sph.SPListsViewsService.GetLists(It.IsAny<int>()))
+            var listService = new Mock<IListsViewsService>();
+            listService.Setup(sph => sph.GetLists(It.IsAny<int>())).Verifiable();
+            listService.SetupSequence(sph => sph.GetLists(It.IsAny<int>()))
                 .Returns( new List<SPList>() )
                 .Returns(new List<SPList>());
+            locator.Setup(m => m.GetInstance<IListsViewsService>()).Returns(listService.Object);
 
-            Mock<ISharePointMessageHelper> helper = new Mock<ISharePointMessageHelper>();
-            helper.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
+            Mock<IMetaDataProcessor> processor = new Mock<IMetaDataProcessor>();
+            processor.Setup(h => h.BeginProcessing(It.IsAny<string>(),It.IsAny<IEnumerable<SPList>>())).Verifiable();
+           
+            UpdateJob job = new UpdateJob(locator.Object, processor.Object, "some list ids");
+            lock( SharePointMessageEmitterFactoryTests._MessagingLock )
+            {
+                new SharePointMessageEmitterFactory().Clear();
+                job.Execute();
+            }
 
-            UpdateJob job = new UpdateJob(hub.Object, helper.Object, "some list ids", settings.Object);
-            job.Execute();
-
-            hub.Verify(h => h.SPListsViewsService.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");
-
-            hub.Verify(h => h.SPListsViewsService.GetLists(It.Is<int>(i => i == (int)ListBaseType.DocumentLibrary )), Times.AtLeastOnce, "Never called with DocumentLibrary");
-            hub.Verify(h => h.SPListsViewsService.GetLists(It.Is<int>(i => i == (int)ListBaseType.GenericList)), Times.AtLeastOnce, "Never called with GenericList");
-            helper.Verify(h => h.BeginProcessing(It.IsAny<string>(), It.IsAny<IEnumerable<SPList>>()), Times.Exactly(1), "Begin processing should be called once.");
+            listService.Verify(h => h.GetLists(It.IsAny<int>()), Times.Exactly(2), "GetLists should be called 2 with two different libs");
+            listService.Verify(h => h.GetLists(It.Is<int>(i => i == (int)ListBaseType.DocumentLibrary )), Times.AtLeastOnce, "Never called with DocumentLibrary");
+            listService.Verify(h => h.GetLists(It.Is<int>(i => i == (int)ListBaseType.GenericList)), Times.AtLeastOnce, "Never called with GenericList");
+            processor.Verify(h => h.BeginProcessing(It.IsAny<string>(), It.IsAny<IEnumerable<SPList>>()), Times.Exactly(1), "Begin processing should be called once.");
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using EPiServer.ConnectForSharePoint.Models;
 using System.Collections.Generic;
 
-namespace EPiServer.ConnectForSharePoint.Helpers
+namespace EPiServer.ConnectForSharePoint.Processor
 {
-    public interface ISharePointMessageHelper
+    public interface IMetaDataProcessor
     {
         /// <summary>
         /// This is where the main processing begins. 
@@ -13,11 +13,14 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         void BeginProcessing(string listids, IEnumerable<SPList> splists);
 
         /// <summary>
-        /// Called by the UI when lists are removed and the 
-        /// configuration is saved. 
+        /// Call to stop the processing of the metadata
         /// </summary>
-        /// <param name="splists"></param>
-        /// <param name="listids"></param>
-        void QueueRootFoldersForDelete(IEnumerable<SPList> splists, IEnumerable<string> listids = null);
+        void Stop();
+
+        /// <summary>
+        /// REturns true if the processor is running
+        /// </summary>
+        /// <returns></returns>
+        bool IsRunning();
     }
 }

@@ -22,6 +22,8 @@ using EPiServer.Web;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.DataAbstraction;
+using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -40,7 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static bool _createNewEntryPointFolder = false;
         private static string _newFolderName;
-
+        
         /// <summary>
         /// Called by web page during data bind operation
         /// </summary>
@@ -78,15 +80,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             {
                 string retval = "0";
 
-                var queueStore = new InMemoryQueueStore(AppDomain.CurrentDomain);
-                var queue = queueStore.Get("sharepointmod");
-                if (queue.Count() > 0)
+                var emmiter = new SharePointMessageEmitterFactory();
+                if (emmiter.QueueCount > 0)
                 {
-                    retval = queue.Count.ToString();
+                    retval = emmiter.QueueCount.ToString();
                 }
                 else
                 {
-                    if( SharePointMessageHelper.IsRunning() )
+                    var processor = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
+                    if (processor.IsRunning() )
                     {
                         // its possible that the thread is running, but we 
                         // havent added anything to the queue, this allows the 
@@ -448,7 +450,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 // Get the previous Lists-View Ids (the one was saved before this time)
                 var oldListIds = SharePointSettings.Current.ListIds;
                 var oldEntryPoint = SharePointSettings.Current.EntryPoint;
-                var messageHelper = new SharePointMessageHelper();
+                var messageHelper = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
 
                 // if the entry point is different or the url is differnt or 
                 // we need to queue all the current folders for delete
@@ -460,20 +462,16 @@ namespace EPiServer.ConnectForSharePoint.Web
                     // Delete all the folders we created under the current entry point.
                     FolderData fd = new FolderData();
                     var folders = fd.GetFolders();
-                    foreach( var folder in folders )
+                    foreach (var folder in folders)
                     {
                         ContentFolder cmsfolder;
-                        if (  _contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder) )
+                        if (_contentRepository.TryGet<ContentFolder>(new ContentReference(folder.RefId), out cmsfolder))
                         {
-                            SPListItem item = new SPListItem()
+                            emmiter.Emit<SharePointFolderDeleteMessage>(new SPListItem()
                             {
                                 entryPointId = SharePointSettings.Current.EntryPoint.ID,
                                 Folder = new SPFolder() { Name = cmsfolder.Name },
                                 GUID = folder.FolderGuid
-                            };
-                            emmiter.Create().Emit(new SharePointFolderDeleteMessage()
-                            {
-                                Item = item
                             });
                         }
                         else
@@ -483,7 +481,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                     }
                 }
                 else // else we only delete folders that have been deselected
-                    messageHelper.QueueRootFoldersForDelete(lists, selectedListViewIds);
+                {
+                    var utils = new SharepointToCmsUtilities(ServiceLocator.Current);
+                    var emFactory = new SharePointMessageEmitterFactory();
+                    utils.QueueRootFoldersForDelete(emFactory, lists, selectedListViewIds);
+                }
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
@@ -551,14 +553,15 @@ namespace EPiServer.ConnectForSharePoint.Web
             
             if (lists != null && lists.Any())
             {
-            var messageHelper = new SharePointMessageHelper();
-            // Put all the add folder messages on the queue
-            messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+                var messageHelper = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
 
-            ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
-            QueueCountTB.Text = QueueCount;
-            Connect.Enabled = false;
-            ActivateControls(false);
+                // Put all the add folder messages on the queue
+                messageHelper.BeginProcessing(SharePointSettings.Current.ListIds, lists);
+
+                ShowMessage(Translate("/sharepoint/admin/message/refreshsuccess"), false);
+                QueueCountTB.Text = QueueCount;
+                Connect.Enabled = false;
+                ActivateControls(false);
                 BindListViewData(SharePointHelper.GetListViewPairsData(lists));
             }
         }
@@ -612,10 +615,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else
                 {
                     // Concatinate the document and custom lists.
-                    var documentLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                        .GetLists((int)ListBaseType.DocumentLibrary);
-                    var customLists = SharePointHelper.SPServicesHub.SPListsViewsService
-                        .GetLists((int)ListBaseType.GenericList);
+                    var listViewsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
+                    var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
+                    var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
                     var supportedLists = documentLists.Concat(customLists);
 
                     return supportedLists;

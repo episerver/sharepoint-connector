@@ -31,8 +31,8 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             _serviceLocator = ServiceLocator.Current;
             _contentProviderHelper = new ContentProviderHelper();
-            _fileStreamService = SharePointHelper.SPServicesHub.SPFileStreamService;
-            _listViewsService = SharePointHelper.SPServicesHub.SPListsViewsService;
+            _fileStreamService = _serviceLocator.GetInstance<IFileStreamService>();
+            _listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
             _helper = new SharePointProcessorHelper();
             _logger = LogManager.GetLogger();
         }
