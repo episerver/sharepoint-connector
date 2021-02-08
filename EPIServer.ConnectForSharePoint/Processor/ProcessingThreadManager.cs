@@ -52,8 +52,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 _ = int.TryParse(setting, out maxRetries);
             }
 
-            _logger.Debug($"Sharepoint thread count : {maxThreads}");
-            _logger.Debug($"Sharepoint max retries : {maxRetries}");
+            _logger.Debug("Sharepoint thread count : " + maxThreads);
+            _logger.Debug("Sharepoint max retries : " + maxRetries);
         }
 
         object AddThreadLock = new Object();
