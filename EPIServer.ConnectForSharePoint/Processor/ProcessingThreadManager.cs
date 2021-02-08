@@ -5,15 +5,19 @@ using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
     public class ProcessingThreadManager
     {
-        private int MAX_THREADS = 8;
-        private List<AutoResetEvent> eventList = new List<AutoResetEvent>();
-        private ILogger _logger;
+        internal static int DefaultThreadCount = 4;
+
+        private int maxThreads = DefaultThreadCount;
+        private int maxRetries = 3;
+        private readonly List<AutoResetEvent> eventList = new List<AutoResetEvent>();
+        private readonly ILogger _logger;
 
         class ThreadData
         {
@@ -25,24 +29,49 @@ namespace EPiServer.ConnectForSharePoint.Processor
         public ProcessingThreadManager()
         {
             _logger = LogManager.GetLogger();
+//            GetOptions();
         }
 
-        ProcessingThreadManager(IServiceLocator serviceLocator)
+        internal ProcessingThreadManager(IServiceLocator serviceLocator)
         {
             _logger = serviceLocator.GetInstance<ILogger>();
+//            GetOptions();
         }
+
+        private void GetOptions()
+        {
+            var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"]?.ToString();
+            if (setting != null)
+            {
+                _ = int.TryParse(setting, out maxThreads);
+            }
+
+            setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"]?.ToString();
+            if (setting != null)
+            {
+                _ = int.TryParse(setting, out maxRetries);
+            }
+
+            _logger.Debug($"Sharepoint thread count : {maxThreads}");
+            _logger.Debug($"Sharepoint max retries : {maxRetries}");
+        }
+
+        object AddThreadLock = new Object();
 
         public void AddThread(ISharePointProcessor p, SharePointMessage mes)
         {
-            if(eventList.Count == MAX_THREADS)
+            lock (AddThreadLock)
             {
-                int i = WaitHandle.WaitAny(eventList.ToArray());
-                eventList.Remove(eventList[i]);
+                if (eventList.Count == maxThreads)
+                {
+                    int i = WaitHandle.WaitAny(eventList.ToArray());
+                    eventList.Remove(eventList[i]);
+                }
+                AutoResetEvent rs = new AutoResetEvent(false);
+                eventList.Add(rs);
+                ThreadPool.QueueUserWorkItem(new WaitCallback(WorkerThread),
+                    new ThreadData { resetEvent = rs, message = mes, processor = p });
             }
-            AutoResetEvent rs = new AutoResetEvent(false);
-            eventList.Add( rs );
-            ThreadPool.QueueUserWorkItem(new WaitCallback(WorkerThread), 
-                new ThreadData { resetEvent = rs, message = mes, processor = p });
         }
 
         // To support unit tests
@@ -54,7 +83,6 @@ namespace EPiServer.ConnectForSharePoint.Processor
         private void WorkerThread(Object o)
         {
             ThreadData td = o as ThreadData;
-            int MAX_RETRY = 3;
             int retry = 0;
 
             using (var pp = new PrincipalPreserver())
@@ -74,15 +102,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 catch (Exception ex)
                 {
                     retry++;
-                    if (retry > MAX_RETRY)
+                    if (retry > maxRetries)
                     {
                         td.resetEvent.Set(); // event set, and done
-                        _logger.Error("WorkerThread - failed after " + MAX_RETRY + " attempts.", ex);
+                        _logger.Error("WorkerThread - failed after " + maxRetries + " attempts.", ex);
                         throw;
                     }
                     _logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
                 }
-            } while (retry > 0 && retry < MAX_RETRY);
+            } while (retry > 0 && retry < maxRetries) ;
+
             td.resetEvent.Set(); // event set, and done
         }
     }

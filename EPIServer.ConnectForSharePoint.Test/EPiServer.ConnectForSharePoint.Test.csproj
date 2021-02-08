@@ -262,6 +262,7 @@
     <Compile Include="Messaging\SP_Specific\SharePointMessageHandlerTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointProcessFactoryTests.cs" />
     <Compile Include="Messaging\SP_Specific\SharePointProcessorTests.cs" />
+    <Compile Include="ProcessingThreadManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\FileStreamServiceTest.cs" />
     <Compile Include="Rest\FilesFoldersServiceTest.cs" />
