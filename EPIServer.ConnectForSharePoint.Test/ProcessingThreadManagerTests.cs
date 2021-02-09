@@ -6,6 +6,7 @@ using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -60,11 +61,35 @@ namespace EPiServer.ConnectForSharePoint.Test
                 }
             });
             addmessagesThread.Start();
-            while (!addmessagesThread.IsAlive);
+            while (!addmessagesThread.IsAlive) ;
 
             Thread.Sleep(1000);
 
-            Assert.AreEqual(expectedNumberOfThreads,actualNumberOfThreads);                
+            Assert.AreEqual(expectedNumberOfThreads, actualNumberOfThreads);
+        }
+
+        [TestMethod]
+        public void Uses_Default_DefaultMaxRetries_Value_IfNotSpecified_InConfig()
+        {
+            int expectedNumberOfRetries= ProcessingThreadManager.DefaultMaxRetries;
+            int actualNumberOfRetries = 0;
+
+            processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>())).Callback(() => {
+                actualNumberOfRetries++;
+                throw new Exception("oops");
+            });
+
+            threadManager.AddThread(processor.Object, new SharePointContentAddMessage()
+            {
+                Item = new SPListItem()
+                {
+                    Title = "Oh this thing"
+                }
+            });
+
+            Thread.Sleep(1000);
+
+            Assert.AreEqual(expectedNumberOfRetries, actualNumberOfRetries);
         }
         #endregion Message Thread Tests
     }

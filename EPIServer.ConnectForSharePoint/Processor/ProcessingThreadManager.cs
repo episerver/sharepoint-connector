@@ -13,9 +13,10 @@ namespace EPiServer.ConnectForSharePoint.Processor
     public class ProcessingThreadManager
     {
         internal static int DefaultThreadCount = 4;
+        internal static int DefaultMaxRetries = 3;
 
         private int maxThreads = DefaultThreadCount;
-        private int maxRetries = 3;
+        private int maxRetries = DefaultMaxRetries;
         private readonly List<AutoResetEvent> eventList = new List<AutoResetEvent>();
         private readonly ILogger _logger;
 
@@ -40,16 +41,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
         private void GetOptions()
         {
-            var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"]?.ToString();
+            var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"];
             if (setting != null)
             {
-                _ = int.TryParse(setting, out maxThreads);
+                int.TryParse(setting, out maxThreads);
             }
 
-            setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"]?.ToString();
+            setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"];
             if (setting != null)
             {
-                _ = int.TryParse(setting, out maxRetries);
+                int.TryParse(setting, out maxRetries);
             }
 
             _logger.Debug("Sharepoint thread count : " + maxThreads);
@@ -87,30 +88,33 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
             using (var pp = new PrincipalPreserver())
             {
-                try
+                do
                 {
-                    if (td.message is SharePointListItemAddMessage)
+                    try
                     {
-                        td.processor.AddListItem(td.message.Item);
+                        if (td.message is SharePointListItemAddMessage)
+                        {
+                            td.processor.AddListItem(td.message.Item);
+                        }
+                        else if (td.message is SharePointContentAddMessage)
+                        {
+                            td.processor.AddDocument(td.message.Item);
+                        }
+                        break;
                     }
-                    else if (td.message is SharePointContentAddMessage)
+                    catch (Exception ex)
                     {
-                        td.processor.AddDocument(td.message.Item);
+                        retry++;
+                        if (retry > maxRetries)
+                        {
+                            td.resetEvent.Set(); // event set, and done
+                            _logger.Error("Failed after " + maxRetries + " attempts.", ex);
+                            throw;
+                        }
+                        _logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
                     }
-                    retry = 0;
-                }
-                catch (Exception ex)
-                {
-                    retry++;
-                    if (retry > maxRetries)
-                    {
-                        td.resetEvent.Set(); // event set, and done
-                        _logger.Error("WorkerThread - failed after " + maxRetries + " attempts.", ex);
-                        throw;
-                    }
-                    _logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
-                }
-            } while (retry > 0 && retry < maxRetries) ;
+                } while (retry > 0 && retry < maxRetries);
+            } 
 
             td.resetEvent.Set(); // event set, and done
         }
