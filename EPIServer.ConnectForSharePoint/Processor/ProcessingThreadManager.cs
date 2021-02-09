@@ -45,12 +45,16 @@ namespace EPiServer.ConnectForSharePoint.Processor
             if (setting != null)
             {
                 int.TryParse(setting, out maxThreads);
+                if(maxThreads <= 0 || maxThreads > 8)
+                {
+                    throw new ArgumentException("maxThreads must be > 1 and less than 9");
+                }
             }
 
             setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"];
             if (setting != null)
             {
-                int.TryParse(setting, out maxRetries);
+//                int.TryParse(setting, out maxRetries);
             }
 
             _logger.Debug("Sharepoint thread count : " + maxThreads);

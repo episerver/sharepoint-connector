@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading;
 
 namespace EPiServer.ConnectForSharePoint.Test
@@ -28,10 +29,13 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             serviceLocator.Setup(s => s.GetInstance<ILogger>()).Returns(logger.Object);
 
-            threadManager = new ProcessingThreadManager(serviceLocator.Object);
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = null;
+        }
 
-            //            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "10";
-            //            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"] = "10";
+        [TestCleanup]
+        public void cleanup()
+        {
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = null;
         }
 
         #region Message Thread Tests
@@ -41,6 +45,8 @@ namespace EPiServer.ConnectForSharePoint.Test
             int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount;
             int actualNumberOfThreads = 0;
             int testSleepTime = 5000;
+
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
 
             processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>())).Callback(() => {
                 actualNumberOfThreads++;
@@ -69,28 +75,71 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
-        public void Uses_Default_DefaultMaxRetries_Value_IfNotSpecified_InConfig()
+        public void Uses_MessageThreads_Config_Value_IfSpecified_InConfig()
         {
-            int expectedNumberOfRetries= ProcessingThreadManager.DefaultMaxRetries;
-            int actualNumberOfRetries = 0;
+            int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount - 1;
+            int actualNumberOfThreads = 0;
+            int testSleepTime = 5000;
+
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = expectedNumberOfThreads.ToString();
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
 
             processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>())).Callback(() => {
-                actualNumberOfRetries++;
-                throw new Exception("oops");
+                actualNumberOfThreads++;
+                Thread.Sleep(testSleepTime);
             });
 
-            threadManager.AddThread(processor.Object, new SharePointContentAddMessage()
+            var messageList = new List<SharePointContentAddMessage>();
+            for (var x = 0; x < expectedNumberOfThreads + 1; x++)
             {
-                Item = new SPListItem()
+                messageList.Add(new SharePointContentAddMessage() { });
+            }
+
+            Thread addmessagesThread = new Thread(() =>
+            {
+                foreach (var message in messageList)
                 {
-                    Title = "Oh this thing"
+                    threadManager.AddThread(processor.Object, message);
                 }
             });
+            addmessagesThread.Start();
+            while (!addmessagesThread.IsAlive) ;
 
             Thread.Sleep(1000);
 
-            Assert.AreEqual(expectedNumberOfRetries, actualNumberOfRetries);
+            Assert.AreEqual(expectedNumberOfThreads, actualNumberOfThreads);
         }
+
+        [TestMethod]
+        public void Uses_MessageThreads_Max_Value_IfValueinConfigGreaterthanMx()
+        {
+            try
+            {
+                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "9";
+                threadManager = new ProcessingThreadManager(serviceLocator.Object);
+                Assert.Fail();
+            }
+            catch (ArgumentException e)
+            {
+
+            }
+        }
+
+        [TestMethod]
+        public void IfMaxThreadValueValue_LessThan1_ThrowsArgumentException()
+        {
+            try
+            {
+                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "0";
+                threadManager = new ProcessingThreadManager(serviceLocator.Object);
+                Assert.Fail();
+            }
+            catch (ArgumentException e)
+            {
+
+            }
+        }
+
         #endregion Message Thread Tests
     }
 }
