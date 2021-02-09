@@ -46,9 +46,9 @@ namespace EPiServer.ConnectForSharePoint.Processor
             if (threadSettings != null)
             {
                 int.TryParse(threadSettings, out maxThreads);
-                if(maxThreads <= 0 || maxThreads > 8)
+                if(maxThreads < 1 || maxThreads > 8)
                 {
-                    throw new ArgumentException("maxThreads must be > 1 and less than 9");
+                    throw new ArgumentException("maxThreads must be between 1 and 8");
                 }
             }
 
@@ -56,9 +56,9 @@ namespace EPiServer.ConnectForSharePoint.Processor
             if (retrySettings != null)
             {
                 int.TryParse(retrySettings, out maxRetries);
-                if (maxRetries <= 0 || maxRetries > 8)
+                if (maxRetries < 1 || maxRetries > 8)
                 {
-                    throw new ArgumentException("maxRetries must be > 1 and less than 9");
+                    throw new ArgumentException("maxRetries must be between 1 and 8");
                 }
             }
 

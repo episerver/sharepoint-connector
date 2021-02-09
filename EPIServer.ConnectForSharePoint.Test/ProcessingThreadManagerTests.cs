@@ -113,33 +113,19 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void ThrowsException_If_MessageThreads_ToLarge()
         {
-            try
-            {
-                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "9";
-                threadManager = new ProcessingThreadManager(serviceLocator.Object);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-
-            }
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "9";
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void ThrowsException_If_MessageThreads_ToSmall()
         {
-            try
-            {
-                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "0";
-                threadManager = new ProcessingThreadManager(serviceLocator.Object);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-
-            }
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "0";
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
         }
 
         #endregion Message Thread Tests
@@ -147,33 +133,19 @@ namespace EPiServer.ConnectForSharePoint.Test
         #region Message Retry Tests
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void ThrowsException_If_MessageRetry_ToLarge()
         {
-            try
-            {
-                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "9";
-                threadManager = new ProcessingThreadManager(serviceLocator.Object);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-
-            }
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "9";
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void ThrowsException_If_MessageRetrys_ToSmall()
         {
-            try
-            {
-                ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "0";
-                threadManager = new ProcessingThreadManager(serviceLocator.Object);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-
-            }
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "0";
+            threadManager = new ProcessingThreadManager(serviceLocator.Object);
         }
 
         [TestMethod]
@@ -181,7 +153,6 @@ namespace EPiServer.ConnectForSharePoint.Test
         {
             int expectedNumberOfRetrys = 3;
             int actualNumberOfRetrys = 0;
-            int testSleepTime = 5000;
 
             threadManager = new ProcessingThreadManager(serviceLocator.Object);
 
@@ -202,7 +173,6 @@ namespace EPiServer.ConnectForSharePoint.Test
         {
             int expectedNumberOfRetrys = 6;
             int actualNumberOfRetrys = 0;
-            int testSleepTime = 5000;
 
             ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = expectedNumberOfRetrys.ToString();
 
