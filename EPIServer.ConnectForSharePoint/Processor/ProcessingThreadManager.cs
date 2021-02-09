@@ -14,11 +14,12 @@ namespace EPiServer.ConnectForSharePoint.Processor
     {
         internal static int DefaultThreadCount = 4;
         internal static int DefaultMaxRetries = 3;
-
         private int maxThreads = DefaultThreadCount;
         private int maxRetries = DefaultMaxRetries;
-        private readonly List<AutoResetEvent> eventList = new List<AutoResetEvent>();
-        private readonly ILogger _logger;
+
+        private readonly ILogger logger;
+        private readonly object addThreadLock = new Object();
+        private readonly List<AutoResetEvent> resetEventList = new List<AutoResetEvent>();
 
         class ThreadData
         {
@@ -29,13 +30,13 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
         public ProcessingThreadManager()
         {
-            _logger = LogManager.GetLogger();
+            logger = LogManager.GetLogger();
             GetOptions();
         }
 
         internal ProcessingThreadManager(IServiceLocator serviceLocator)
         {
-            _logger = serviceLocator.GetInstance<ILogger>();
+            logger = serviceLocator.GetInstance<ILogger>();
             GetOptions();
         }
 
@@ -61,23 +62,21 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 }
             }
 
-            _logger.Debug("Sharepoint thread count : " + maxThreads);
-            _logger.Debug("Sharepoint max retries : " + maxRetries);
+            logger.Debug("Sharepoint thread count : " + maxThreads);
+            logger.Debug("Sharepoint max retries : " + maxRetries);
         }
-
-        object AddThreadLock = new Object();
 
         public void AddThread(ISharePointProcessor p, SharePointMessage mes)
         {
-            lock (AddThreadLock)
+            lock (addThreadLock)
             {
-                if (eventList.Count == maxThreads)
+                if (resetEventList.Count == maxThreads)
                 {
-                    int i = WaitHandle.WaitAny(eventList.ToArray());
-                    eventList.Remove(eventList[i]);
+                    int i = WaitHandle.WaitAny(resetEventList.ToArray());
+                    resetEventList.Remove(resetEventList[i]);
                 }
                 AutoResetEvent rs = new AutoResetEvent(false);
-                eventList.Add(rs);
+                resetEventList.Add(rs);
                 ThreadPool.QueueUserWorkItem(new WaitCallback(WorkerThread),
                     new ThreadData { resetEvent = rs, message = mes, processor = p });
             }
@@ -86,7 +85,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
         // To support unit tests
         internal void WaitAll()
         {
-            WaitHandle.WaitAll(eventList.ToArray());
+            WaitHandle.WaitAll(resetEventList.ToArray());
         }
 
         private void WorkerThread(Object o)
@@ -116,10 +115,10 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         if (retry > maxRetries)
                         {
                             td.resetEvent.Set(); // event set, and done
-                            _logger.Error("Failed after " + maxRetries + " attempts.", ex);
+                            logger.Error("Failed after " + maxRetries + " attempts.", ex);
                             throw;
                         }
-                        _logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
+                        logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
                     }
                 } while (retry > 0 && retry < maxRetries);
             } 

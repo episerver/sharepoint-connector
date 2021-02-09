@@ -219,8 +219,6 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             Assert.AreEqual(expectedNumberOfRetrys, actualNumberOfRetrys);
         }
-
         #endregion Message Retry Tests
-
     }
 }
