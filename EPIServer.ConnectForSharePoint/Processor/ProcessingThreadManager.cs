@@ -41,20 +41,24 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
         private void GetOptions()
         {
-            var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"];
-            if (setting != null)
+            var threadSettings = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"];
+            if (threadSettings != null)
             {
-                int.TryParse(setting, out maxThreads);
+                int.TryParse(threadSettings, out maxThreads);
                 if(maxThreads <= 0 || maxThreads > 8)
                 {
                     throw new ArgumentException("maxThreads must be > 1 and less than 9");
                 }
             }
 
-            setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"];
-            if (setting != null)
+            var retrySettings = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"];
+            if (retrySettings != null)
             {
-//                int.TryParse(setting, out maxRetries);
+                int.TryParse(retrySettings, out maxRetries);
+                if (maxRetries <= 0 || maxRetries > 8)
+                {
+                    throw new ArgumentException("maxRetries must be > 1 and less than 9");
+                }
             }
 
             _logger.Debug("Sharepoint thread count : " + maxThreads);
