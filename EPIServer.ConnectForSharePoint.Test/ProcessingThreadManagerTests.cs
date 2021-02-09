@@ -2,16 +2,12 @@
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Processor;
+using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
@@ -21,14 +17,20 @@ namespace EPiServer.ConnectForSharePoint.Test
         ProcessingThreadManager threadManager;
         Mock<IServiceLocator> serviceLocator = new Mock<IServiceLocator>();
         Mock<ISharePointProcessor> processor = new Mock<ISharePointProcessor>();
+        Mock<ILogger> logger = new Mock<ILogger>();
 
         public ProcessingThreadManagerTests()
         {
             serviceLocator = new Mock<IServiceLocator>();
+            processor = new Mock<ISharePointProcessor>();
+            logger = new Mock<ILogger>();
+
+            serviceLocator.Setup(s => s.GetInstance<ILogger>()).Returns(logger.Object);
+
             threadManager = new ProcessingThreadManager(serviceLocator.Object);
 
-//            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "10";
-//            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"] = "10";
+            //            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "10";
+            //            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"] = "10";
         }
 
         #region Message Thread Tests

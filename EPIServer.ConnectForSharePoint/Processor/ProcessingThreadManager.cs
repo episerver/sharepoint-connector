@@ -29,32 +29,32 @@ namespace EPiServer.ConnectForSharePoint.Processor
         public ProcessingThreadManager()
         {
             _logger = LogManager.GetLogger();
-//            GetOptions();
+            GetOptions();
         }
 
         internal ProcessingThreadManager(IServiceLocator serviceLocator)
         {
             _logger = serviceLocator.GetInstance<ILogger>();
-//            GetOptions();
+            GetOptions();
         }
 
-        //private void GetOptions()
-        //{
-        //    var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"]?.ToString();
-        //    if (setting != null)
-        //    {
-        //        _ = int.TryParse(setting, out maxThreads);
-        //    }
+        private void GetOptions()
+        {
+            var setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"]?.ToString();
+            if (setting != null)
+            {
+                _ = int.TryParse(setting, out maxThreads);
+            }
 
-        //    setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"]?.ToString();
-        //    if (setting != null)
-        //    {
-        //        _ = int.TryParse(setting, out maxRetries);
-        //    }
+            setting = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetrys"]?.ToString();
+            if (setting != null)
+            {
+                _ = int.TryParse(setting, out maxRetries);
+            }
 
-        //    _logger.Debug("Sharepoint thread count : " + maxThreads);
-        //    _logger.Debug("Sharepoint max retries : " + maxRetries);
-        //}
+            _logger.Debug("Sharepoint thread count : " + maxThreads);
+            _logger.Debug("Sharepoint max retries : " + maxRetries);
+        }
 
         object AddThreadLock = new Object();
 
