@@ -107,6 +107,10 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         {
                             td.processor.AddDocument(td.message.Item);
                         }
+                        else if (td.message is SharePointContentUpdateMessage)
+                        {
+                            td.processor.UpdateDocument(td.message.Item);
+                        }
                         break;
                     }
                     catch (Exception ex)
