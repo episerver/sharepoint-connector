@@ -42,7 +42,7 @@ namespace EPiServer.ConnectForSharePoint.Test
 
         #region Message Thread Tests
         [TestMethod]
-        public void Uses_Default_MessageThreads_Value_WhenNot_InConfig()
+        public void Uses_Default_ThreadCount_WhenNotSpecifiedInConfig()
         {
             int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount;
             int actualNumberOfThreads = 0;
@@ -77,7 +77,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
-        public void Uses_MessageThreads_Config_Value()
+        public void Uses_ThreadCount_Specified_InConfig()
         {
             int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount - 1;
             int actualNumberOfThreads = 0;
@@ -149,9 +149,9 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
-        public void Retrys_ExpectedNumberOfDefaultTimes()
+        public void Retries_ExpectedNumberOfDefaultTimes()
         {
-            int expectedNumberOfRetrys = 3;
+            int expectedNumberOfRetrys = ProcessingThreadManager.DefaultMaxRetries;
             int actualNumberOfRetrys = 0;
 
             threadManager = new ProcessingThreadManager(serviceLocator.Object);
@@ -169,7 +169,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         [TestMethod]
-        public void Retrys_ExpectedNumberOfTimes_withConfigValue()
+        public void Retries_ExpectedNumberOfTimes_withConfigValue()
         {
             int expectedNumberOfRetrys = 6;
             int actualNumberOfRetrys = 0;
