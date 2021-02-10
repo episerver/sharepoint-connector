@@ -174,7 +174,7 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             threadManager.AddThread(processor.Object, new SharePointContentAddMessage() {  Item = new SPListItem() {  Title = "Title" } });
 
-            threadManager.WaitAll();
+            Thread.Sleep(1000);
 
             Assert.AreEqual(expectedNumberOfRetrys, actualNumberOfRetrys);
         }
@@ -196,7 +196,7 @@ namespace EPiServer.ConnectForSharePoint.Test
 
             threadManager.AddThread(processor.Object, new SharePointContentAddMessage() { Item = new SPListItem() { Title = "Title" } });
 
-            threadManager.WaitAll();
+            Thread.Sleep(1000);
 
             Assert.AreEqual(expectedNumberOfRetrys, actualNumberOfRetrys);
         }
