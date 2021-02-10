@@ -48,7 +48,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         {
                             resetEventList.Remove(resetEventList[waitHandle]);
 
-                            QueWorker(processor, message);
+                            AddWorkerToQueue(processor, message);
                         }
                         else
                         {
@@ -58,7 +58,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     }
                     else
                     {
-                        QueWorker(processor, message);
+                        AddWorkerToQueue(processor, message);
                     }
                 }
                 catch ( Exception exception )
@@ -68,7 +68,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
             }
         }
 
-        private void QueWorker(ISharePointProcessor processor, SharePointMessage message)
+        private void AddWorkerToQueue(ISharePointProcessor processor, SharePointMessage message)
         {
             var threadContext = new ThreadContext() { Message = message, Processor = processor };
             resetEventList.Add(threadContext.ResetEvent);

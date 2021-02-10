@@ -18,10 +18,10 @@ namespace EPiServer.ConnectForSharePoint.Test
     [ExcludeFromCodeCoverage]
     public class ProcessingThreadManagerTests
     {
-        ProcessingThreadManager threadManager;
-        Mock<IServiceLocator> serviceLocator = new Mock<IServiceLocator>();
-        Mock<ISharePointProcessor> processor = new Mock<ISharePointProcessor>();
-        Mock<ILogger> logger = new Mock<ILogger>();
+        private ProcessingThreadManager threadManager;
+        private readonly Mock<IServiceLocator> serviceLocator = new Mock<IServiceLocator>();
+        private readonly Mock<ISharePointProcessor> processor = new Mock<ISharePointProcessor>();
+        private readonly Mock<ILogger> logger = new Mock<ILogger>();
         private static readonly object SyncRoot = new object();
 
         public ProcessingThreadManagerTests()
