@@ -9,11 +9,13 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace EPiServer.ConnectForSharePoint.Test
 {
     [TestClass]
+    [ExcludeFromCodeCoverage]
     public class ProcessingThreadManagerTests
     {
         ProcessingThreadManager threadManager;
@@ -171,7 +173,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         [TestMethod]
         public void Retries_ExpectedNumberOfTimes_withConfigValue()
         {
-            int expectedNumberOfRetrys = 6;
+            int expectedNumberOfRetrys = 1;
             int actualNumberOfRetrys = 0;
 
             ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = expectedNumberOfRetrys.ToString();
