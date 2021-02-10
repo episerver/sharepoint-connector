@@ -12,7 +12,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
 {
     public class ProcessingThreadManager
     {
-        internal static int DefaultThreadCount = 4;
+        internal static int DefaultThreadCount = 2;
         internal static int DefaultMaxRetries = 3;
         internal static int DefaultWaitTimeSpanInMinutes = 5;
 
@@ -138,7 +138,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 }
             }
 
-            logger.Debug("Sharepoint thread count : " + maxThreads + " max retries : " + maxRetries);
+            logger.Debug("Sharepoint thread count: " + maxThreads + " max retries: " + maxRetries + " processor count: " + Environment.ProcessorCount);
         }
 
         // To support unit tests
