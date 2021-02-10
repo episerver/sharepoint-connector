@@ -144,7 +144,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
         // To support unit tests
         internal void WaitAll()
         {
-            WaitHandle.WaitAll(resetEventList.ToArray());
+            WaitHandle.WaitAll(resetEventList.ToArray(), new TimeSpan(0,0,30));
         }
 
         /// <summary>

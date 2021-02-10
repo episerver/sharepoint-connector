@@ -22,6 +22,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         Mock<IServiceLocator> serviceLocator = new Mock<IServiceLocator>();
         Mock<ISharePointProcessor> processor = new Mock<ISharePointProcessor>();
         Mock<ILogger> logger = new Mock<ILogger>();
+        private static readonly object SyncRoot = new object();
 
         public ProcessingThreadManagerTests()
         {
@@ -35,11 +36,19 @@ namespace EPiServer.ConnectForSharePoint.Test
             ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = null;
         }
 
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            Monitor.Enter(SyncRoot);
+        }
+
         [TestCleanup]
         public void cleanup()
         {
             ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = null;
             ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = null;
+
+            Monitor.Exit(SyncRoot);
         }
 
         #region Message Thread Tests
