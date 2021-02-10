@@ -17,3 +17,5 @@
 /EPIServer.ConnectForSharePoint.Messaging/obj/Release
 /EPIServer.ConnectForSharePoint.Test/obj/Release
 **/*.user
+/EPIServer.ConnectForSharePoint.Test/bin/Release
+/EPIServer.ConnectForSharePoint.Messaging/bin/Release

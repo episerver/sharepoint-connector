@@ -105,7 +105,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                         {
                             threadContext.ResetEvent.Set(); // event set, and done
                             logger.Error("Failed after " + maxRetries + " attempts.", ex);
-                            throw;
+                            break;
                         }
 
                         logger.Warning("Will retry processing method. Retry count = " + threadContext.Retries + " for item : " + threadContext.Message.Item.DisplayName);
