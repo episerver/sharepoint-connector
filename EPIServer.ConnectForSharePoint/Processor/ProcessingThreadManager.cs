@@ -5,85 +5,142 @@ using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
     public class ProcessingThreadManager
     {
-        private int MAX_THREADS = 8;
-        private List<AutoResetEvent> eventList = new List<AutoResetEvent>();
-        private ILogger _logger;
+        internal static int MaxThreadCount = 16;
+        internal static int DefaultThreadCount = 4;
+        internal static int DefaultWaitTimeSpanInMinutes = 5;
 
-        class ThreadData
-        {
-            public AutoResetEvent resetEvent;
-            public SharePointMessage message;
-            public ISharePointProcessor processor;
-        }
+        private int maxThreads = DefaultThreadCount;
+
+        private readonly ILogger logger;
+        private readonly object addThreadLock = new Object();
+        private readonly List<AutoResetEvent> resetEventList = new List<AutoResetEvent>();
 
         public ProcessingThreadManager()
         {
-            _logger = LogManager.GetLogger();
+            logger = LogManager.GetLogger();
+            GetOptions();
         }
 
-        ProcessingThreadManager(IServiceLocator serviceLocator)
+        internal ProcessingThreadManager(IServiceLocator serviceLocator)
         {
-            _logger = serviceLocator.GetInstance<ILogger>();
+            logger = serviceLocator.GetInstance<ILogger>();
+            GetOptions();
         }
 
-        public void AddThread(ISharePointProcessor p, SharePointMessage mes)
+        public void AddThread(ISharePointProcessor processor, SharePointMessage message)
         {
-            if(eventList.Count == MAX_THREADS)
+            lock (addThreadLock)
             {
-                int i = WaitHandle.WaitAny(eventList.ToArray());
-                eventList.Remove(eventList[i]);
+                try
+                {
+                    if (resetEventList.Count == maxThreads)
+                    {
+                        var waitHandle = WaitHandle.WaitAny(resetEventList.ToArray(), new TimeSpan(0, DefaultWaitTimeSpanInMinutes, 0));
+                        if (waitHandle != System.Threading.WaitHandle.WaitTimeout)
+                        {
+                            resetEventList.Remove(resetEventList[waitHandle]);
+
+                            AddWorkerToQueue(processor, message);
+                        }
+                        else
+                        {
+                            logger.Warning("Too many long running threads. " + message.Item.DisplayName +
+                                " will be processed the next time the job runs.");
+                        }
+                    }
+                    else
+                    {
+                        AddWorkerToQueue(processor, message);
+                    }
+                }
+                catch ( Exception exception )
+                {
+                    logger.Error("Sharepoint : Error adding message ", exception);
+                }
             }
-            AutoResetEvent rs = new AutoResetEvent(false);
-            eventList.Add( rs );
-            ThreadPool.QueueUserWorkItem(new WaitCallback(WorkerThread), 
-                new ThreadData { resetEvent = rs, message = mes, processor = p });
+        }
+
+        private void AddWorkerToQueue(ISharePointProcessor processor, SharePointMessage message)
+        {
+            var threadContext = new ThreadContext() { Message = message, Processor = processor };
+            resetEventList.Add(threadContext.ResetEvent);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(WorkerThread), threadContext);
+        }
+
+        private void WorkerThread(Object context)
+        {
+            var threadContext = context as ThreadContext;
+            using (var pp = new PrincipalPreserver())
+            {
+                try
+                {
+                    logger.Debug("Processing : " + threadContext.Message.Item.DisplayName);
+
+                    if (threadContext.Message is SharePointListItemAddMessage)
+                    {
+                        threadContext.Processor.AddListItem(threadContext.Message.Item);
+                    }
+                    else if (threadContext.Message is SharePointContentAddMessage)
+                    {
+                        threadContext.Processor.AddDocument(threadContext.Message.Item);
+                    }
+                    else if (threadContext.Message is SharePointContentUpdateMessage)
+                    {
+                        threadContext.Processor.UpdateDocument(threadContext.Message.Item);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error("Sharepoint: Failed to process request", ex);
+                }
+            }
+            threadContext.ResetEvent.Set();
+        }
+
+        private void GetOptions()
+        {
+            var threadSettings = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"];
+            if (threadSettings != null)
+            {
+                int.TryParse(threadSettings, out maxThreads);
+                if (maxThreads < 1 || maxThreads > MaxThreadCount)
+                {
+                    throw new ArgumentException("maxThreads must be between 1 and " + MaxThreadCount);
+                }
+            }
+
+            logger.Debug("Sharepoint thread count: " + maxThreads + " processor count: " + Environment.ProcessorCount);
         }
 
         // To support unit tests
         internal void WaitAll()
         {
-            WaitHandle.WaitAll(eventList.ToArray());
+            WaitHandle.WaitAll(resetEventList.ToArray(), new TimeSpan(0,0,30));
         }
 
-        private void WorkerThread(Object o)
+        /// <summary>
+        /// ThreadContext contains data required by the thread processing the request.
+        /// </summary>
+        internal class ThreadContext
         {
-            ThreadData td = o as ThreadData;
-            int MAX_RETRY = 3;
-            int retry = 0;
+            public AutoResetEvent ResetEvent { get; set; }
+            public SharePointMessage Message { get; set; }
+            public ISharePointProcessor Processor { get; set; }
 
-            using (var pp = new PrincipalPreserver())
+            public int Retries { get; set; }
+
+            public ThreadContext()
             {
-                try
-                {
-                    if (td.message is SharePointListItemAddMessage)
-                    {
-                        td.processor.AddListItem(td.message.Item);
-                    }
-                    else if (td.message is SharePointContentAddMessage)
-                    {
-                        td.processor.AddDocument(td.message.Item);
-                    }
-                    retry = 0;
-                }
-                catch (Exception ex)
-                {
-                    retry++;
-                    if (retry > MAX_RETRY)
-                    {
-                        td.resetEvent.Set(); // event set, and done
-                        _logger.Error("WorkerThread - failed after " + MAX_RETRY + " attempts.", ex);
-                        throw;
-                    }
-                    _logger.Warning("Will retry processing method. Retry count = " + retry + " for item : " + td.message.Item.DisplayName);
-                }
-            } while (retry > 0 && retry < MAX_RETRY);
-            td.resetEvent.Set(); // event set, and done
+                Retries = 0;
+                ResetEvent = new AutoResetEvent(false);
+            }
         }
     }
 }

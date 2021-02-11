@@ -121,9 +121,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 var selectedLists = _helper.GetSelectedListViewIds(_splists);
                 _SPItemsInCMs = SharepointToCmsUtils.FindSharePointItems();
 
-                _logger.Information("Starting Sharepoint processing.");
-                _logger.Information("Current SP item count in CMS: " + _SPItemsInCMs.Count());
-                _logger.Information("Current SP folders in CMS: " + (new FolderData()).GetFolders().Count() );
+                _logger.Debug("Sharepoint: Processing start. Current Items : " + _SPItemsInCMs.Count() +" Current folders: " + (new FolderData()).GetFolders().Count() );
 
                 _AllSPItems.Clear();
 
@@ -153,7 +151,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     var folderRef = SharepointToCmsUtils.AddOrUpdateFolder(_emitterFactory, rootFolder);
                     _SPFolders.Add(rootFolder);
 
-                    _logger.Information("- Processing SharePoint list: " + selectedList.Title + " ItemCount(including folders): " + selectedList.ItemCount);
+                    _logger.Debug("Sharepoint: Processing SharePoint list: " + selectedList.Title + " ItemCount(including folders): " + selectedList.ItemCount);
 
                     // now get all the items, paged, and process each item.
                     string nextUri;
@@ -164,11 +162,11 @@ namespace EPiServer.ConnectForSharePoint.Processor
                     // process any more batches, if any
                     while (!String.IsNullOrEmpty(nextUri) && !_stopSignaled)
                     {
-                        _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
+                        _logger.Debug("Sharepoint: " + _SPItems.Count() + " folders : " + _SPFolders.Count());
                         ProcessItemList(selectedList, selectedView, rootFolder,
                             _helper.GetNextPagedItems(selectedList, nextUri, out nextUri), selectedView.Scope);
                     }
-                    _logger.Information("- items : " + _SPItems.Count() + " folders : " + _SPFolders.Count());
+                    _logger.Debug("Sharepoint: " + _SPItems.Count() + " folders : " + _SPFolders.Count());
 
                     // if the list folder already existed we need to check if anything has 
                     // changed since the last processing loop
@@ -192,12 +190,12 @@ namespace EPiServer.ConnectForSharePoint.Processor
             catch ( Exception e)
             {
                 // Unexpected error condition ending processing thread too soon.
-                _logger.Error("Error running update thread.", e);
+                _logger.Error("Sharepoint: Error running update thread.", e);
                 _processingResult = false;
                 _processingException = e;
             }
-            _logger.Information( _emitterFactory.QueueCount + " Items in the queue.");
 
+            _logger.Debug( "Sharepoint: Processing Complete. Items in Queue:" + _emitterFactory.QueueCount);
             if( _clearAllSPItemsWhenDone )
             {
                 _AllSPItems.Clear();
@@ -213,7 +211,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
         /// <param name="items">The items to process</param>
         internal void ProcessItemList(SPList list, SPListView view, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope)
         {
-            _logger.Information("-- Processing batch: " + items.Count());
+            _logger.Debug("Sharepoint: Processing batch: " + items.Count());
             var fileFolderService = _serviceLocator.GetInstance<IFilesFoldersService>();
 
             // iterate over all the items

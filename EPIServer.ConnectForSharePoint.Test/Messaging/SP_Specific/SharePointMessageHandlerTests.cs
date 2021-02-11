@@ -59,6 +59,7 @@ namespace EPiServer.ConnectForSharePoint.Test.Messaging.SP_Specific
             };
 
             handler.Handle(message);
+            handler._threadManager.WaitAll();
 
             processor.Verify(p => p.UpdateDocument(It.Is<SPListItem>(item => item == message.Item)), Times.Once, "Did not call into the processor with the expected string");
         }

@@ -135,19 +135,7 @@ namespace EPiServer.ConnectForSharePoint.Messaging.Handlers
         /// <param name="message">Message describing the operation</param>
         public void Handle(SharePointContentUpdateMessage message)
         {
-            using (var pp = new PrincipalPreserver())
-            {
-                try
-                {
-                    processor.UpdateDocument(message.Item);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error("Error UpdateDocument", e);
-                    if (e is EPiServer.Core.AccessDeniedException)
-                        showErrorHelperMessages();
-                }
-            }
+            _threadManager.AddThread(processor, message);
         }
 
         /// <summary>
