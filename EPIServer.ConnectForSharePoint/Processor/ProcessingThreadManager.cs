@@ -12,12 +12,11 @@ namespace EPiServer.ConnectForSharePoint.Processor
 {
     public class ProcessingThreadManager
     {
-        internal static int DefaultThreadCount = 2;
-        internal static int DefaultMaxRetries = 3;
+        internal static int MaxThreadCount = 16;
+        internal static int DefaultThreadCount = 4;
         internal static int DefaultWaitTimeSpanInMinutes = 5;
 
         private int maxThreads = DefaultThreadCount;
-        private int maxRetries = DefaultMaxRetries;
 
         private readonly ILogger logger;
         private readonly object addThreadLock = new Object();
@@ -63,7 +62,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
                 }
                 catch ( Exception exception )
                 {
-                    logger.Error("Error adding message ", exception);
+                    logger.Error("Sharepoint : Error adding message ", exception);
                 }
             }
         }
@@ -78,42 +77,31 @@ namespace EPiServer.ConnectForSharePoint.Processor
         private void WorkerThread(Object context)
         {
             var threadContext = context as ThreadContext;
-
             using (var pp = new PrincipalPreserver())
             {
-                while(true)
+                try
                 {
-                    try
-                    {
-                        if (threadContext.Message is SharePointListItemAddMessage)
-                        {
-                            threadContext.Processor.AddListItem(threadContext.Message.Item);
-                        }
-                        else if (threadContext.Message is SharePointContentAddMessage)
-                        {
-                            threadContext.Processor.AddDocument(threadContext.Message.Item);
-                        }
-                        else if (threadContext.Message is SharePointContentUpdateMessage)
-                        {
-                            threadContext.Processor.UpdateDocument(threadContext.Message.Item);
-                        }
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (++threadContext.Retries >= maxRetries)
-                        {
-                            threadContext.ResetEvent.Set(); // event set, and done
-                            logger.Error("Failed after " + maxRetries + " attempts.", ex);
-                            break;
-                        }
+                    logger.Debug("Processing : " + threadContext.Message.Item.DisplayName);
 
-                        logger.Warning("Will retry processing method. Retry count = " + threadContext.Retries + " for item : " + threadContext.Message.Item.DisplayName);
+                    if (threadContext.Message is SharePointListItemAddMessage)
+                    {
+                        threadContext.Processor.AddListItem(threadContext.Message.Item);
+                    }
+                    else if (threadContext.Message is SharePointContentAddMessage)
+                    {
+                        threadContext.Processor.AddDocument(threadContext.Message.Item);
+                    }
+                    else if (threadContext.Message is SharePointContentUpdateMessage)
+                    {
+                        threadContext.Processor.UpdateDocument(threadContext.Message.Item);
                     }
                 }
-            } 
-
-            threadContext.ResetEvent.Set(); // event set, and done
+                catch (Exception ex)
+                {
+                    logger.Error("Sharepoint: Failed to process request", ex);
+                }
+            }
+            threadContext.ResetEvent.Set();
         }
 
         private void GetOptions()
@@ -122,23 +110,13 @@ namespace EPiServer.ConnectForSharePoint.Processor
             if (threadSettings != null)
             {
                 int.TryParse(threadSettings, out maxThreads);
-                if (maxThreads < 1 || maxThreads > 8)
+                if (maxThreads < 1 || maxThreads > MaxThreadCount)
                 {
-                    throw new ArgumentException("maxThreads must be between 1 and 8");
+                    throw new ArgumentException("maxThreads must be between 1 and " + MaxThreadCount);
                 }
             }
 
-            var retrySettings = ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"];
-            if (retrySettings != null)
-            {
-                int.TryParse(retrySettings, out maxRetries);
-                if (maxRetries < 1 || maxRetries > 8)
-                {
-                    throw new ArgumentException("maxRetries must be between 1 and 8");
-                }
-            }
-
-            logger.Debug("Sharepoint thread count: " + maxThreads + " max retries: " + maxRetries + " processor count: " + Environment.ProcessorCount);
+            logger.Debug("Sharepoint thread count: " + maxThreads + " processor count: " + Environment.ProcessorCount);
         }
 
         // To support unit tests

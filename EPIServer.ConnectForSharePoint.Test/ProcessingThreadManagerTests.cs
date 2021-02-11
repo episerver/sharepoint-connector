@@ -69,7 +69,7 @@ namespace EPiServer.ConnectForSharePoint.Test
             var messageList = new List<SharePointContentAddMessage>();
             for (var x = 0; x < expectedNumberOfThreads + 1; x++)
             {
-                messageList.Add(new SharePointContentAddMessage() { });
+                messageList.Add(new SharePointContentAddMessage() { Item = new SPListItem() { Title = "Test" + x} });
             }
 
             Thread addmessagesThread = new Thread(() =>
@@ -80,9 +80,7 @@ namespace EPiServer.ConnectForSharePoint.Test
                 }
             });
             addmessagesThread.Start();
-            while (!addmessagesThread.IsAlive) ;
-
-            Thread.Sleep(1000);
+            addmessagesThread.Join( new TimeSpan(0,0,1) );
 
             Assert.AreEqual(expectedNumberOfThreads, actualNumberOfThreads);
         }
@@ -105,7 +103,7 @@ namespace EPiServer.ConnectForSharePoint.Test
             var messageList = new List<SharePointContentAddMessage>();
             for (var x = 0; x < expectedNumberOfThreads + 1; x++)
             {
-                messageList.Add(new SharePointContentAddMessage() { });
+                messageList.Add(new SharePointContentAddMessage() { Item = new SPListItem() { Title = "Test" + x } });
             }
 
             Thread addmessagesThread = new Thread(() =>
@@ -116,9 +114,7 @@ namespace EPiServer.ConnectForSharePoint.Test
                 }
             });
             addmessagesThread.Start();
-            while (!addmessagesThread.IsAlive) ;
-
-            Thread.Sleep(2000);
+            addmessagesThread.Join(new TimeSpan(0, 0, 1));
 
             Assert.AreEqual(expectedNumberOfThreads, actualNumberOfThreads);
         }
@@ -127,7 +123,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         [ExpectedException(typeof(ArgumentException))]
         public void ThrowsException_If_MessageThreads_ToLarge()
         {
-            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = "9";
+            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageThreads"] = (ProcessingThreadManager.MaxThreadCount + 1).ToString();
             threadManager = new ProcessingThreadManager(serviceLocator.Object);
         }
 
@@ -140,66 +136,5 @@ namespace EPiServer.ConnectForSharePoint.Test
         }
 
         #endregion Message Thread Tests
-
-        #region Message Retry Tests
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ThrowsException_If_MessageRetry_ToLarge()
-        {
-            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "9";
-            threadManager = new ProcessingThreadManager(serviceLocator.Object);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ThrowsException_If_MessageRetrys_ToSmall()
-        {
-            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = "0";
-            threadManager = new ProcessingThreadManager(serviceLocator.Object);
-        }
-
-        [TestMethod]
-        public void Retries_ExpectedNumberOfDefaultTimes()
-        {
-            int expectedNumberOfRetrys = ProcessingThreadManager.DefaultMaxRetries;
-            int actualNumberOfRetrys = 0;
-
-            threadManager = new ProcessingThreadManager(serviceLocator.Object);
-
-            processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>())).Callback(() => {
-                actualNumberOfRetrys++;
-                throw new Exception("oh oh");
-            });
-
-            threadManager.AddThread(processor.Object, new SharePointContentAddMessage() {  Item = new SPListItem() {  Title = "Title" } });
-
-            Thread.Sleep(1000);
-
-            Assert.AreEqual(expectedNumberOfRetrys, actualNumberOfRetrys);
-        }
-
-        [TestMethod]
-        public void Retries_ExpectedNumberOfTimes_withConfigValue()
-        {
-            int expectedNumberOfRetrys = 1;
-            int actualNumberOfRetrys = 0;
-
-            ConfigurationManager.AppSettings["EPiServer:Sharepoint:MessageRetries"] = expectedNumberOfRetrys.ToString();
-
-            threadManager = new ProcessingThreadManager(serviceLocator.Object);
-
-            processor.Setup(p => p.AddDocument(It.IsAny<SPListItem>())).Callback(() => {
-                actualNumberOfRetrys++;
-                throw new Exception("oh oh");
-            });
-
-            threadManager.AddThread(processor.Object, new SharePointContentAddMessage() { Item = new SPListItem() { Title = "Title" } });
-
-            Thread.Sleep(1000);
-
-            Assert.AreEqual(expectedNumberOfRetrys, actualNumberOfRetrys);
-        }
-        #endregion Message Retry Tests
     }
 }
