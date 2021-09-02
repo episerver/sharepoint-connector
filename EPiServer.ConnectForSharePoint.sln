@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPiServer.ConnectForSharePoint", "EPiServer.ConnectForSharePoint\EPiServer.ConnectForSharePoint.csproj", "{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPiServer.ConnectForSharePoint.Test", "EPiServer.ConnectForSharePoint.Test\EPiServer.ConnectForSharePoint.Test.csproj", "{50B63761-87D3-4E00-9EB2-AA973D077CCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPIServer.ConnectForSharePoint.Messaging", "EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj", "{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{50B63761-87D3-4E00-9EB2-AA973D077CCE}.Release|x86.ActiveCfg = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6C6E8F61-8A4F-4C49-A85B-9D637A9C1D34}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

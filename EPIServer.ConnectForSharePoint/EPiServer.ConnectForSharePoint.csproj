@@ -1,0 +1,599 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <LangVersion>5</LangVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CFB2557C-26B4-406B-8ADA-7C66365CFAE9}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EPiServer.ConnectForSharePoint</RootNamespace>
+    <AssemblyName>EPiServer.ConnectForSharePoint</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UseGlobalApplicationHostFile />
+    <TargetFrameworkProfile />
+    <Use64BitIISExpress />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AjaxControlToolkit, Version=15.1.3.0, Culture=neutral, PublicKeyToken=28f01b0e84b6d53e, processorArchitecture=MSIL">
+      <HintPath>..\packages\AjaxControlToolkit.15.1.3.0\lib\net40\AjaxControlToolkit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.2.1\lib\net45\Castle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Windsor.4.1.0\lib\net45\Castle.Windsor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.Core.11.3.3\lib\net461\EPiServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.ApplicationModules, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.ApplicationModules.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Cms.AspNet, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.AspNet.11.3.3\lib\net461\EPiServer.Cms.AspNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Cms.Shell.UI, Version=11.1.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.UI.Core.11.1.0\lib\net461\EPiServer.Cms.Shell.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Configuration, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.AspNet.11.3.3\lib\net461\EPiServer.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Data, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Data.Cache, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.Data.Cache.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Enterprise, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.Core.11.3.3\lib\net461\EPiServer.Enterprise.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Events, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.Events.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Framework, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.Framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Framework.AspNet, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.AspNet.11.3.3\lib\net461\EPiServer.Framework.AspNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.ImageLibrary, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.AspNet.11.3.3\lib\net461\EPiServer.ImageLibrary.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Licensing, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Framework.11.3.3\lib\net461\EPiServer.Licensing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.LinkAnalyzer, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.Core.11.3.3\lib\net461\EPiServer.LinkAnalyzer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Logging.Log4Net, Version=2.2.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Logging.Log4Net.2.2.0\lib\net461\EPiServer.Logging.Log4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Packaging, Version=3.4.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Packaging.3.4.0\lib\net461\EPiServer.Packaging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Packaging.CmdAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.Packaging.3.4.0\lib\net461\EPiServer.Packaging.CmdAPI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.ServiceLocation.StructureMap, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.ServiceLocation.StructureMap.2.0.0\lib\net461\EPiServer.ServiceLocation.StructureMap.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Shell, Version=11.1.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.UI.Core.11.1.0\lib\net461\EPiServer.Shell.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Shell.UI, Version=11.1.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.UI.Core.11.1.0\lib\net461\EPiServer.Shell.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.UI, Version=11.1.0.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.UI.Core.11.1.0\lib\net461\EPiServer.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EPiServer.Web.WebControls, Version=11.3.3.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPiServer.CMS.AspNet.11.3.3\lib\net461\EPiServer.Web.WebControls.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.9.1.8\lib\net20\Ionic.Zip.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SharePoint.Client.Runtime.dll.15.0.4859.1000\lib\Microsoft.SharePoint.Client.Runtime\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=2.5.40416.9020, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NuGet.Core.2.5.0\lib\net40-Client\NuGet.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StructureMap, Version=4.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StructureMap.4.5.2\lib\net45\StructureMap.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StructureMap.Net4, Version=3.1.6.186, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\structuremap-signed.3.1.6.191\lib\net40\StructureMap.Net4.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StructureMap.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\structuremap.web-signed.3.1.6.191\lib\net40\StructureMap.Web.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ComponentModel.Annotations.4.4.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Data.SqlClient, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SqlClient.4.4.0\lib\net461\System.Data.SqlClient.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.4.4.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Xml.4.4.0\lib\net461\System.Security.Cryptography.Xml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Permissions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Permissions.4.4.0\lib\net461\System.Security.Permissions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.4.4.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Threading.AccessControl, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.AccessControl.4.4.0\lib\net461\System.Threading.AccessControl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AssemblyVersionAuto.cs">
+      <Link>AssemblyVersionAuto.cs</Link>
+    </Compile>
+    <Compile Include="Consts.cs" />
+    <Compile Include="Controllers\SharePointBlockDataController.cs" />
+    <Compile Include="Controllers\SharePointGenericController.cs" />
+    <Compile Include="Controllers\SharePointImageController.cs" />
+    <Compile Include="Controllers\SharePointVideoController.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Helpers\AccessRightsHelper.cs" />
+    <Compile Include="Helpers\IAccessRightsHelper.cs" />
+    <Compile Include="Helpers\IContentProviderHelper.cs" />
+    <Compile Include="Helpers\ISharePointHelper.cs" />
+    <Compile Include="Messaging\Messages\ISharePointMessage.cs" />
+    <Compile Include="Processor\IMetaDataProcessor.cs" />
+    <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
+    <Compile Include="Helpers\ISharepointToCmsUtilities.cs" />
+    <Compile Include="Processor\MetaDataProcessor.cs" />
+    <Compile Include="Helpers\SharePointProcessorHelper.cs" />
+    <Compile Include="Helpers\SharepointToCmsUtilities.cs" />
+    <Compile Include="Mappers\IMapper.cs" />
+    <Compile Include="Mappers\SPFieldItemMapper.cs" />
+    <Compile Include="Mappers\SPFileMapper.cs" />
+    <Compile Include="Mappers\SPFolderMapper.cs" />
+    <Compile Include="Mappers\SPListItemMapper.cs" />
+    <Compile Include="Mappers\SPListMapper.cs" />
+    <Compile Include="Mappers\SPUserMapper.cs" />
+    <Compile Include="Mappers\SPViewMapper.cs" />
+    <Compile Include="Messaging\Handlers\SharePointMessageHandler.cs" />
+    <Compile Include="Messaging\IMessageEmitterFactory.cs" />
+    <Compile Include="Messaging\Messages\SharePointFolderAddMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentUpdateMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointContentAddMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointFolderDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointFolderUpdateMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemAddMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemDeleteMessage.cs" />
+    <Compile Include="Messaging\Messages\SharePointListItemUpdateMessage.cs" />
+    <Compile Include="Messaging\SharePointMessageEmitterFactory.cs" />
+    <Compile Include="Messaging\SharePointProcessorFactory.cs" />
+    <Compile Include="Models\ContextWebInformation.cs" />
+    <Compile Include="Models\FileTypes\ISharePointItem.cs" />
+    <Compile Include="Models\FileTypes\SharePointBlockData.cs" />
+    <Compile Include="Models\FileTypes\SharepointGenericMedia.cs" />
+    <Compile Include="Models\FileTypes\SharepointImageFile.cs" />
+    <Compile Include="Models\FileTypes\SharepointVideoFile.cs" />
+    <Compile Include="Models\FolderData.cs" />
+    <Compile Include="Models\SPFieldItem.cs" />
+    <Compile Include="Models\SPFile.cs" />
+    <Compile Include="Models\SPFolder.cs" />
+    <Compile Include="Models\SPListItem.cs" />
+    <Compile Include="Models\SPUser.cs" />
+    <Compile Include="Models\ViewModels\GenericViewModel.cs" />
+    <Compile Include="Models\ViewModels\ImageViewModel.cs" />
+    <Compile Include="Models\ViewModels\ListItemField.cs" />
+    <Compile Include="Models\ViewModels\ListItemViewModel.cs" />
+    <Compile Include="Models\ViewModels\VideoViewModel.cs" />
+    <Compile Include="Processor\ISharePointProcessor.cs" />
+    <Compile Include="Processor\ProcessingThreadManager.cs" />
+    <Compile Include="Processor\SharePointProcessor.cs" />
+    <Compile Include="Processor\SharePointProcessorData.cs" />
+    <Compile Include="Rest\Models\JsonFieldItem.cs" />
+    <Compile Include="Rest\Models\JsonFieldItemCollection.cs" />
+    <Compile Include="Rest\Models\JsonFolderProperties.cs" />
+    <Compile Include="Rest\Models\JsonUser.cs" />
+    <Compile Include="Rest\Models\JsonFile.cs" />
+    <Compile Include="Rest\Models\JsonFileCollection.cs" />
+    <Compile Include="Rest\Models\JsonFolder.cs" />
+    <Compile Include="Rest\Models\JsonFolderCollection.cs" />
+    <Compile Include="Rest\Models\JsonList.cs" />
+    <Compile Include="Rest\Models\JsonListCollection.cs" />
+    <Compile Include="Rest\Models\JsonListItem.cs" />
+    <Compile Include="Rest\Models\JsonListItemCollection.cs" />
+    <Compile Include="Rest\Models\JsonView.cs" />
+    <Compile Include="Rest\Models\JsonViewCollection.cs" />
+    <Compile Include="Rest\Models\SharedClasses.cs" />
+    <Compile Include="Rest\Models\GetContextWebInformation.cs" />
+    <Compile Include="Helpers\ContentProviderHelper.cs" />
+    <Compile Include="Helpers\WebHelper.cs" />
+    <Compile Include="Configuration\SharePointSettings.cs" />
+    <Compile Include="Models\SPList.cs" />
+    <Compile Include="Models\SPListView.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="InitializationModule.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Authentication\ClaimsWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Authentication\MsOnlineClaimsHelper.cs" />
+    <Compile Include="Rest\Requests\IRestRequest.cs" />
+    <Compile Include="Rest\Requests\RestJsonRequest.cs" />
+    <Compile Include="Rest\Responses\RestResponse.cs" />
+    <Compile Include="Rest\SPRestClient.cs" />
+    <Compile Include="Authentication\WcfClientContracts.cs" />
+    <Compile Include="SPServices\TagsService.cs" />
+    <Compile Include="SPServices\REST\EndpointContextService.cs" />
+    <Compile Include="SPServices\REST\FilesFoldersService.cs" />
+    <Compile Include="SPServices\IEndpointContextService.cs" />
+    <Compile Include="SPServices\REST\FileStreamService.cs" />
+    <Compile Include="SPServices\IFilesFoldersService.cs" />
+    <Compile Include="SPServices\IFileStreamService.cs" />
+    <Compile Include="SPServices\IListsViewsService.cs" />
+    <Compile Include="SPServices\ITagsService.cs" />
+    <Compile Include="SPServices\REST\ListsViewsService.cs" />
+    <Compile Include="SPServices\REST\RESTServiceBase.cs" />
+    <Compile Include="UpdateJob.cs" />
+    <Compile Include="Web References\SPServices\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SharepointDataSource.cs" />
+    <Compile Include="Web\SharePointConfiguration.aspx.cs">
+      <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Web\SharePointConfiguration.aspx.designer.cs">
+      <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\SharePointHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ClientResources\Images\DefaultThumbnail.png" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DA.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_DE.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_ES.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_FI.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_FR.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_IT.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_JA.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_NL.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_NO.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_SV.xml" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_ZH.xml" />
+    <Content Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Include="Views\Shared\SharePoint\Image.cshtml" />
+    <Content Include="Web References\SPServices\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </Content>
+    <Content Include="Web References\SPServices\SocialDataService.disco" />
+    <Content Include="Web\SharePointConfiguration.aspx" />
+    <EmbeddedResource Include="EmbeddedLangFiles\EPiServer.SharePoint_EN.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="module.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="https://someurl.sample">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\SPServices\</RelPath>
+      <UpdateFromURL>https://someurl.sample</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>EPiServer_ConnectForSharePoint_SPServices_SocialDataService</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Web References\SPServices\SocialDataService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Web References\SPServices\SocialCommentDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialRatingAverageDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialRatingDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialReplicationData1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialTagDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialTermDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SPServices\SocialUrlDetail1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\Shared\SharePoint\Video.cshtml" />
+    <Content Include="Views\Shared\SharePoint\Generic.cshtml" />
+    <Content Include="Views\Shared\SharePoint\ListItem.cshtml" />
+    <Content Include="modules\_protected\Shell\web.config" />
+    <Content Include="modules\_protected\Shell\Shell.zip" />
+    <Content Include="modules\_protected\CMS\web.config" />
+    <Content Include="modules\_protected\CMS\CMS.zip" />
+    <None Include="packages.config" />
+    <None Include="web.Debug.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+    <None Include="web.Release.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EPIServer.ConnectForSharePoint.Messaging\EPIServer.ConnectForSharePoint.Messaging.csproj">
+      <Project>{6c6e8f61-8a4f-4c49-a85b-9d637a9c1d34}</Project>
+      <Name>EPIServer.ConnectForSharePoint.Messaging</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ClientResources\Scripts\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <!-- Import shared common targets -->
+  <Target Name="BeforeBuild">
+    <!--<CallTarget Targets="BuildLessFiles" />-->
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>54716</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:61975/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <PropertyGroup>
+    <PostBuildEvent>IF exist "$(SolutionDir)Deployment\lib\" ( rmdir "$(SolutionDir)Deployment\lib" /s /q )
+mkdir "$(SolutionDir)Deployment\lib"
+del $(SolutionDir)Deployment\*.nupkg
+xcopy "$(TargetDir)"\$(TargetName)*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+xcopy "$(TargetDir)"\EPiServer.ConnectForSharePoint*dll "$(SolutionDir)Deployment\lib\"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" ( rmdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint" /s /q )
+mkdir "$(SolutionDir)Deployment\content\Views\Shared\SharePoint"
+xcopy "$(ProjectDir)"\Views\Shared\SharePoint\*cshtml "$(SolutionDir)\Deployment\content\Views\Shared\SharePoint\"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web" /s /q )
+mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"
+xcopy "$(ProjectDir)"\Web\SharePointconfiguration.aspx "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\Web"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\EmbeddedLangFiles" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\EmbeddedLangFiles" /s /q )
+mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\EmbeddedLangFiles"
+xcopy "$(ProjectDir)"\EmbeddedLangFiles\EPiServer.SharePoint_EN.xml "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\EmbeddedLangFiles\"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\ClientResources" ( rmdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\ClientResources" /s /q )
+mkdir "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\ClientResources"
+xcopy "$(ProjectDir)"\ClientResources "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\ClientResources"  /S /R /Y
+
+IF exist "$(SolutionDir)Deployment\temp\" ( rmdir "$(SolutionDir)Deployment\temp" /s /q )
+mkdir "$(SolutionDir)Deployment\temp"
+
+"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" powershell -ExecutionPolicy ByPass -File "$(SolutionDir)\buildzip.ps1" "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint" "$(SolutionDir)Deployment\temp\EPiServer.ConnectForSharePoint.zip"
+"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" Unblock-File "$(SolutionDir)Deployment\temp\EPiServer.ConnectForSharePoint.zip"
+
+for /d %25%25i in ("$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\*") do rd /s /q "%25%25i"
+del /q "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\*.*"
+
+xcopy "$(SolutionDir)Deployment\temp\*.zip" "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\"  /I /F /R /Y
+rmdir "$(SolutionDir)Deployment\temp" /s /q
+
+IF exist "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\module.config" ( del "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\module.config" /s /q )
+xcopy "$(ProjectDir)"\module.config "$(SolutionDir)Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint\"  /I /F /R /Y
+
+IF exist "$(SolutionDir)Deployment\*.nuspec" ( del "$(SolutionDir)Deployment\*.nuspec" /s /q )
+xcopy "$(SolutionDir)"MSBuild\*.nuspec "$(SolutionDir)Deployment\"  /I /F /R /Y
+
+"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" powershell -ExecutionPolicy ByPass -File "$(SolutionDir)MSBuild\buildpackage.ps1" "$(SolutionDir)\"
+
+xcopy "$(SolutionDir)Deployment\*.nupkg" "$(TargetDir)" /I /F /R /Y</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

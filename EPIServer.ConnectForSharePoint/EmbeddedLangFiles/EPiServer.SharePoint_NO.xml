@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?> <languages>
+    <language name="Norsk" id="no">
+        <sharepoint>
+          <scheduledjob>
+            <description>Importerer nye eller oppdaterte dokumenter, elementer og mapper fra SharePoint til Episerver.</description>
+            <displayname>SharePoint-oppdatering</displayname>
+          </scheduledjob>
+          <admin>
+                <ok>Ok</ok>
+                <cancel>Avbryt</cancel>
+                <displayname>Koble til for SharePoint</displayname>
+                <description>SharePoint-områdepålogging</description>
+                <queuedescription>Informasjon i kø</queuedescription>
+                <remainingitems>Gjenstående elementer</remainingitems>
+                <selectviewdescription>Velg en eller flere lister og tilhørende visninger</selectviewdescription>
+                <serverurl>URL-adresse for område</serverurl>
+                <username>Brukernavn</username>
+                <password>Passord</password>
+                <connectiontype>Tilkoblingstype</connectiontype>
+                <online>Pålogget</online>
+                <onpremises>Lokalt</onpremises>
+                <save>Lagre</save>
+                <connect>Test tilkobling</connect>
+                <selectedfolder>Mappe</selectedfolder>
+                <selectfolder>Velg mappe:</selectfolder>
+                <entrypoint>Inngangspunkt for tilkobling</entrypoint>
+                <entrypointinstructions>Velg en mappe som skal være inngangspunkt for tilkobling.  I tillegg bruker du tekstboksen nedenfor hvis du ønsker å opprette en ny undermappe.</entrypointinstructions>
+                <newsubfolder>Opprett ny undermappe:</newsubfolder>  
+                <expirationtime>Utløpstid</expirationtime>
+                <refreshcache>Oppdater</refreshcache>
+                <entrypointrequired>Inngangspunkt for tilkobling er påkrevd.</entrypointrequired>
+                <message>
+                    <savesuccess>Konfigurasjonen er lagret.</savesuccess>
+                    <refreshsuccess>SharePoint-dataene oppdateres.</refreshsuccess>
+                    <connectsuccess>Koblet til SharePoint-område. Velg SharePoint-visninger å hente media fra.</connectsuccess>
+                    <savesuccesswithnomedia>Konfigurasjonen er lagret. Leg merke til at siden det ikke er valgt en visning, vil ingen SharePoint-medier tilordnes.</savesuccesswithnomedia>
+                    <saveerror>Feil under lagring: {0}.</saveerror>
+                    <connecttosharepointerror>Feil ved tilkobling til SharePoint-område: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>SharePoint-URL, brukernavn eller passord er ikke oppgitt.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Kunne ikke godkjenne med oppgitt brukernavn og passord.</unauthorizederror>
+                    <notfounderror>SharePoint-URL er feil, eller du har ikke tilgang til området som er angitt i URL-en.</notfounderror>
+                    <listviewnotmatched>Visningslisten er ikke oppdatert. Koble til på nytt for å få nye SharePoint-visninger.</listviewnotmatched>
+                    <invalidentrypoint>Ugyldig inngangspunkt for tilkobling.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>Inngangspunkt for tilkobling må være en innholdsmappe.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>Inngangspunkt for tilkobling må være tom.  Velg en mappe som ikke inneholder noen «Blokker» eller mediaelementer.</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>Valg mappe kan ikke være en undermappe av tidligere valgt mappe.  Velg en annen mappe.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Utløpstiden må være i minutter.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(større enn eller lik 3 minutter)</expirationtimegreaterorequalthree>
+                    <folderdeleted>Mappen «{0}» har blitt slettet, velg et nytt mål.</folderdeleted>
+                </message>
+            </admin>
+            <plugin>
+                <spcontentindexjob>
+                    <displayname>SharePoint innholdsindeks</displayname>
+                    <description>Denne oppgaven indekserer mediainnhold fra SharePoint.</description>
+                    <indexcompleted>Innholdet er indeksert.</indexcompleted>
+                    <indexfailed>Feil under indeksering av innhold.</indexfailed>
+                </spcontentindexjob>
+            </plugin>
+        </sharepoint>
+    </language>
+</languages>

@@ -1,0 +1,9 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="EPiServer.ConnectForSharePoint.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="EPiServer_ConnectForSharePoint_SPServices_SocialDataService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://episerver99.sharepoint.com/_vti_bin/SocialDataService.asmx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

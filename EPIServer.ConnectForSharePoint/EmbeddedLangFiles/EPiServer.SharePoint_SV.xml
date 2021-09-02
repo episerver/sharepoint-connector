@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+    <language name="svenska" id="sv">
+        <sharepoint>
+          <scheduledjob>
+            <description>Importerar nya eller uppdaterade dokument, objekt och kataloger från SharePoint till Episerver.</description>
+            <displayname>Uppdatera SharePoint</displayname>
+          </scheduledjob>
+          <admin>
+                <ok>Ok</ok>
+                <cancel>Avbryt</cancel>
+                <displayname>Connect For SharePoint</displayname>
+                <description>SharePoint-webbplats</description>
+                <queuedescription>Köinformation</queuedescription>
+                <remainingitems>Kvarvarande objekt</remainingitems>
+                <selectviewdescription>Välj en eller flera listor och motsvarande vyer.</selectviewdescription>
+                <serverurl>Webbplats-URL</serverurl>
+                <username>Användarnamn</username>
+                <password>Lösenord</password>
+                <connectiontype>Anslutningstyp</connectiontype>
+                <online>Online lagringsplats</online>
+                <onpremises>Lokal lagringsplats</onpremises>
+                <save>Spara</save>
+                <connect>Testa anslutningen</connect>
+                <selectedfolder>Katalog</selectedfolder>
+                <selectfolder>Välj katalog:</selectfolder>
+                <entrypoint>Startpunkt för anslutningen</entrypoint>
+                <entrypointinstructions>Välj en katalog som är startpunkt för anslutningen. Om du vill skapa en ny underkatalog, använd textrutan nedanför:</entrypointinstructions>
+                <newsubfolder>Skapa ny underkatalog:</newsubfolder>  
+                <expirationtime>Utgångsdatum</expirationtime>
+                <refreshcache>Uppdatera</refreshcache>
+                <entrypointrequired>En startpunkt för anslutningen krävs.</entrypointrequired>
+                <message>
+                    <savesuccess>Dina inställningar har sparats.</savesuccess>
+                    <refreshsuccess>SharePoint-data uppdateras.</refreshsuccess>
+                    <connectsuccess>Anslutningen till SharePoint-webbplatsen lyckades. Välj SharePoint-vyer att hämta media från.</connectsuccess>
+                    <savesuccesswithnomedia>Dina inställningar har sparats. Observera att ingen vy är vald, ingen SharePoint-data är därför mappad.</savesuccesswithnomedia>
+                    <saveerror>Fel vid sparande: {0}.</saveerror>
+                    <connecttosharepointerror>Fel vid anslutning till SharePoint-webbplats: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>Ingen SharePoint-URL, användarnamn eller lösenord har angetts.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Det gick inte att auktorisera med det angivna användarnamnet och lösenordet.</unauthorizederror>
+                    <notfounderror>SharePoint-URL:en är felaktig eller också har du inte rättigheter till webbplatsen som angetts i URL:en.</notfounderror>
+                    <listviewnotmatched>Listan med vyer är inte uppdaterad. Anslut igen för att se nya SharePoint-vyer.</listviewnotmatched>
+                    <invalidentrypoint>Ogiltig startpunkt för anslutningen.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>Startpunkten för anslutningen måste vara en innehållskatalog.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>Startpunkt för anslutningen måste vara tom.  Välj en katalog som inte innehåller några block eller mediaobjekt.</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>Den valda katalogen kan inte vara en underkatalog till den tidigare valda katalogen. Välj en annan katalog.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Utgångstiden måste anges i minuter.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(större än eller lika med 3 minuter)</expirationtimegreaterorequalthree>
+                    <folderdeleted>Katalogen '{0}' har tagits bort, välj en ny målkatalog.</folderdeleted>
+                </message>
+            </admin>
+            <plugin>
+                <spcontentindexjob>
+                    <displayname>SharePoint innehållsindex</displayname>
+                    <description>Detta jobb indexerar mediainnehåll från SharePoint.</description>
+                    <indexcompleted>Innehållet har indexerats.</indexcompleted>
+                    <indexfailed>Innehållet kunde inte indexeras.</indexfailed>
+                </spcontentindexjob>
+            </plugin>
+        </sharepoint>
+    </language>
+</languages>

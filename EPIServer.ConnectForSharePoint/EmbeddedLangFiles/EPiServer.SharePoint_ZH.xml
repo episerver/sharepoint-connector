@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?> <languages>
+    <language name="中文 (Chinese)" id="zh-CN">
+        <sharepoint>
+          <scheduledjob>
+            <description>从 SharePoint 向 Episerver 导入新的或更新后的文件、项目和文件夹。</description>
+            <displayname>SharePoint 更新</displayname>
+          </scheduledjob>
+          <admin>
+                <ok>确定</ok>
+                <cancel>取消</cancel>
+                <displayname>为 SharePoint 连接</displayname>
+                <description>SharePoint 站点证书</description>
+                <queuedescription>队列信息</queuedescription>
+                <remainingitems>剩余项目</remainingitems>
+                <selectviewdescription>选择一个或多个列表及相应的视图。</selectviewdescription>
+                <serverurl>网站 URL</serverurl>
+                <username>用户名</username>
+                <password>密码</password>
+                <connectiontype>连接类型</connectiontype>
+                <online>在线</online>
+                <onpremises>本机端</onpremises>
+                <save>保存</save>
+                <connect>测试类型</connect>
+                <selectedfolder>文件夹</selectedfolder>
+                <selectfolder>选择文件夹：</selectfolder>
+                <entrypoint>连接条目点</entrypoint>
+                <entrypointinstructions>选择将成为条目点位置的文件夹。  此外，如果您想新建子文件夹，请使用以下文本框：</entrypointinstructions>
+                <newsubfolder>新建子文件夹：</newsubfolder>  
+                <expirationtime>截止时间</expirationtime>
+                <refreshcache>刷新</refreshcache>
+                <entrypointrequired>要求连接条目点。</entrypointrequired>
+                <message>
+                    <savesuccess>已成功保存您的配置。</savesuccess>
+                    <refreshsuccess>正在更新 SharePoint 数据。</refreshsuccess>
+                    <connectsuccess>已成功连接至 SharePoint 站点。 选择 SharePoint 视图以从中获取媒体。</connectsuccess>
+                    <savesuccesswithnomedia>已保存您的配置。 请注意，由于未选择视图，因此未映射 Sharepoint 媒体。</savesuccesswithnomedia>
+                    <saveerror>保存过程中的错误： {0}.</saveerror>
+                    <connecttosharepointerror>连接至 SharePoint 站点时发生错误： {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>未指定 SharePoint URL、用户名或密码。</nourlusernamepasswordspecified>
+                    <unauthorizederror>通过指定用户名和密码授权失败。</unauthorizederror>
+                    <notfounderror>SharePoint URL 错误或您没有访问 URL 中指定站点的权限。</notfounderror>
+                    <listviewnotmatched>视图列表未更新。 重新连接以获取新的 SharePoint 视图。</listviewnotmatched>
+                    <invalidentrypoint>无效连接条目点。</invalidentrypoint>
+                    <entrypointmustbecontentfolder>连接条目点必须为内容文件夹。</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>连接条目点必须为空。  请选择不包含任何“块”或媒体项目的文件夹。</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>所选文件夹不得为之前所选文件夹的子文件夹。  请选择别的文件夹。</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>截止时间必须以分为单位。</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>（大于或等于 3 分钟）</expirationtimegreaterorequalthree>
+                    <folderdeleted>已删除文件夹“{0}”，请选择新的目标。</folderdeleted>
+                </message>
+            </admin>
+            <plugin>
+                <spcontentindexjob>
+                    <displayname>SharePoint 内容索引</displayname>
+                    <description>此任务将指示来自 SharePoint 的媒体内容。</description>
+                    <indexcompleted>已成功指示内容。</indexcompleted>
+                    <indexfailed>内容索引失败。</indexfailed>
+                </spcontentindexjob>
+            </plugin>
+        </sharepoint>
+    </language>
+</languages>

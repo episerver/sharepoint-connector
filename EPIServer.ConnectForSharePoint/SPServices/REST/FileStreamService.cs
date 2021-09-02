@@ -1,0 +1,207 @@
+﻿using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.Rest.Requests;
+using EPiServer.Logging;
+using EPiServer.ServiceLocation;
+using System;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace EPiServer.ConnectForSharePoint.SPServices.REST
+{
+    [ServiceConfiguration(ServiceType = typeof(IFileStreamService))]
+    public class FileStreamService : RESTServiceBase, IFileStreamService
+    {
+        private static readonly ILogger _logger = LogManager.GetLogger();
+        private IListsViewsService _spListsService;
+        private IFilesFoldersService _spFilesFoldersService;
+
+        private static object _lock = new object();
+
+        public FileStreamService()
+        {
+            _spListsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
+            _spFilesFoldersService = ServiceLocator.Current.GetInstance<IFilesFoldersService>();
+        }
+
+        public Stream GetFileSteam(string relativeUrl)
+        {
+            // get stream from SharePoint site
+            return OpenDirectFile(relativeUrl);
+        }
+
+        private static string[] GetItemExpandQuery(bool getVideoInfo)
+        {
+            // NOTE: could not get EncodedAbsUrl without select clause, but including select clause 
+            // we MUST mention explicitly all the fields we need
+            // NOTE: don't include the File's Author, ModifiedBy e.g. File/ModifiedBy
+            // because of duplicating user data returned - an user modifies multi files 
+            var selectClause = new StringBuilder();
+            // default fields returned from list/items endpoint
+            selectClause.Append("select=Id,GUID,Created,Modified,FileSystemObjectType,Title,EncodedAbsUrl");
+
+            // some folder generated automatically when upload a video file to SharePoint,
+            // it will contains some properties about the video
+            if (getVideoInfo)
+            {
+                selectClause.Append(",VideoSetShowDownloadLink,VideoSetShowEmbedLink");
+            }
+
+            // fields expand to File/Folder fields
+            // NOTE: some fields e.g File/UniqueId, Folder/UniqueId are not available on default configuration of a premise SharePoint server
+            selectClause.Append(",File/Name,File/Length,File/Level,File/ServerRelativeUrl,File/TimeCreated,File/TimeLastModified");
+            selectClause.Append(",Folder/Name,Folder/ItemCount,Folder/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified");
+
+            // NOTE: our addon Team virtual machine returns no data for TimeCreated, TimeLastModified, haven't known other premise SharePoint environments.
+            // NOTE: want using Folder/Properties to get more data from premise SharePoint environment (SPFolder TimeCreated, TimeLastModified),
+            // but also have seen that "Folder/Properties" in expand clause ONLY works without select clause 
+            // then does NOT include Folder/Properties here
+            var expandClause = "expand=File/Name,Folder/Name";
+            return new string[2] { selectClause.ToString(), expandClause };
+        }
+
+        public string GetListItemJsonData(SPListItem item)
+        {
+            SPList list = item.ParentList;
+            SPListView view = null;
+            if (item.selectedView == null)
+                view = item.ParentList.Views.First();
+            else
+                view = item.selectedView;
+
+            var restRequest = new RestJsonRequest(string.Format(Consts.REST_LIST_GETITEMS_PATH_FORMAT, list.Id), "POST", null);
+            var bodyBuilder = new StringBuilder("{ 'query' : {'__metadata': { 'type': 'SP.CamlQuery' }, ");
+
+            var fixedString = view.ListViewXml.Replace("<ViewFields>", "<ViewFields Properties=\"true\">  <FieldRef Name=\"*\" /> <FieldRef Name=\"MetaInfo\" />");
+            fixedString = fixedString.Replace("<View ", "<View Scope=\"RecursiveAll\" " );           // search sub folders too.
+
+            // We should probably be using xmldocument in this method....
+            string withQueryString;
+            if (fixedString.Contains("<Query>"))
+                withQueryString = fixedString.Replace("<Query>", "<Query><Where><Eq>" +
+                        "<FieldRef Name=\"ID\"/><Value Type =\"Lookup\">" + item.Id + "</Value>" +
+                        "</Eq></Where>");
+            else // custom views with no ordering have <Query/>
+            {
+                withQueryString = fixedString.Replace("<Query />", "<Query><Where><Eq>" +
+                        "<FieldRef Name=\"ID\"/><Value Type =\"Lookup\">" + item.Id + "</Value>" +
+                        "</Eq></Where></Query>");
+            }
+
+            bodyBuilder.AppendFormat("'ViewXml': '{0}'", EncodeDataForCAMLQuery(withQueryString));
+
+            // NOTE: this is on our addon Team virtual machine, haven't known other premise SharePoint environments.
+            // NOTE: only with POST has this way defining DatesInUtc in the request 
+            // NOTE: without DatesInUtc==true the premise SharePoint (addon Team virtual machine) returns local DateTime string 
+            // (a DateTime value string without 'Z' at end and applied Regional Settings of SiteCollection already)
+            // because without Z the desirialize one more time coverts to server local time. Force DatesInUtc:
+            bodyBuilder.Append(",'DatesInUtc': 'true'");
+            bodyBuilder.Append(" } }");
+
+            String str = SendRequest(restRequest, bodyBuilder.ToString(), null, true);
+
+            // remove this Id because it causes Json parsing issues... not sure why sharepoint is returning two id values
+            return str.Replace("\"FileSystemObjectType\":0,\"Id\"", "\"FileSystemObjectType\":0,\"IDDD\"");
+        }
+
+        /// <summary>
+        /// Open and read binary data directly from SharePoint site
+        /// </summary>
+        /// <param name="filePath">The image path, thumbnail or orginal relative url</param>
+        /// <returns></returns>
+        private MemoryStream OpenDirectFile(string fileRelativeUrl)
+        {
+            try
+            {
+                return OpenDirectFileWithRetry(fileRelativeUrl);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private MemoryStream OpenDirectFileWithRetry(string fileRelativeUrl)
+        {
+            int retry = 0;
+            int MAX_RETRY = 3;
+
+            do
+            {
+                try
+                {
+                    var reqInfo = new RestJsonRequest(string.Format(Consts.REST_OPENBINARYSTREAM_FORMAT, fileRelativeUrl));
+                    var headers = new NameValueCollection();
+                    headers.Add("binaryStringResponseBody", "true");
+
+                    var memoryStream = new MemoryStream();
+                    // Get binary data from SharePoint
+                    using (var stream = GetResponseStream(reqInfo, null, headers))
+                    {
+                        stream.CopyTo(memoryStream); // we do this to support seeking
+                        stream.Flush();
+                    }
+
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                    return memoryStream;
+                }
+                catch (Exception ex)
+                {
+                    retry++;
+                    if (retry > MAX_RETRY)
+                    {
+                        _logger.Error("OpenDirectFileWithRetry - failed after " + MAX_RETRY + " attempts.", ex);
+                        throw; 
+                    }
+                    _logger.Warning("Will retry last request... Retry count = " + retry);
+                }
+            } while (true);
+        }
+
+        /// <summary>
+        /// Gets thumbnail url from the the given SharePoint's image url
+        /// </summary>
+        /// <param name="imageUrl">The given SharePoint's image url</param>
+        /// <returns></returns>
+        private string GetSharePointThumbnailUrl(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return string.Empty;
+            }
+
+            var lastSlashPos = imageUrl.LastIndexOf('/');
+            if (lastSlashPos < 0)
+            {
+                return imageUrl;
+            }
+
+            var nameNoExtension = Path.GetFileNameWithoutExtension(imageUrl);
+            var extension = Path.GetExtension(imageUrl);
+            // file without extension
+            if (string.IsNullOrWhiteSpace(nameNoExtension) || string.IsNullOrWhiteSpace(extension))
+            {
+                return imageUrl;
+            }
+
+            var thumbnailUrl = new StringBuilder(imageUrl.Substring(0, lastSlashPos + 1));
+            // Note: SharePoint thumbnail is generated in .jpg extension
+            thumbnailUrl.AppendFormat("_t/{0}_{1}.jpg", nameNoExtension, extension.Remove(0, 1));
+
+            return thumbnailUrl.ToString();
+        }
+
+        public string GetFileRelativeUrl(SPListItem listItem)
+        {
+            if (listItem.File == null)
+            {
+                return string.Empty;
+            }
+
+            return EncodeDataForRESTRequest(listItem.File.ServerRelativeUrl);
+        }
+    }
+}

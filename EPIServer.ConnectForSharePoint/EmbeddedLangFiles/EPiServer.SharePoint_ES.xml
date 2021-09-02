@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?> <languages>
+    <language name="español" id="es">
+        <sharepoint>
+          <scheduledjob>
+            <description>Importa documentos, carpetas y elementos nuevos o actualizados de SharePoint en Episerver.</description>
+            <displayname>Actualización de SharePoint</displayname>
+          </scheduledjob>
+          <admin>
+                <ok>Aceptar</ok>
+                <cancel>Cancelar</cancel>
+                <displayname>Conectar para SharePoint</displayname>
+                <description>Credenciales del sitio para SharePoint</description>
+                <queuedescription>Información de la cola</queuedescription>
+                <remainingitems>Elementos restantes</remainingitems>
+                <selectviewdescription>Seleccione una o varias listas y las vistas correspondientes.</selectviewdescription>
+                <serverurl>URL del sitio</serverurl>
+                <username>Nombre de usuario</username>
+                <password>Contraseña</password>
+                <connectiontype>Tipo de conexión</connectiontype>
+                <online>En línea</online>
+                <onpremises>En las instalaciones</onpremises>
+                <save>Guardar</save>
+                <connect>Conexión de prueba</connect>
+                <selectedfolder>Carpeta</selectedfolder>
+                <selectfolder>Seleccionar carpeta:</selectfolder>
+                <entrypoint>Punto de entrada de la conexión</entrypoint>
+                <entrypointinstructions>Seleccione una carpeta que será la ubicación del punto de entrada.  Además, si desea crear una nueva subcarpeta, utilice el cuadro de texto siguiente:</entrypointinstructions>
+                <newsubfolder>Crear nueva subcarpeta:</newsubfolder>  
+                <expirationtime>Tiempo hasta el vencimiento</expirationtime>
+                <refreshcache>Actualizar</refreshcache>
+                <entrypointrequired>Se requiere un punto de entrada de la conexión.</entrypointrequired>
+                <message>
+                    <savesuccess>Su configuración se ha guardado correctamente.</savesuccess>
+                    <refreshsuccess>Se están actualizando los datos de SharePoint.</refreshsuccess>
+                    <connectsuccess>Conectado correctamente al sitio de SharePoint. Seleccione las vistas de SharePoint desde las que se van a obtener los medios.</connectsuccess>
+                    <savesuccesswithnomedia>Su configuración se ha guardado. Tenga en cuenta que, como no hay ninguna vista seleccionada, no se asignará ningún medio de Sharepoint.</savesuccesswithnomedia>
+                    <saveerror>Error al guardar: {0}.</saveerror>
+                    <connecttosharepointerror>Error al conectar al sitio de SharePoint: {0}</connecttosharepointerror>
+                    <nourlusernamepasswordspecified>No se ha especificado ninguna dirección URL, nombre de usuario o contraseña de SharePoint.</nourlusernamepasswordspecified>
+                    <unauthorizederror>Fallo de autorización con el nombre de usuario y la contraseña especificados.</unauthorizederror>
+                    <notfounderror>La dirección URL de SharePoint es incorrecta o no tiene acceso al sitio especificado en la URL.</notfounderror>
+                    <listviewnotmatched>La lista de vistas no está actualizada. Vuelva a conectar para obtener nuevas vistas de SharePoint.</listviewnotmatched>
+                    <invalidentrypoint>Punto de entrada de la conexión no válido.</invalidentrypoint>
+                    <entrypointmustbecontentfolder>El punto de entrada de la conexión debe ser una carpeta de contenido.</entrypointmustbecontentfolder>
+                    <entrypointmustnothavechildren>El punto de entrada de la conexión debe estar vacío.  Seleccione una carpeta que no contenga ningún “Bloque” ni elemento de medios.</entrypointmustnothavechildren>
+                    <entrypointcannotbechildofprevious>La carpeta seleccionada no puede ser una subcarpeta de la carpeta seleccionada anteriormente.  Seleccione una carpeta diferente.</entrypointcannotbechildofprevious>
+                  <expirationtimemustbeminutes>Tiempo hasta el vencimiento debe ser de minutos.</expirationtimemustbeminutes>                   
+                    <expirationtimegreaterorequalthree>(igual o superior a 3 minutos)</expirationtimegreaterorequalthree>
+                    <folderdeleted>La carpeta “{0}” ha sido borrada; seleccione un destino nuevo.</folderdeleted>
+                </message>
+            </admin>
+            <plugin>
+                <spcontentindexjob>
+                    <displayname>Índice de contenidos de SharePoint</displayname>
+                    <description>Este trabajo indexará el contenido de medios de SharePoint.</description>
+                    <indexcompleted>Contenido indexado correctamente.</indexcompleted>
+                    <indexfailed>Fallo de indexación del contenido.</indexfailed>
+                </spcontentindexjob>
+            </plugin>
+        </sharepoint>
+    </language>
+</languages>
