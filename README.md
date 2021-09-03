@@ -1,7 +1,7 @@
 <a href="https://github.com/episerver/sharepoint-connector"><img src="http://ux.episerver.com/images/logo.png" title="Sharepoint Connector" alt="Sharepoint Connector"></a>
 
 ## Sharepoint Connector
-Optimizely Connect for SharePoint makes it easy to transfer documents from your SharePoint instance to Episerver assets.
+Optimizely Connect for SharePoint makes it easy to transfer documents from your SharePoint instance to Optimizely assets.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Optimizely Connect for SharePoint makes it easy to transfer documents from your 
 
 * Visual Studio 2017 or higher - [Download](https://visualstudio.microsoft.com/downloads/)
 
-See also the general [Episerver system requirements](https://world.episerver.com/documentation/system-requirements/) on Episerver World.
+See also the general [Optimizely system requirements](https://world.optimizely.com/documentation/system-requirements/) on Optimizely World.
 
 ---
 
