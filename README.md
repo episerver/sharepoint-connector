@@ -1,4 +1,4 @@
-<a href="https://github.com/episerver/sharepoint-connector"><img src="http://ux.episerver.com/images/logo.png" title="Sharepoint Connector" alt="Sharepoint Connector"></a>
+<a href="https://github.com/episerver/sharepoint-connector"><img src="https://ux.episerver.com/images/logo.png" title="Sharepoint Connector" alt="Sharepoint Connector"></a>
 
 ## Sharepoint Connector
 Optimizely Connect for SharePoint makes it easy to transfer documents from your SharePoint instance to Optimizely assets.
