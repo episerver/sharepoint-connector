@@ -66,6 +66,26 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return (string)Session[SharePointUserPassword]; }
         }
 
+        private string ConfiguredClientId
+        {
+            get { return ClientId.Text.Trim(); }
+        }
+
+        private string ConfiguredClientSecret
+        {
+            get { return ClientSecret.Text.Trim(); }
+        }
+
+        private string ConfiguredTargetHost
+        {
+            get { return TargetHost.Text.Trim(); }
+        }
+
+        private string ConfiguredRealm
+        {
+            get { return Realm.Text.Trim(); }
+        }
+
         [System.Web.Services.WebMethod()]
         /// Used by jscript in aspx to get the current count asyc - 
         /// the jscript needed a method, not a property.
@@ -491,6 +511,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
                 SharePointSettings.Current.Username = ConfiguredUsername;
                 SharePointSettings.Current.Password = ConfiguredPassword;
+                SharePointSettings.Current.ClientId = ConfiguredClientId;
+                SharePointSettings.Current.ClientSecret = ConfiguredClientSecret;
+                SharePointSettings.Current.TargetHost = ConfiguredTargetHost;
+                SharePointSettings.Current.Realm = ConfiguredRealm;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
                 SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
@@ -662,6 +686,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SiteUrl = ConfiguredUrl,
                 Username = ConfiguredUsername,
                 Password = ConfiguredPassword,
+                ClientId = ConfiguredClientId,
+                ClientSecret = ConfiguredClientSecret,
+                TargetHost = ConfiguredTargetHost,
+                Realm = ConfiguredRealm,
                 IsSharePointOnline = RBOnline.Checked
             };
 
@@ -671,7 +699,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             };
             var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
-            // Concatinate the document and custom lists.
+            // Concatenate the document and custom lists.
             var documentLists = svcLists.GetLists((int)ListBaseType.DocumentLibrary);
             var customLists = svcLists.GetLists((int)ListBaseType.GenericList);
             var supportedLists = documentLists.Concat(customLists);
@@ -681,7 +709,9 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         private bool PreAuthenticationCheck()
         {
-            if (string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredUsername) || string.IsNullOrEmpty(ConfiguredPassword))
+            if (string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredUsername) || string.IsNullOrEmpty(ConfiguredPassword) 
+                || string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) 
+                || string.IsNullOrEmpty(ConfiguredTargetHost) || string.IsNullOrEmpty(ConfiguredRealm))
             {
                 // Show error message in case of posting back and no url/username/password specified
                 if (Page.IsPostBack)

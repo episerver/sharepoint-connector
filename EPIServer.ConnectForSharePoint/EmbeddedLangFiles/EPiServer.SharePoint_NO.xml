@@ -16,6 +16,10 @@
                 <serverurl>URL-adresse for område</serverurl>
                 <username>Brukernavn</username>
                 <password>Passord</password>
+                <clientid>ClientId</clientid>
+                <clientsecret>ClientSecret</clientsecret>
+                <targethost>TargetHost</targethost>
+                <realm>Realm</realm>
                 <connectiontype>Tilkoblingstype</connectiontype>
                 <online>Pålogget</online>
                 <onpremises>Lokalt</onpremises>

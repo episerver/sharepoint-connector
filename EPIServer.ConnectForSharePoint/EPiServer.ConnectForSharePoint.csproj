@@ -283,6 +283,7 @@
     <Compile Include="Helpers\IAccessRightsHelper.cs" />
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
+    <Compile Include="Helpers\SharepointOAuthTokenResult.cs" />
     <Compile Include="Messaging\Messages\ISharePointMessage.cs" />
     <Compile Include="Processor\IMetaDataProcessor.cs" />
     <Compile Include="Helpers\ISharePointProcessorHelper.cs" />
@@ -392,10 +393,10 @@
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Helpers\SharePointHelper.cs" />
     <Compile Include="Web\SharePointConfiguration.aspx.designer.cs">
       <DependentUpon>SharePointConfiguration.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\SharePointHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ClientResources\Images\DefaultThumbnail.png" />

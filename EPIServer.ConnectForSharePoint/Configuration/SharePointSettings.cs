@@ -70,6 +70,14 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// <value>
         public ThumbnailOptions ThumbnailOption { get; set; }
 
+        public string ClientId {  get; set; }
+
+        public string ClientSecret {  get; set; }
+
+        public string TargetHost {  get; set; }
+
+        public string Realm {  get; set; }
+
         /// <summary>
         /// Internal static instance of the connector settings. 
         /// </summary>

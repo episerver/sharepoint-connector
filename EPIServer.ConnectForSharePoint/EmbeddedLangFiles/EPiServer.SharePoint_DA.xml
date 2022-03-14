@@ -16,6 +16,10 @@
                 <serverurl>Websteds-URL</serverurl>
                 <username>Brugernavn</username>
                 <password>Adgangskode</password>
+                <clientid>ClientId</clientid>
+                <clientsecret>ClientSecret</clientsecret>
+                <targethost>TargetHost</targethost>
+                <realm>Realm</realm>
                 <connectiontype>Forbindelsestype</connectiontype>
                 <online>Online</online>
                 <onpremises>Lokalt</onpremises>

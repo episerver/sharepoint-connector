@@ -264,6 +264,27 @@
                 <asp:Label AssociatedControlID="Password" runat="server"><%# Translate("/sharepoint/admin/password") %></asp:Label>
                 <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
             </div>
+            <fieldset class="OAuth">
+                <div class="epi-size15">
+                    <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
+                    <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
+                </div>
+
+                <div class="epi-size15">
+                    <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
+                    <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
+                </div>
+
+                <div class="epi-size15">
+                    <asp:Label AssociatedControlID="TargetHost" runat="server"><%# Translate("/sharepoint/admin/targethost") %></asp:Label>
+                    <asp:TextBox ID="TargetHost" runat="server" MaxLength="255" Text="<%# CurrentSettings.TargetHost %>" />
+                </div>
+
+                <div class="epi-size15">
+                    <asp:Label AssociatedControlID="Realm" runat="server"><%# Translate("/sharepoint/admin/realm") %></asp:Label>
+                    <asp:TextBox ID="Realm" runat="server" MaxLength="255" Text="<%# CurrentSettings.Realm %>" />
+                </div>
+            </fieldset>
 
            <div class="epi-size15">
                 <label style="position:absolute; vertical-align:bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>

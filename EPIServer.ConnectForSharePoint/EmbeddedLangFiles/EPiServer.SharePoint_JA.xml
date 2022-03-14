@@ -16,6 +16,10 @@
                 <serverurl>サイトURL</serverurl>
                 <username>ユーザー名</username>
                 <password>パスワード</password>
+                <clientid>ClientId</clientid>
+                <clientsecret>ClientSecret</clientsecret>
+                <targethost>TargetHost</targethost>
+                <realm>Realm</realm>
                 <connectiontype>接続タイプ</connectiontype>
                 <online>オンライン</online>
                 <onpremises>オンプレミス</onpremises>

@@ -7,11 +7,15 @@ using EPiServer.Framework.Cache;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
@@ -159,6 +163,32 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         {
             //var claimHelper = new MsOnlineClaimsHelper(spSettings.SiteUrl, spSettings.Username, spSettings.Password);
             //return claimHelper.CookieContainer;
+
+            var domain = new Uri(spSettings.TargetHost).Host;
+            var resource = String.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
+            var postData = String.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&resource={2}", spSettings.ClientId, spSettings.ClientSecret, resource);
+            var data = Encoding.ASCII.GetBytes(postData);
+
+            var requestUrl = String.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
+            var headers = new System.Collections.Specialized.NameValueCollection();
+            headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+            var request = WebHelper.CreateRequest(requestUrl, "POST", headers);
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = data.Length;
+
+            using (var stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+
+            var response = (HttpWebResponse)request.GetResponse();
+            var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            
+            SharepointOAuthTokenResult oAuthTokenObj = JsonConvert.DeserializeObject<SharepointOAuthTokenResult>(responseString);
+
+            
+
             var securePassword = new SecureString();
             var siteUri = new Uri(spSettings.SiteUrl);
             foreach (var c in spSettings.Password) { securePassword.AppendChar(c); }

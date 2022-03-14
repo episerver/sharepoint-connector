@@ -16,6 +16,10 @@
                 <serverurl>URL del sitio</serverurl>
                 <username>Nombre de usuario</username>
                 <password>Contraseña</password>
+                <clientid>ClientId</clientid>
+                <clientsecret>ClientSecret</clientsecret>
+                <targethost>TargetHost</targethost>
+                <realm>Realm</realm>
                 <connectiontype>Tipo de conexión</connectiontype>
                 <online>En línea</online>
                 <onpremises>En las instalaciones</onpremises>
