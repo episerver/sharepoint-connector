@@ -45,6 +45,7 @@
           <saveerror>Errore durante il salvataggio: {0}.</saveerror>
           <connecttosharepointerror>Errore durante la connessione al sito di SharePoint: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Nessun URL, nome utente o password specificati per SharePoint.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Autorizzazione fallita con password e nome utente specificati.</unauthorizederror>
           <notfounderror>URL di SharePoint errato o non hai accesso al sito specificato nel URL.</notfounderror>
           <listviewnotmatched>L'elenco delle visualizzazioni non è aggiornato. Ricollegati per ottenere nuove visualizzazioni di SharePoint.</listviewnotmatched>

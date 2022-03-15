@@ -45,6 +45,7 @@
           <saveerror>Fel vid sparande: {0}.</saveerror>
           <connecttosharepointerror>Fel vid anslutning till SharePoint-webbplats: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Ingen SharePoint-URL, användarnamn eller lösenord har angetts.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Det gick inte att auktorisera med det angivna användarnamnet och lösenordet.</unauthorizederror>
           <notfounderror>SharePoint-URL:en är felaktig eller också har du inte rättigheter till webbplatsen som angetts i URL:en.</notfounderror>
           <listviewnotmatched>Listan med vyer är inte uppdaterad. Anslut igen för att se nya SharePoint-vyer.</listviewnotmatched>

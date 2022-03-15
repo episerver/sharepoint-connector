@@ -45,6 +45,7 @@
           <saveerror>Erreur lors de l’enregistrement : {0}.</saveerror>
           <connecttosharepointerror>Erreur lors de la connexion au site SharePoint : {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Aucun URL SharePoint, nom d’utilisateur ou mot de passe n’est spécifié.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Autorisation impossible avec le mot de passe et le nom d’utilisateur spécifiés.</unauthorizederror>
           <notfounderror>L’URL SharePoint est incorrect ou vous n’avez pas accès au site spécifié dans l’URL.</notfounderror>
           <listviewnotmatched>La liste des affichages n’est pas à jour. Reconnectez-vous pour obtenir les nouveaux affichages SharePoint.</listviewnotmatched>

@@ -45,6 +45,7 @@
           <saveerror>保存時のエラー： {0}。</saveerror>
           <connecttosharepointerror>SharePointサイトへ接続時のエラー： {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>SharePoint URL、ユーザー名、パスワードが何も指定されていません。</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>指定のユーザー名およびパスワードによる認証に失敗しました。</unauthorizederror>
           <notfounderror>SharePoint URLが正しくありません。またはURLで指定されているサイトへのアクセス権がありません。</notfounderror>
           <listviewnotmatched>ビューのリストが最新ではありません。 再接続して、新しいSharePointビューを取得してください。</listviewnotmatched>

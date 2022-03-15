@@ -45,6 +45,7 @@
           <saveerror>Error al guardar: {0}.</saveerror>
           <connecttosharepointerror>Error al conectar al sitio de SharePoint: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>No se ha especificado ninguna dirección URL, nombre de usuario o contraseña de SharePoint.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Fallo de autorización con el nombre de usuario y la contraseña especificados.</unauthorizederror>
           <notfounderror>La dirección URL de SharePoint es incorrecta o no tiene acceso al sitio especificado en la URL.</notfounderror>
           <listviewnotmatched>La lista de vistas no está actualizada. Vuelva a conectar para obtener nuevas vistas de SharePoint.</listviewnotmatched>

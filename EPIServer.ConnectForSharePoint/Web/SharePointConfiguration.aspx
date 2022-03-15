@@ -19,7 +19,7 @@
         }
 
         .listViewSelector {
-            padding: 0 0 8px 2px;
+        padding: 0 0 8px 2px;
         }
     </style>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -59,7 +59,7 @@
                 $('#FullRegion_Connect').removeAttr('disabled');
             }
 
-            // (save or refersh triggered by another user in another browser)
+            // (save or refresh triggered by another user in another browser)
             // items in the queue, but the buttons are enabled 
             if (result != "0" && button.disabled == false) {
                 $('span.listCheckBox input[type="checkbox"]').attr('disabled', 'disabled'); // List of all the checkboxes corresponding to lists
@@ -76,8 +76,10 @@
 
             lastValue = result;
         }
+
         function onError(result) {
         }
+
         document.body.onload = updateQueCounts;
         window.setInterval(updateQueCounts, 1000);
 
@@ -109,7 +111,6 @@
             if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
                 $('#FullRegion_Save').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
                 $('#FullRegion_Refresh').attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
-
             }
 
             // Enable or Disable Save and Refresh buttons based on checkbox selection(s).
@@ -240,27 +241,31 @@
         }
         
         function setAuthTypePanelVisibility() {
-            var isChecked = $('#FullRegion_RBModernAuth').checked;
-
-            if (isChecked) {
-                $('#ModernAuth').css('display', 'block');
-                $('#BasicAuth').css('display', 'none');
+            var isModernAuthChecked = $('#FullRegion_RBModernAuth').is(':checked');
+            if (isModernAuthChecked) {
+                displayModernAuthSection();
             } else {
-                $('#ModernAuth').css('display', 'none');
-                $('#BasicAuth').css('display', 'block');
+                displayBasicAuthSection();
             }
 
-            $('#FullRegion_RBModernAuth').click(function() {
-                $('#ModernAuth').css('display', 'block');
-                $('#BasicAuth').css('display', 'none');
-            })
-
             $('#FullRegion_RBBasicAuth').click(function() {
-                $('#ModernAuth').css('display', 'none');
-                $('#BasicAuth').css('display', 'block');
-            })
+                displayBasicAuthSection();
+            });
+
+            $('#FullRegion_RBModernAuth').click(function() {
+                displayModernAuthSection();
+            });
+       }
+
+        function displayModernAuthSection() {
+            $('#ModernAuth').css('display', 'block');
+            $('#BasicAuth').css('display', 'none');
         }
 
+        function displayBasicAuthSection() {
+            $('#ModernAuth').css('display', 'none');
+            $('#BasicAuth').css('display', 'block');
+        }
     </script>
 
     <div class="epi-contentContainer epi-padding">
@@ -288,7 +293,7 @@
                     <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/modernauth") %></label>
                     <br />
                 </div>
-                <fieldset id="BasicAuth" style="display:none;">
+                <fieldset id="BasicAuth">
                     <div class="epi-size15">
                         <asp:Label AssociatedControlID="ServerUrl" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
                         <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
@@ -303,28 +308,24 @@
                         <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
                     </div>
                 </fieldset>
-                <fieldset id="ModernAuth" style="display:none;">
-                    <div class="epi-size15">
-                        <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
-                        <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
-                    </div>
-
-                    <div class="epi-size15">
-                        <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
-                        <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
-                    </div>
-
+                <fieldset id="ModernAuth">
                     <div class="epi-size15">
                         <asp:Label AssociatedControlID="TargetHost" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
                         <asp:TextBox ID="TargetHost" runat="server" MaxLength="255" Text="<%# CurrentSettings.TargetHost %>" />
                     </div>
-
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
+                        <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
+                    </div>
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
+                        <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
+                    </div>
                     <div class="epi-size15">
                         <asp:Label AssociatedControlID="Realm" runat="server"><%# Translate("/sharepoint/admin/realm") %></asp:Label>
                         <asp:TextBox ID="Realm" runat="server" MaxLength="255" Text="<%# CurrentSettings.Realm %>" />
                     </div>
                 </fieldset>
-
                 <div class="epi-size15">
                     <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
                     <br />

@@ -1,14 +1,21 @@
 using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Helpers;
-using EPiServer.ConnectForSharePoint.Messaging.InMemory;
+using EPiServer.ConnectForSharePoint.Messaging;
+using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.Processor;
 using EPiServer.ConnectForSharePoint.Rest;
+using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
+using EPiServer.DataAbstraction;
+using EPiServer.DataAccess;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
+using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Shell.WebForms;
+using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +23,6 @@ using System.Net;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EPiServer.DataAccess;
-using EPiServer.Security;
-using EPiServer.Web;
-using EPiServer.ConnectForSharePoint.Messaging;
-using EPiServer.ConnectForSharePoint.Messaging.Messages;
-using EPiServer.DataAbstraction;
-using EPiServer.ConnectForSharePoint.SPServices;
-using EPiServer.ConnectForSharePoint.Processor;
 
 namespace EPiServer.ConnectForSharePoint.Web
 {
@@ -42,7 +41,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         private static readonly IContentRepository _contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
         private static bool _createNewEntryPointFolder = false;
         private static string _newFolderName;
-        
+
         /// <summary>
         /// Called by web page during data bind operation
         /// </summary>
@@ -108,12 +107,12 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else
                 {
                     var processor = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
-                    if (processor.IsRunning() )
+                    if (processor.IsRunning())
                     {
                         // its possible that the thread is running, but we 
                         // havent added anything to the queue, this allows the 
                         // ui script to set all the buttons disabled.
-                        retval = "1"; 
+                        retval = "1";
                     }
                 }
 
@@ -223,7 +222,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     ContentFolder f;
                     var repo = ServiceLocator.Current.GetInstance<IContentRepository>();
                     bool loaded = repo.TryGet<ContentFolder>(SharePointSettings.Current.EntryPoint, out f);
-                    if (ContentReference.EmptyReference == SharePointSettings.Current.EntryPoint || 
+                    if (ContentReference.EmptyReference == SharePointSettings.Current.EntryPoint ||
                         loaded == false || f.IsDeleted)
                     {
                         Refresh.Enabled = false;
@@ -358,9 +357,9 @@ namespace EPiServer.ConnectForSharePoint.Web
                         {
                             // If the ID is different, check to see if there are any children.
                             var children = contentRepository.GetChildren<IContent>(contentLink);
-                                if (children.Any())
-                                    strErrors.AppendLine(
-                                        Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
+                            if (children.Any())
+                                strErrors.AppendLine(
+                                    Translate("/sharepoint/admin/message/entrypointmustnothavechildren"));
 
                             // make sure the new folder is not a sub folder of the old parent.
                             var current = new ContentReference(SharePointSettings.Current.EntryPoint.ID);
@@ -384,7 +383,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else // otherwise, we create a new folder, which by default is empty so we can just carry on
                 {
                     // make sure we dont keep trying to create it under success or failure conditions.
-                    _createNewEntryPointFolder = false; 
+                    _createNewEntryPointFolder = false;
 
                     // make sure the new folder is not a sub folder of the old parent.
                     var current = new ContentReference(SharePointSettings.Current.EntryPoint.ID);
@@ -513,7 +512,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Password = ConfiguredPassword;
                 SharePointSettings.Current.ClientId = ConfiguredClientId;
                 SharePointSettings.Current.ClientSecret = ConfiguredClientSecret;
-                SharePointSettings.Current.TargetHost = ConfiguredTargetHost;
+                SharePointSettings.Current.TargetHost = ConfiguredTargetHost.EndsWith("/") ? ConfiguredTargetHost : ConfiguredTargetHost + "/";
                 SharePointSettings.Current.Realm = ConfiguredRealm;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
@@ -575,7 +574,7 @@ namespace EPiServer.ConnectForSharePoint.Web
 
             // dont test the connection, that would get the data from the control which could have been changed
             var lists = GetMediaLists(false, out errorMessage);
-            
+
             if (lists != null && lists.Any())
             {
                 var messageHelper = ServiceLocator.Current.GetInstance<IMetaDataProcessor>();
@@ -639,7 +638,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
                 else
                 {
-                    // Concatinate the document and custom lists.
+                    // Concatenate the document and custom lists.
                     var listViewsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
                     var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
                     var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
@@ -695,10 +694,16 @@ namespace EPiServer.ConnectForSharePoint.Web
                 IsAuthModern = RBModernAuth.Checked
             };
 
-            var contextService = new EndpointContextService
-            {
-                EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
-            };
+            var contextService = newSettings.IsAuthModern ?
+                new EndpointContextService
+                {
+                    EndpointContext = new SPRestClient(newSettings)
+                } :
+                new EndpointContextService
+                {
+                    EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
+                };
+
             var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
             // Concatenate the document and custom lists.
@@ -711,17 +716,31 @@ namespace EPiServer.ConnectForSharePoint.Web
 
         private bool PreAuthenticationCheck()
         {
-            if (string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredUsername) || string.IsNullOrEmpty(ConfiguredPassword) 
-                || string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) 
-                || string.IsNullOrEmpty(ConfiguredTargetHost) || string.IsNullOrEmpty(ConfiguredRealm))
+            if (RBBasicAuth.Checked)
             {
-                // Show error message in case of posting back and no url/username/password specified
-                if (Page.IsPostBack)
+                if (string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredUsername) || string.IsNullOrEmpty(ConfiguredPassword))
                 {
-                    ShowMessage(Translate("/sharepoint/admin/message/nourlusernamepasswordspecified"), true);
-                }
+                    // Show error message in case of posting back and no url/username/password specified
+                    if (Page.IsPostBack)
+                    {
+                        ShowMessage(Translate("/sharepoint/admin/message/nourlusernamepasswordspecified"), true);
+                    }
 
-                return false;
+                    return false;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) || string.IsNullOrEmpty(ConfiguredTargetHost) || string.IsNullOrEmpty(ConfiguredRealm))
+                {
+                    // Show error message in case of posting back and no relevant config values are specified
+                    if (Page.IsPostBack)
+                    {
+                        ShowMessage(Translate("/sharepoint/admin/message/nourlusernamepasswordspecified"), true);
+                    }
+
+                    return false;
+                }
             }
 
             return true;

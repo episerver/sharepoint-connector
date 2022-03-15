@@ -45,6 +45,7 @@
           <saveerror>Error while saving: {0}.</saveerror>
           <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
           <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
           <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>

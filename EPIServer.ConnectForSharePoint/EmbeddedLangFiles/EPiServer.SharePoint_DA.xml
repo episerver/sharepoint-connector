@@ -45,6 +45,7 @@
           <saveerror>Fejl under lagring: {0}.</saveerror>
           <connecttosharepointerror>Fejl ved oprettelse af forbindelse til SharePoint-websted: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Der er ikke angivet SharePoint-URL, brugernavn eller adgangskode.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Der kunne ikke godkendes med angivne brugernavn og adgangskode.</unauthorizederror>
           <notfounderror>SharePoint-URL'en er forkert, eller du har ikke adgang til webstedet, der er angivet af URL'en.</notfounderror>
           <listviewnotmatched>Listen over visninger er ikke opdateret. Opret forbindelse igen for at få nye SharePoint-visninger.</listviewnotmatched>

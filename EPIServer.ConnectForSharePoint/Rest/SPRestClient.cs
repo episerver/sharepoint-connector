@@ -19,16 +19,25 @@ namespace EPiServer.ConnectForSharePoint.Rest
         private IObjectSerializer _serializer = ServiceLocator.Current.GetInstance<IObjectSerializerFactory>().GetSerializer(KnownContentTypes.Json);
         private SharePointSettings _spSettings;
         private Func<SharePointSettings, CookieContainer> _getCookieContainer;
+        private SharepointOAuthTokenResult _oAuthTokenResult;
 
         public SPRestClient()
             : this(SharePointSettings.Current, (currentSettings) => { return SharePointHelper.GetCookies(currentSettings); })
-        { }
+        {
+            _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
+        }
 
         public SPRestClient(
             SharePointSettings settings, Func<SharePointSettings, CookieContainer> getCookieContainer)
         {
             _spSettings = settings;
             _getCookieContainer = getCookieContainer;
+        }
+
+        public SPRestClient(SharePointSettings settings)
+        {
+            _spSettings = settings;
+            _oAuthTokenResult = SharePointHelper.GetOAuthResponse(_spSettings);
         }
 
         /// <summary>
@@ -80,24 +89,32 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
         private WebRequest CreateRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers)
         {
-            var requestUrl = WebHelper.CombineUrl(_spSettings.SiteUrl, requestInfo.EncodedUrl);
+            var url = _spSettings.IsAuthModern ? _spSettings.TargetHost : _spSettings.SiteUrl;
+            var requestUrl = WebHelper.CombineUrl(url, requestInfo.EncodedUrl);
             string acceptType = "application/json;odata=verbose";
-            if (requestInfo.EncodedUrl.StartsWith(_spSettings.SiteUrl, StringComparison.OrdinalIgnoreCase))
+            if (requestInfo.EncodedUrl.StartsWith(url, StringComparison.OrdinalIgnoreCase))
             {
                 acceptType = "application/atom+xml";
             }
 
             var webRequest = (HttpWebRequest)WebHelper.CreateRequest(requestUrl, requestInfo.RequestMethod, headers, acceptType);
 
-            // NOTE: the CookieContainer MUST be set before GetRequestStream() call
-            // so that any POST request can work successfully
-            if (_spSettings.IsSharePointOnline || SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
+            if (_spSettings.IsAuthModern)
             {
-                webRequest.CookieContainer = _getCookieContainer(_spSettings);
+                webRequest.Headers.Add("Authorization", "Bearer " + _oAuthTokenResult.AccessToken);
             }
             else
             {
-                webRequest.Credentials = SharePointHelper.GetCredentialCache(_spSettings);
+                // NOTE: the CookieContainer MUST be set before GetRequestStream() call
+                // so that any POST request can work successfully
+                if (_spSettings.IsSharePointOnline || SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
+                {
+                    webRequest.CookieContainer = _getCookieContainer(_spSettings);
+                }
+                else
+                {
+                    webRequest.Credentials = SharePointHelper.GetCredentialCache(_spSettings);
+                }
             }
 
             AddRequestBody(webRequest, requestBody);
