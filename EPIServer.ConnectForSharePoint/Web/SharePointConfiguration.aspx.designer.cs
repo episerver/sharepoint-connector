@@ -7,11 +7,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EPiServer.ConnectForSharePoint.Web {
-    
-    
-    public partial class SharePointConfiguration {
-        
+namespace EPiServer.ConnectForSharePoint.Web
+{
+
+
+    public partial class SharePointConfiguration
+    {
+
         /// <summary>
         /// ScriptManager1 control.
         /// </summary>
@@ -20,7 +22,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.ScriptManager ScriptManager1;
-        
+
         /// <summary>
         /// ConnectionNote control.
         /// </summary>
@@ -29,7 +31,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel ConnectionNote;
-        
+
         /// <summary>
         /// MessagePanel control.
         /// </summary>
@@ -38,7 +40,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel MessagePanel;
-        
+
         /// <summary>
         /// ServerUrl control.
         /// </summary>
@@ -47,7 +49,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox ServerUrl;
-        
+
         /// <summary>
         /// Username control.
         /// </summary>
@@ -56,7 +58,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox Username;
-        
+
         /// <summary>
         /// Password control.
         /// </summary>
@@ -110,7 +112,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RadioButton RBOnPremises;
-        
+
         /// <summary>
         /// RBOnline control.
         /// </summary>
@@ -119,7 +121,25 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RadioButton RBOnline;
-        
+
+        /// <summary>
+        /// RBBasicAuth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBBasicAuth;
+
+        /// <summary>
+        /// RBModernAuth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBModernAuth;
+
         /// <summary>
         /// Connect control.
         /// </summary>
@@ -155,7 +175,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ListView lvLists;
-        
+
         /// <summary>
         /// hdnSelectedViews control.
         /// </summary>
@@ -164,7 +184,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hdnSelectedViews;
-        
+
         /// <summary>
         /// EntryPointFolderName control.
         /// </summary>
@@ -173,7 +193,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPointFolderName;
-        
+
         /// <summary>
         /// contentDataSource control.
         /// </summary>
@@ -182,7 +202,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::EPiServer.ConnectForSharePoint.Models.SharepointContentDataSource contentDataSource;
-        
+
         /// <summary>
         /// pageTreeView control.
         /// </summary>
@@ -191,7 +211,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::EPiServer.UI.WebControls.PageTreeView pageTreeView;
-        
+
         /// <summary>
         /// SelectedFolderName control.
         /// </summary>
@@ -200,7 +220,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox SelectedFolderName;
-        
+
         /// <summary>
         /// EntryPoint control.
         /// </summary>
@@ -209,7 +229,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPoint;
-        
+
         /// <summary>
         /// EntryPointRequired control.
         /// </summary>
@@ -218,7 +238,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator EntryPointRequired;
-        
+
         /// <summary>
         /// EntryPointCache control.
         /// </summary>
@@ -246,7 +266,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::EPiServer.UI.WebControls.ToolButton Save;
-        
+
         /// <summary>
         /// QueueCountTB control.
         /// </summary>
@@ -255,7 +275,7 @@ namespace EPiServer.ConnectForSharePoint.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label QueueCountTB;
-        
+
         /// <summary>
         /// Refresh control.
         /// </summary>

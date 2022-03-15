@@ -1,66 +1,70 @@
-<?xml version="1.0" encoding="utf-8" ?> <languages>
-    <language name="français" id="fr">
-        <sharepoint>
-          <scheduledjob>
-            <description>Importe des documents, des éléments et des dossiers nouveaux ou mis à jour depuis SharePoint dans Episerver.</description>
-            <displayname>Mise à jour de SharePoint</displayname>
-          </scheduledjob>
-          <admin>
-                <ok>OK</ok>
-                <cancel>Annuler</cancel>
-                <displayname>Connexion pour SharePoint</displayname>
-                <description>Informations d'authentification de site SharePoint</description>
-                <queuedescription>Informations sur la file</queuedescription>
-                <remainingitems>Éléments restants</remainingitems>
-                <selectviewdescription>Choisissez une ou plusieurs listes et les affichages correspondants.</selectviewdescription>
-                <serverurl>URL du site</serverurl>
-                <username>Nom d'utilisateur</username>
-                <password>Mot de passe</password>
-                <clientid>ClientId</clientid>
-                <clientsecret>ClientSecret</clientsecret>
-                <targethost>TargetHost</targethost>
-                <realm>Realm</realm>
-                <connectiontype>Type de connexion</connectiontype>
-                <online>En ligne</online>
-                <onpremises>Local</onpremises>
-                <save>Enregistrer</save>
-                <connect>Test connexion</connect>
-                <selectedfolder>Dossier</selectedfolder>
-                <selectfolder>Sélectionner un dossier :</selectfolder>
-                <entrypoint>Point d’entrée de la connexion :</entrypoint>
-                <entrypointinstructions>Sélectionnez un dossier qui sera l’emplacement du point d’entrée.  Si vous souhaitez aussi créer un nouveau sous-dossier, utilisez la zone de texte ci-dessous :</entrypointinstructions>
-                <newsubfolder>Créer un nouveau sous-dossier :</newsubfolder>  
-                <expirationtime>Heure d'expiration</expirationtime>
-                <refreshcache>Actualiser</refreshcache>
-                <entrypointrequired>Un point d’entrée est requis pour la connexion.</entrypointrequired>
-                <message>
-                    <savesuccess>Votre configuration a été enregistrée avec succès.</savesuccess>
-                    <refreshsuccess>Les données SharePoint sont en cours d’actualisation.</refreshsuccess>
-                    <connectsuccess>La connexion au site SharePoint a réussi. Sélectionnez les affichages SharePoint desquels obtenir des médias.</connectsuccess>
-                    <savesuccesswithnomedia>Votre configuration a été enregistrée. Notez qu’aucune vue n’étant sélectionnée, aucun média Sharepoint n’est mappé.</savesuccesswithnomedia>
-                    <saveerror>Erreur lors de l’enregistrement : {0}.</saveerror>
-                    <connecttosharepointerror>Erreur lors de la connexion au site SharePoint : {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>Aucun URL SharePoint, nom d’utilisateur ou mot de passe n’est spécifié.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Autorisation impossible avec le mot de passe et le nom d’utilisateur spécifiés.</unauthorizederror>
-                    <notfounderror>L’URL SharePoint est incorrect ou vous n’avez pas accès au site spécifié dans l’URL.</notfounderror>
-                    <listviewnotmatched>La liste des affichages n’est pas à jour. Reconnectez-vous pour obtenir les nouveaux affichages SharePoint.</listviewnotmatched>
-                    <invalidentrypoint>Point d’entrée incorrect de la connexion.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Le point d’entrée de la connexion doit être un dossier de contenu.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Le point d’entrée de la connexion doit être vide.  Veuillez sélectionner un dossier qui ne contienne pas de 'Blocs' ou d’éléments de média.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Le dossier sélectionné ne peut pas être un enfant du dossier précédemment sélectionné.  Veuillez sélectionner un dossier différent.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Le délai d’expiration doit être en minutes.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(supérieur ou égal à 3 minutes)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Le dossier '{0}' a été supprimé, veuillez sélectionner une nouvelle destination.</folderdeleted>
-                </message>
-            </admin>
-            <plugin>
-                <spcontentindexjob>
-                    <displayname>Index du contenu de SharePoint</displayname>
-                    <description>Ce travail va indexer le contenu de média depuis SharePoint.</description>
-                    <indexcompleted>Le contenu a été correctement indexé.</indexcompleted>
-                    <indexfailed>L'indexation du contenu a échoué.</indexfailed>
-                </spcontentindexjob>
-            </plugin>
-        </sharepoint>
-    </language>
+<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <language name="français" id="fr">
+    <sharepoint>
+      <scheduledjob>
+        <description>Importe des documents, des éléments et des dossiers nouveaux ou mis à jour depuis SharePoint dans Episerver.</description>
+        <displayname>Mise à jour de SharePoint</displayname>
+      </scheduledjob>
+      <admin>
+        <ok>OK</ok>
+        <cancel>Annuler</cancel>
+        <displayname>Connexion pour SharePoint</displayname>
+        <description>Informations d'authentification de site SharePoint</description>
+        <queuedescription>Informations sur la file</queuedescription>
+        <remainingitems>Éléments restants</remainingitems>
+        <selectviewdescription>Choisissez une ou plusieurs listes et les affichages correspondants.</selectviewdescription>
+        <authenticationtype>Authentication Type</authenticationtype>
+        <basicauth>Basic</basicauth>
+        <modernauth>Modern</modernauth>
+        <serverurl>URL du site</serverurl>
+        <username>Nom d'utilisateur</username>
+        <password>Mot de passe</password>
+        <clientid>ClientId</clientid>
+        <clientsecret>ClientSecret</clientsecret>
+        <targethost>TargetHost</targethost>
+        <realm>Realm</realm>
+        <connectiontype>Type de connexion</connectiontype>
+        <online>En ligne</online>
+        <onpremises>Local</onpremises>
+        <save>Enregistrer</save>
+        <connect>Test connexion</connect>
+        <selectedfolder>Dossier</selectedfolder>
+        <selectfolder>Sélectionner un dossier :</selectfolder>
+        <entrypoint>Point d’entrée de la connexion :</entrypoint>
+        <entrypointinstructions>Sélectionnez un dossier qui sera l’emplacement du point d’entrée.  Si vous souhaitez aussi créer un nouveau sous-dossier, utilisez la zone de texte ci-dessous :</entrypointinstructions>
+        <newsubfolder>Créer un nouveau sous-dossier :</newsubfolder>
+        <expirationtime>Heure d'expiration</expirationtime>
+        <refreshcache>Actualiser</refreshcache>
+        <entrypointrequired>Un point d’entrée est requis pour la connexion.</entrypointrequired>
+        <message>
+          <savesuccess>Votre configuration a été enregistrée avec succès.</savesuccess>
+          <refreshsuccess>Les données SharePoint sont en cours d’actualisation.</refreshsuccess>
+          <connectsuccess>La connexion au site SharePoint a réussi. Sélectionnez les affichages SharePoint desquels obtenir des médias.</connectsuccess>
+          <savesuccesswithnomedia>Votre configuration a été enregistrée. Notez qu’aucune vue n’étant sélectionnée, aucun média Sharepoint n’est mappé.</savesuccesswithnomedia>
+          <saveerror>Erreur lors de l’enregistrement : {0}.</saveerror>
+          <connecttosharepointerror>Erreur lors de la connexion au site SharePoint : {0}</connecttosharepointerror>
+          <nourlusernamepasswordspecified>Aucun URL SharePoint, nom d’utilisateur ou mot de passe n’est spécifié.</nourlusernamepasswordspecified>
+          <unauthorizederror>Autorisation impossible avec le mot de passe et le nom d’utilisateur spécifiés.</unauthorizederror>
+          <notfounderror>L’URL SharePoint est incorrect ou vous n’avez pas accès au site spécifié dans l’URL.</notfounderror>
+          <listviewnotmatched>La liste des affichages n’est pas à jour. Reconnectez-vous pour obtenir les nouveaux affichages SharePoint.</listviewnotmatched>
+          <invalidentrypoint>Point d’entrée incorrect de la connexion.</invalidentrypoint>
+          <entrypointmustbecontentfolder>Le point d’entrée de la connexion doit être un dossier de contenu.</entrypointmustbecontentfolder>
+          <entrypointmustnothavechildren>Le point d’entrée de la connexion doit être vide.  Veuillez sélectionner un dossier qui ne contienne pas de 'Blocs' ou d’éléments de média.</entrypointmustnothavechildren>
+          <entrypointcannotbechildofprevious>Le dossier sélectionné ne peut pas être un enfant du dossier précédemment sélectionné.  Veuillez sélectionner un dossier différent.</entrypointcannotbechildofprevious>
+          <expirationtimemustbeminutes>Le délai d’expiration doit être en minutes.</expirationtimemustbeminutes>
+          <expirationtimegreaterorequalthree>(supérieur ou égal à 3 minutes)</expirationtimegreaterorequalthree>
+          <folderdeleted>Le dossier '{0}' a été supprimé, veuillez sélectionner une nouvelle destination.</folderdeleted>
+        </message>
+      </admin>
+      <plugin>
+        <spcontentindexjob>
+          <displayname>Index du contenu de SharePoint</displayname>
+          <description>Ce travail va indexer le contenu de média depuis SharePoint.</description>
+          <indexcompleted>Le contenu a été correctement indexé.</indexcompleted>
+          <indexfailed>L'indexation du contenu a échoué.</indexfailed>
+        </spcontentindexjob>
+      </plugin>
+    </sharepoint>
+  </language>
 </languages>

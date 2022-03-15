@@ -1,29 +1,29 @@
-<%@ Page Language="c#" AutoEventWireup="False" CodeBehind="SharePointConfiguration.aspx.cs"
-    Inherits="EPiServer.ConnectForSharePoint.Web.SharePointConfiguration, EPiServer.ConnectForSharePoint" Title="EPiServer ConnectForSharePoint Add-on" %>
+<%@ page language="c#" autoeventwireup="False" codebehind="SharePointConfiguration.aspx.cs"
+    inherits="EPiServer.ConnectForSharePoint.Web.SharePointConfiguration, EPiServer.ConnectForSharePoint" title="EPiServer ConnectForSharePoint Add-on" %>
 
-<%@ Import Namespace="EPiServer" %>
-<%@ Register Assembly="EPiServer.UI" Namespace="EPiServer.UI.WebControls" TagPrefix="EPiServerUI" %>
-<%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Web" Assembly="EPiServer.ConnectForSharePoint" %>
-<%@ Register TagPrefix="EPiServerUISharePoint" Namespace="EPiServer.ConnectForSharePoint.Models" Assembly="EPiServer.ConnectForSharePoint" %>
+<%@ import namespace="EPiServer" %>
+<%@ register assembly="EPiServer.UI" namespace="EPiServer.UI.WebControls" tagprefix="EPiServerUI" %>
+<%@ register tagprefix="EPiServerUISharePoint" namespace="EPiServer.ConnectForSharePoint.Web" assembly="EPiServer.ConnectForSharePoint" %>
+<%@ register tagprefix="EPiServerUISharePoint" namespace="EPiServer.ConnectForSharePoint.Models" assembly="EPiServer.ConnectForSharePoint" %>
 
-<asp:content contentplaceholderid="HeaderContentRegion" runat="server">
-</asp:content>
+<asp:Content ContentPlaceHolderID="HeaderContentRegion" runat="server">
+</asp:Content>
 
-<asp:content contentplaceholderid="FullRegion" runat="server">
-    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true"/>
+<asp:Content ContentPlaceHolderID="FullRegion" runat="server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" LoadScriptsBeforeUI="true" />
 
-	<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
+    <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
     <style type="text/css">
-         .listCheckBox input[type="checkbox"] {
-             vertical-align: top;
-         }
+        .listCheckBox input[type="checkbox"] {
+            vertical-align: top;
+        }
 
-         .listViewSelector {
-             padding: 0 0 8px 2px;
-         }
-     </style>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+        .listViewSelector {
+            padding: 0 0 8px 2px;
+        }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <script type="text/javascript">
         function updateQueCounts() {
             PageMethods.getCurrentQueCount(onSucess, onError);
@@ -116,6 +116,9 @@
             $('span.listCheckBox input[type="checkbox"]').change(function () {
                 setSaveButtonState();
             });
+
+            //Select authentication form to display based on authentication type selected.
+            setAuthTypePanelVisibility();
         });
 
         function setSaveButtonState() {
@@ -235,6 +238,28 @@
 
             return false;
         }
+        
+        function setAuthTypePanelVisibility() {
+            var isChecked = $('#FullRegion_RBModernAuth').checked;
+
+            if (isChecked) {
+                $('#ModernAuth').css('display', 'block');
+                $('#BasicAuth').css('display', 'none');
+            } else {
+                $('#ModernAuth').css('display', 'none');
+                $('#BasicAuth').css('display', 'block');
+            }
+
+            $('#FullRegion_RBModernAuth').click(function() {
+                $('#ModernAuth').css('display', 'block');
+                $('#BasicAuth').css('display', 'none');
+            })
+
+            $('#FullRegion_RBBasicAuth').click(function() {
+                $('#ModernAuth').css('display', 'none');
+                $('#BasicAuth').css('display', 'block');
+            })
+        }
 
     </script>
 
@@ -247,143 +272,157 @@
             <asp:ValidationSummary runat="server" CssClass="EP-validationSummary" />
             <asp:Panel ID="MessagePanel" runat="server" Visible="false" />
         </div>
-               
+
         <asp:Panel runat="server" class="epi-formArea">
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/description")%></legend>
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="ServerUrl" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
-                <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
-            </div>
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="Username" runat="server"><%# Translate("/sharepoint/admin/username") %></asp:Label>
-                <asp:TextBox ID="Username" runat="server" MaxLength="255" Text="<%# CurrentSettings.Username %>" />
-            </div>
-
-            <div class="epi-size15">
-                <asp:Label AssociatedControlID="Password" runat="server"><%# Translate("/sharepoint/admin/password") %></asp:Label>
-                <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
-            </div>
-            <fieldset class="OAuth">
                 <div class="epi-size15">
-                    <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
-                    <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
+                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/authenticationtype")%></label>
+                    <br />
+                    <label></label>
+                    <asp:RadioButton ID="RBBasicAuth" GroupName="AuthenticationType" runat="server" checked="<%# !CurrentSettings.IsAuthModern %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/basicauth") %></label>
+                    <br />
+                    <label></label>
+                    <asp:RadioButton ID="RBModernAuth" GroupName="AuthenticationType" runat="server" checked="<%# CurrentSettings.IsAuthModern %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/modernauth") %></label>
+                    <br />
+                </div>
+                <fieldset id="BasicAuth" style="display:none;">
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="ServerUrl" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
+                        <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
+                    </div>
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="Username" runat="server"><%# Translate("/sharepoint/admin/username") %></asp:Label>
+                        <asp:TextBox ID="Username" runat="server" MaxLength="255" Text="<%# CurrentSettings.Username %>" />
+                    </div>
+
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="Password" runat="server"><%# Translate("/sharepoint/admin/password") %></asp:Label>
+                        <asp:TextBox ID="Password" TextMode="Password" runat="server" MaxLength="255" />
+                    </div>
+                </fieldset>
+                <fieldset id="ModernAuth" style="display:none;">
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
+                        <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
+                    </div>
+
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
+                        <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
+                    </div>
+
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="TargetHost" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
+                        <asp:TextBox ID="TargetHost" runat="server" MaxLength="255" Text="<%# CurrentSettings.TargetHost %>" />
+                    </div>
+
+                    <div class="epi-size15">
+                        <asp:Label AssociatedControlID="Realm" runat="server"><%# Translate("/sharepoint/admin/realm") %></asp:Label>
+                        <asp:TextBox ID="Realm" runat="server" MaxLength="255" Text="<%# CurrentSettings.Realm %>" />
+                    </div>
+                </fieldset>
+
+                <div class="epi-size15">
+                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
+                    <br />
+                    <label></label>
+                    <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
+                    <br />
+                    <label></label>
+                    <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/online") %></label>
+                    <br />
                 </div>
 
                 <div class="epi-size15">
-                    <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
-                    <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
+                    <br />
+                    <label></label>
+                    <episerverui:toolbutton runat="server" skinid="ArrowRight" id="Connect" onclick="Connect_Click"
+                        text="<%$ Resources: EPiServer, sharepoint.admin.connect %>" />
                 </div>
-
-                <div class="epi-size15">
-                    <asp:Label AssociatedControlID="TargetHost" runat="server"><%# Translate("/sharepoint/admin/targethost") %></asp:Label>
-                    <asp:TextBox ID="TargetHost" runat="server" MaxLength="255" Text="<%# CurrentSettings.TargetHost %>" />
-                </div>
-
-                <div class="epi-size15">
-                    <asp:Label AssociatedControlID="Realm" runat="server"><%# Translate("/sharepoint/admin/realm") %></asp:Label>
-                    <asp:TextBox ID="Realm" runat="server" MaxLength="255" Text="<%# CurrentSettings.Realm %>" />
-                </div>
-            </fieldset>
-
-           <div class="epi-size15">
-                <label style="position:absolute; vertical-align:bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
-                <br />
-                <label></label>
-                <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>"/>
-                <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
-                <br />
-                <label></label>
-                <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>"/>
-                <label style="position:relative; vertical-align:middle;"><%# Translate("/sharepoint/admin/online") %></label>
-                <br />
-            </div>
-
-            <div class="epi-size15">
-                <br />
-                <label></label>
-                <EPiServerUI:ToolButton runat="server" SkinID="ArrowRight" ID="Connect" OnClick="Connect_Click" 
-                    Text="<%$ Resources: EPiServer, sharepoint.admin.connect %>" />
-            </div>        
-            <asp:Label ID = "ListSelectorLabel" runat="server" Visible="False">
-                </br>
-                <%= Translate("/sharepoint/admin/selectviewdescription")%>
+                <asp:Label ID="ListSelectorLabel" runat="server" Visible="False"></br>
+               
+                    <%= Translate("/sharepoint/admin/selectviewdescription")%>
             </asp:Label>
                 <asp:HiddenField ID="hdnListIds" ClientIDMode="Static" Value="<%# CurrentSettings.ListIds %>" runat="server"></asp:HiddenField>
-            <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False"  Height="300px" ScrollBars="Auto">
-                 <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
-                        <LayoutTemplate>
+                <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False" Height="300px" ScrollBars="Auto">
+                    <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
+                        <layouttemplate>
                             <div>
                                 <asp:PlaceHolder runat="server" ID="phLists" />
                             </div>
-                        </LayoutTemplate>
-                        <ItemTemplate>
-                           <div class="listViewSelector">
-                            <asp:CheckBox ID="chkList" class="listCheckBox" runat="server"></asp:CheckBox>
-                                      <div class="viewSelector">
-                            <asp:DropDownList ID="ddViews" class="viewsDropDown" runat="server"></asp:DropDownList>
-                                          </div>
-                           </div>
-                        </ItemTemplate>
+                        </layouttemplate>
+                        <itemtemplate>
+                            <div class="listViewSelector">
+                                <asp:CheckBox ID="chkList" class="listCheckBox" runat="server"></asp:CheckBox>
+                                <div class="viewSelector">
+                                    <asp:DropDownList ID="ddViews" class="viewsDropDown" runat="server"></asp:DropDownList>
+                                </div>
+                            </div>
+                        </itemtemplate>
                     </asp:ListView>
                     <asp:HiddenField ID="hdnSelectedViews" ClientIDMode="Static" runat="server"></asp:HiddenField>
-            </asp:Panel>                  
+                </asp:Panel>
                 <br />
                 <!-- Modal Tree Dlg -->
                 <asp:Label AssociatedControlID="EntryPointFolderName" runat="server"><%# Translate("/sharepoint/admin/selectfolder") %>&nbsp;</asp:Label>
                 <asp:TextBox ID="EntryPointFolderName" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>" ToolTip="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
-                <input type="button" ID="btnShow" Value="..." />
-                <div id="treedialog" class="ui-helper-hidden" >
+                <input type="button" id="btnShow" value="..." />
+                <div id="treedialog" class="ui-helper-hidden">
                     <asp:Label runat="server"><%# Translate("/sharepoint/admin/entrypointinstructions") %></asp:Label>
-                    <EPiServerUISharePoint:SharepointContentDataSource ID="contentDataSource" 
-                        AccessLevel="NoAccess" 
-                        runat="server" 
-                        IncludeRootItem="true" 
-                        ContentLink="<%# EPiServer.Web.SiteDefinition.Current.GlobalAssetsRoot %>" />
-                    <div class="episcroll episerver-pagetree-selfcontained" style="max-height:250px;">
-                       <EPiServerUI:PageTreeView ID="pageTreeView" 
-                           DataSourceID="contentDataSource" 
-                           CssClass="episerver-pagetreeview" 
-                           runat="server" 
-                           ExpandDepth="1"
-                           DataTextField="Name" 
-                           ExpandOnSelect="false"
-                           DataNavigateUrlField="ContentLink" EnableViewState="false">
-                            <TreeNodeTemplate>
-                                <a style="outline:none !important" href="#" title="<%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)" >
+                    <episerveruisharepoint:sharepointcontentdatasource id="contentDataSource"
+                        accesslevel="NoAccess"
+                        runat="server"
+                        includerootitem="true"
+                        contentlink="<%# EPiServer.Web.SiteDefinition.Current.GlobalAssetsRoot %>" />
+                    <div class="episcroll episerver-pagetree-selfcontained" style="max-height: 250px;">
+                        <episerverui:pagetreeview id="pageTreeView"
+                            datasourceid="contentDataSource"
+                            cssclass="episerver-pagetreeview"
+                            runat="server"
+                            expanddepth="1"
+                            datatextfield="Name"
+                            expandonselect="false"
+                            datanavigateurlfield="ContentLink" enableviewstate="false">
+                            <treenodetemplate>
+                                <a style="outline: none !important" href="#" title="<%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>" onclick="return setval(<%# ((EPiServer.Core.IContent)((PageTreeNode)Container.DataItem).DataItem).ContentLink.ID %>)">
                                     <%# Server.HtmlEncode(((PageTreeNode)Container.DataItem).Text) %>
                                 </a>
-                            </TreeNodeTemplate>
-                        </EPiServerUI:PageTreeView>
-                    </div> 
+                            </treenodetemplate>
+                        </episerverui:pagetreeview>
+                    </div>
                     <div class="epi-size15">
-                        <asp:TextBox ID="SelectedFolderName" style="display:none" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
-                        <asp:CheckBox ID="CBCreateNewFolder" onmousedown="onCBClick();" runat="server" Text='<%# Translate("/sharepoint/admin/newsubfolder") %>' checked="<%# !CurrentSettings.UseSelectedFolder %>"/>
+                        <asp:TextBox ID="SelectedFolderName" style="display: none" runat="server" onkeydown="return false" Text="<%# CurrentSettings.EntryPointFolderName %>"></asp:TextBox>
+                        <asp:CheckBox ID="CBCreateNewFolder" onmousedown="onCBClick();" runat="server" Text='<%# Translate("/sharepoint/admin/newsubfolder") %>' checked="<%# !CurrentSettings.UseSelectedFolder %>" />
                         <asp:TextBox ID="TBNewFolderName" runat="server" Enabled="False"></asp:TextBox>
                         <br />
                     </div>
                     <br />
                     <div align="right">
-                        <EPiServerUI:ToolButton ID="FolderOk" runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.ok %>" OnClientClick="return onOkClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools" />
-                        <EPiServerUI:ToolButton runat="server" Text="<%$ Resources: EPiServer, sharepoint.admin.cancel %>" OnClientClick="onCloseClick()" CssClass="epi-cmsButton-text epi-cmsButton-tools"/>
+                        <episerverui:toolbutton id="FolderOk" runat="server" text="<%$ Resources: EPiServer, sharepoint.admin.ok %>" onclientclick="return onOkClick()" cssclass="epi-cmsButton-text epi-cmsButton-tools" />
+                        <episerverui:toolbutton runat="server" text="<%$ Resources: EPiServer, sharepoint.admin.cancel %>" onclientclick="onCloseClick()" cssclass="epi-cmsButton-text epi-cmsButton-tools" />
                     </div>
-                    <asp:Label AssociatedControlID="EntryPoint" style="display:none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
-                    <asp:TextBox ID="EntryPoint" runat="server" style="display:none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />                
-                   
-                <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
-                  ControlToValidate="EntryPoint"
-                  ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
-                  ForeColor="Red" 
-                  validationgroup="inputValidationGroup">
-                </asp:RequiredFieldValidator>
-                    </div>
-                <!-- Modal Tree Dlg -->
-                 <asp:TextBox ID="EntryPointCache" runat="server" style="display:none" MaxLength="10" />
-            <br/>
+                    <asp:Label AssociatedControlID="EntryPoint" style="display: none" runat="server"><%# Translate("/sharepoint/admin/entrypoint") %></asp:Label>
+                    <asp:TextBox ID="EntryPoint" runat="server" style="display: none" MaxLength="10" Text="<%# CurrentSettings.EntryPoint.ID %>" />
 
-                <EPiServerUI:ToolButton runat="server" SkinID="Save" ID="Save" Enabled="False" OnClick="Save_Click"
-                    Text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup" 
-                    style="vertical-align:top; float: right"/>
+                    <asp:RequiredFieldValidator id="EntryPointRequired" runat="server"
+                        ControlToValidate="EntryPoint"
+                        ErrorMessage='<%# Translate("/sharepoint/admin/entrypointrequired") %>'
+                        ForeColor="Red"
+                        validationgroup="inputValidationGroup">
+                    </asp:RequiredFieldValidator>
+                </div>
+                <!-- Modal Tree Dlg -->
+                <asp:TextBox ID="EntryPointCache" runat="server" style="display: none" MaxLength="10" />
+                <br />
+
+                <episerverui:toolbutton runat="server" skinid="Save" id="Save" enabled="False" onclick="Save_Click"
+                    text="<%$ Resources: EPiServer, sharepoint.admin.save %>" validationgroup="inputValidationGroup"
+                    style="vertical-align: top; float: right" />
             </fieldset>
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/queuedescription")%></legend>
@@ -392,11 +431,11 @@
                         <%= Translate("/sharepoint/admin/remainingitems")%>
                     </asp:Label>
                     <asp:Label ID="QueueCountTB" runat="server"><%# QueueCount %></asp:Label>
-                    <EPiServerUI:ToolButton runat="server" SkinID="Refresh" ID="Refresh" Enabled="False" OnClick="Refresh_Click"
-                        Text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" style="vertical-align:top; float: right" />
+                    <episerverui:toolbutton runat="server" skinid="Refresh" id="Refresh" enabled="False" onclick="Refresh_Click"
+                        text="<%$ Resources: EPiServer, sharepoint.admin.refreshcache %>" style="vertical-align: top; float: right" />
                 </div>
             </fieldset>
 
         </asp:Panel>
     </div>
-</asp:content>
+</asp:Content>

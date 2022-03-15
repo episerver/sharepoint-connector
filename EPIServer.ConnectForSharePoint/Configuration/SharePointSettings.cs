@@ -58,10 +58,16 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// 
         /// </summary>
         public bool UseSelectedFolder { get; set; }
+
         /// <summary>
         /// Indicates if we are connecting to a SharePoint Online instance
         /// </summary>
         public bool IsSharePointOnline { get; set; }
+
+        /// <summary>
+        /// Indicates if we are using Basic or Modern Authentication
+        /// </summary>
+        public bool IsAuthModern { get; set; }
 
         // Todo we should get rid of the thumbnail field but when we do it causes an issue loading the config in an existing environment
         /// <summary>

@@ -1,66 +1,70 @@
-<?xml version="1.0" encoding="utf-8" ?> <languages>
-    <language name="suomi" id="fi">
-        <sharepoint>
-          <scheduledjob>
-            <description>Tuo uudet tai päivitetyt asiakirjat, kohteet ja kansiot SharePointista Episerveriin.</description>
-            <displayname>SharePoint-päivitys</displayname>
-          </scheduledjob>
-          <admin>
-                <ok>OK</ok>
-                <cancel>Peruuta</cancel>
-                <displayname>Yhdistä SharePointiin</displayname>
-                <description>SharePoint-sivuston tunnistetiedot</description>
-                <queuedescription>Jonon tiedot</queuedescription>
-                <remainingitems>Jäljellä olevat kohteet</remainingitems>
-                <selectviewdescription>Valitse luettelo tai useampi luettelo ja vastaavat näkymät.</selectviewdescription>
-                <serverurl>Sivuston URL</serverurl>
-                <username>Käyttäjänimi</username>
-                <password>Salasana</password>
-                <clientid>ClientId</clientid>
-                <clientsecret>ClientSecret</clientsecret>
-                <targethost>TargetHost</targethost>
-                <realm>Realm</realm>
-                <connectiontype>Yhteyden tyyppi</connectiontype>
-                <online>Online</online>
-                <onpremises>Tiloissa</onpremises>
-                <save>Tallenna</save>
-                <connect>Testaa yhteys</connect>
-                <selectedfolder>Kansio</selectedfolder>
-                <selectfolder>Valitse kansio:</selectfolder>
-                <entrypoint>Yhteyden aloituskohta</entrypoint>
-                <entrypointinstructions>Valitse kansio, joka on aloituskohta.  Lisäksi, jos haluat luoda uuden alikansion, käyttää alla olevaa ruutua:</entrypointinstructions>
-                <newsubfolder>Luo uusi alikansio:</newsubfolder>  
-                <expirationtime>Erääntymisaika</expirationtime>
-                <refreshcache>Päivitä</refreshcache>
-                <entrypointrequired>Yhteyden aloituskohta vaaditaan.</entrypointrequired>
-                <message>
-                    <savesuccess>Määrityksesi tallennus onnistui.</savesuccess>
-                    <refreshsuccess>SharePoint-tietoja päivitetään.</refreshsuccess>
-                    <connectsuccess>Yhteyden muodostus onnistui SharePoint-sivustolle. Valitse SharePoint näkymät, josta haet mediaa.</connectsuccess>
-                    <savesuccesswithnomedia>Määrityksesi on tallennettu. Huomaa, että näkymää ei ole valittu, Sharepoint-mediaa ei kartoiteta.</savesuccesswithnomedia>
-                    <saveerror>Virhe tallennettaessa: {0}.</saveerror>
-                    <connecttosharepointerror>Virhe muodostettaessa yhteyttä SharePoint-sivustoon: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>SharePointin URL-osoitetta, käyttäjänimeä tai salasanaa ei määritetty.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Ei onnistunut valtuuttamaan määritettyä käyttäjänimeä ja salasanaa.</unauthorizederror>
-                    <notfounderror>SharePointin URL-osoite on virheellinen tai sinulla ei ole pääsyä URL-osoitteen mukaiselle sivustolle.</notfounderror>
-                    <listviewnotmatched>Näkymien luettelo ei ole ajan tasalla. Yhdistä uudelleen, jos haluat uusia SharePoint-näkymiä.</listviewnotmatched>
-                    <invalidentrypoint>Virheellinen yhteyden aloituskohta.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Yhteyden aloituskohdan on oltava sisältökansio.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Yhteyden aloituskohdan täytyy olla tyhjä.  Valitse kansio, joka ei sisällä mitään lohkoja tai mediakohteita.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Valittu kansio ei voi olla aiemmin valitun kansion alikansio.  Valitse eri kansio.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Erääntymisaika on oltava minuuteissa.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(on suurempi tai yhtä suuri kuin 3 minuuttia)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Kansio {0} on poistettu, valitse uusi kohde.</folderdeleted>
-                </message>
-            </admin>
-            <plugin>
-                <spcontentindexjob>
-                    <displayname>SharePoint-sisältöindeksi</displayname>
-                    <description>Tämä työ indeksoi SharePoint-mediasisältöä.</description>
-                    <indexcompleted>Indeksoitu onnistuneesti.</indexcompleted>
-                    <indexfailed>Sisällön indeksointi epäonnistui.</indexfailed>
-                </spcontentindexjob>
-            </plugin>
-        </sharepoint>
-    </language>
+<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <language name="suomi" id="fi">
+    <sharepoint>
+      <scheduledjob>
+        <description>Tuo uudet tai päivitetyt asiakirjat, kohteet ja kansiot SharePointista Episerveriin.</description>
+        <displayname>SharePoint-päivitys</displayname>
+      </scheduledjob>
+      <admin>
+        <ok>OK</ok>
+        <cancel>Peruuta</cancel>
+        <displayname>Yhdistä SharePointiin</displayname>
+        <description>SharePoint-sivuston tunnistetiedot</description>
+        <queuedescription>Jonon tiedot</queuedescription>
+        <remainingitems>Jäljellä olevat kohteet</remainingitems>
+        <selectviewdescription>Valitse luettelo tai useampi luettelo ja vastaavat näkymät.</selectviewdescription>
+        <authenticationtype>Authentication Type</authenticationtype>
+        <basicauth>Basic</basicauth>
+        <modernauth>Modern</modernauth>
+        <serverurl>Sivuston URL</serverurl>
+        <username>Käyttäjänimi</username>
+        <password>Salasana</password>
+        <clientid>ClientId</clientid>
+        <clientsecret>ClientSecret</clientsecret>
+        <targethost>TargetHost</targethost>
+        <realm>Realm</realm>
+        <connectiontype>Yhteyden tyyppi</connectiontype>
+        <online>Online</online>
+        <onpremises>Tiloissa</onpremises>
+        <save>Tallenna</save>
+        <connect>Testaa yhteys</connect>
+        <selectedfolder>Kansio</selectedfolder>
+        <selectfolder>Valitse kansio:</selectfolder>
+        <entrypoint>Yhteyden aloituskohta</entrypoint>
+        <entrypointinstructions>Valitse kansio, joka on aloituskohta.  Lisäksi, jos haluat luoda uuden alikansion, käyttää alla olevaa ruutua:</entrypointinstructions>
+        <newsubfolder>Luo uusi alikansio:</newsubfolder>
+        <expirationtime>Erääntymisaika</expirationtime>
+        <refreshcache>Päivitä</refreshcache>
+        <entrypointrequired>Yhteyden aloituskohta vaaditaan.</entrypointrequired>
+        <message>
+          <savesuccess>Määrityksesi tallennus onnistui.</savesuccess>
+          <refreshsuccess>SharePoint-tietoja päivitetään.</refreshsuccess>
+          <connectsuccess>Yhteyden muodostus onnistui SharePoint-sivustolle. Valitse SharePoint näkymät, josta haet mediaa.</connectsuccess>
+          <savesuccesswithnomedia>Määrityksesi on tallennettu. Huomaa, että näkymää ei ole valittu, Sharepoint-mediaa ei kartoiteta.</savesuccesswithnomedia>
+          <saveerror>Virhe tallennettaessa: {0}.</saveerror>
+          <connecttosharepointerror>Virhe muodostettaessa yhteyttä SharePoint-sivustoon: {0}</connecttosharepointerror>
+          <nourlusernamepasswordspecified>SharePointin URL-osoitetta, käyttäjänimeä tai salasanaa ei määritetty.</nourlusernamepasswordspecified>
+          <unauthorizederror>Ei onnistunut valtuuttamaan määritettyä käyttäjänimeä ja salasanaa.</unauthorizederror>
+          <notfounderror>SharePointin URL-osoite on virheellinen tai sinulla ei ole pääsyä URL-osoitteen mukaiselle sivustolle.</notfounderror>
+          <listviewnotmatched>Näkymien luettelo ei ole ajan tasalla. Yhdistä uudelleen, jos haluat uusia SharePoint-näkymiä.</listviewnotmatched>
+          <invalidentrypoint>Virheellinen yhteyden aloituskohta.</invalidentrypoint>
+          <entrypointmustbecontentfolder>Yhteyden aloituskohdan on oltava sisältökansio.</entrypointmustbecontentfolder>
+          <entrypointmustnothavechildren>Yhteyden aloituskohdan täytyy olla tyhjä.  Valitse kansio, joka ei sisällä mitään lohkoja tai mediakohteita.</entrypointmustnothavechildren>
+          <entrypointcannotbechildofprevious>Valittu kansio ei voi olla aiemmin valitun kansion alikansio.  Valitse eri kansio.</entrypointcannotbechildofprevious>
+          <expirationtimemustbeminutes>Erääntymisaika on oltava minuuteissa.</expirationtimemustbeminutes>
+          <expirationtimegreaterorequalthree>(on suurempi tai yhtä suuri kuin 3 minuuttia)</expirationtimegreaterorequalthree>
+          <folderdeleted>Kansio {0} on poistettu, valitse uusi kohde.</folderdeleted>
+        </message>
+      </admin>
+      <plugin>
+        <spcontentindexjob>
+          <displayname>SharePoint-sisältöindeksi</displayname>
+          <description>Tämä työ indeksoi SharePoint-mediasisältöä.</description>
+          <indexcompleted>Indeksoitu onnistuneesti.</indexcompleted>
+          <indexfailed>Sisällön indeksointi epäonnistui.</indexfailed>
+        </spcontentindexjob>
+      </plugin>
+    </sharepoint>
+  </language>
 </languages>
