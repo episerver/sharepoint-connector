@@ -518,7 +518,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
                 SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
                 SharePointSettings.Current.IsSharePointOnline = RBOnline.Checked;
-                SharePointSettings.Current.IsAuthModern = RBModernAuth.Checked;
+                SharePointSettings.Current.IsModernAuth = RBModernAuth.Checked;
                 SharePointSettings.Current.Save();
 
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
@@ -691,10 +691,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 TargetHost = ConfiguredTargetHost,
                 Realm = ConfiguredRealm,
                 IsSharePointOnline = RBOnline.Checked,
-                IsAuthModern = RBModernAuth.Checked
+                IsModernAuth = RBModernAuth.Checked
             };
 
-            var contextService = newSettings.IsAuthModern ?
+            var contextService = newSettings.IsModernAuth ?
                 new EndpointContextService
                 {
                     EndpointContext = new SPRestClient(newSettings)

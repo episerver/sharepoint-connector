@@ -285,11 +285,11 @@
                     <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/authenticationtype")%></label>
                     <br />
                     <label></label>
-                    <asp:RadioButton ID="RBBasicAuth" GroupName="AuthenticationType" runat="server" checked="<%# !CurrentSettings.IsAuthModern %>" />
+                    <asp:RadioButton ID="RBBasicAuth" GroupName="AuthenticationType" runat="server" checked="<%# !CurrentSettings.IsModernAuth %>" />
                     <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/basicauth") %></label>
                     <br />
                     <label></label>
-                    <asp:RadioButton ID="RBModernAuth" GroupName="AuthenticationType" runat="server" checked="<%# CurrentSettings.IsAuthModern %>" />
+                    <asp:RadioButton ID="RBModernAuth" GroupName="AuthenticationType" runat="server" checked="<%# CurrentSettings.IsModernAuth %>" />
                     <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/modernauth") %></label>
                     <br />
                 </div>

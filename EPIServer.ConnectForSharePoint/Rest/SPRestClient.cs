@@ -19,7 +19,7 @@ namespace EPiServer.ConnectForSharePoint.Rest
         private IObjectSerializer _serializer = ServiceLocator.Current.GetInstance<IObjectSerializerFactory>().GetSerializer(KnownContentTypes.Json);
         private SharePointSettings _spSettings;
         private Func<SharePointSettings, CookieContainer> _getCookieContainer;
-        private SharepointOAuthTokenResult _oAuthTokenResult;
+        private SharePointOAuthTokenResult _oAuthTokenResult;
 
         public SPRestClient()
             : this(SharePointSettings.Current, (currentSettings) => { return SharePointHelper.GetCookies(currentSettings); })
@@ -89,7 +89,7 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
         private WebRequest CreateRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers)
         {
-            var url = _spSettings.IsAuthModern ? _spSettings.TargetHost : _spSettings.SiteUrl;
+            var url = _spSettings.IsModernAuth ? _spSettings.TargetHost : _spSettings.SiteUrl;
             var requestUrl = WebHelper.CombineUrl(url, requestInfo.EncodedUrl);
             string acceptType = "application/json;odata=verbose";
             if (requestInfo.EncodedUrl.StartsWith(url, StringComparison.OrdinalIgnoreCase))
@@ -99,7 +99,7 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
             var webRequest = (HttpWebRequest)WebHelper.CreateRequest(requestUrl, requestInfo.RequestMethod, headers, acceptType);
 
-            if (_spSettings.IsAuthModern)
+            if (_spSettings.IsModernAuth)
             {
                 webRequest.Headers.Add("Authorization", "Bearer " + _oAuthTokenResult.AccessToken);
             }

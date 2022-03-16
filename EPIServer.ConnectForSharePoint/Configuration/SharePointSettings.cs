@@ -67,7 +67,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// <summary>
         /// Indicates if we are using Basic or Modern Authentication
         /// </summary>
-        public bool IsAuthModern { get; set; }
+        public bool IsModernAuth { get; set; }
 
         // Todo we should get rid of the thumbnail field but when we do it causes an issue loading the config in an existing environment
         /// <summary>
@@ -76,12 +76,24 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// <value>
         public ThumbnailOptions ThumbnailOption { get; set; }
 
+        /// <summary>
+        /// Gets or sets the SharePoint Client Id
+        /// </summary>
         public string ClientId {  get; set; }
 
+        /// <summary>
+        /// Gets or sets the SharePoint Client Secret
+        /// </summary>
         public string ClientSecret {  get; set; }
 
+        /// <summary>
+        /// Gets or sets the SharePoint url.
+        /// </summary>
         public string TargetHost {  get; set; }
 
+        /// <summary>
+        /// Gets or sets the SharePoint Realm
+        /// </summary>
         public string Realm {  get; set; }
 
         /// <summary>

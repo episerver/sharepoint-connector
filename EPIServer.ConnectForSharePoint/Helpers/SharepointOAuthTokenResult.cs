@@ -3,7 +3,7 @@ using System;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
-    public class SharepointOAuthTokenResult
+    public class SharePointOAuthTokenResult
     {
         [JsonProperty("token_type")]
         public String TokenType { get; set; }

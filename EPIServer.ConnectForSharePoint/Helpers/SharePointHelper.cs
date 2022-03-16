@@ -172,7 +172,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// </summary>
         /// <param name="spSettings">The SharePoint settings.</param>
         /// <returns></returns>
-        public static SharepointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
+        public static SharePointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
         {
             using (WebClient client = new WebClient())
             {
@@ -188,7 +188,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                 client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
                 byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
                 string responsebody = Encoding.UTF8.GetString(responsebytes);
-                return JsonConvert.DeserializeObject<SharepointOAuthTokenResult>(responsebody);
+                return JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
             }
         }
 
