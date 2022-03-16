@@ -282,6 +282,10 @@
             <fieldset>
                 <legend><%= Translate("/sharepoint/admin/description")%></legend>
                 <div class="epi-size15">
+                    <asp:Label AssociatedControlID="ServerUrl" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
+                    <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
+                </div>
+                <div class="epi-size15">
                     <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/authenticationtype")%></label>
                     <br />
                     <label></label>
@@ -295,10 +299,6 @@
                 </div>
                 <fieldset id="BasicAuth">
                     <div class="epi-size15">
-                        <asp:Label AssociatedControlID="ServerUrl" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
-                        <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
-                    </div>
-                    <div class="epi-size15">
                         <asp:Label AssociatedControlID="Username" runat="server"><%# Translate("/sharepoint/admin/username") %></asp:Label>
                         <asp:TextBox ID="Username" runat="server" MaxLength="255" Text="<%# CurrentSettings.Username %>" />
                     </div>
@@ -309,10 +309,6 @@
                     </div>
                 </fieldset>
                 <fieldset id="ModernAuth">
-                    <div class="epi-size15">
-                        <asp:Label AssociatedControlID="TargetHost" runat="server"><%# Translate("/sharepoint/admin/serverurl") %></asp:Label>
-                        <asp:TextBox ID="TargetHost" runat="server" MaxLength="255" Text="<%# CurrentSettings.TargetHost %>" />
-                    </div>
                     <div class="epi-size15">
                         <asp:Label AssociatedControlID="ClientId" runat="server"><%# Translate("/sharepoint/admin/clientid") %></asp:Label>
                         <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />

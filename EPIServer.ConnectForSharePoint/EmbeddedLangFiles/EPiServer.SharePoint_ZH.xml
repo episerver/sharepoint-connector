@@ -22,7 +22,6 @@
         <password>密码</password>
         <clientid>ClientId</clientid>
         <clientsecret>ClientSecret</clientsecret>
-        <targethost>TargetHost</targethost>
         <realm>Realm</realm>
         <connectiontype>连接类型</connectiontype>
         <online>在线</online>

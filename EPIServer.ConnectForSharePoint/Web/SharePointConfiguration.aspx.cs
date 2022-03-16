@@ -75,11 +75,6 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return ClientSecret.Text.Trim(); }
         }
 
-        private string ConfiguredTargetHost
-        {
-            get { return TargetHost.Text.Trim(); }
-        }
-
         private string ConfiguredRealm
         {
             get { return Realm.Text.Trim(); }
@@ -512,7 +507,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Password = ConfiguredPassword;
                 SharePointSettings.Current.ClientId = ConfiguredClientId;
                 SharePointSettings.Current.ClientSecret = ConfiguredClientSecret;
-                SharePointSettings.Current.TargetHost = ConfiguredTargetHost.EndsWith("/") ? ConfiguredTargetHost : ConfiguredTargetHost + "/";
                 SharePointSettings.Current.Realm = ConfiguredRealm;
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
@@ -522,6 +516,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 SharePointSettings.Current.Save();
 
                 CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
+                CacheManager.Remove(SharePointHelper.AccessTokenCacheKey);
 
                 // Make sure the selected folder has the CmsAdmin full access rights.
                 var repo = ServiceLocator.Current.GetInstance<IContentSecurityRepository>();
@@ -688,7 +683,6 @@ namespace EPiServer.ConnectForSharePoint.Web
                 Password = ConfiguredPassword,
                 ClientId = ConfiguredClientId,
                 ClientSecret = ConfiguredClientSecret,
-                TargetHost = ConfiguredTargetHost,
                 Realm = ConfiguredRealm,
                 IsSharePointOnline = RBOnline.Checked,
                 IsModernAuth = RBModernAuth.Checked
@@ -731,7 +725,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
             else
             {
-                if (string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) || string.IsNullOrEmpty(ConfiguredTargetHost) || string.IsNullOrEmpty(ConfiguredRealm))
+                if (string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) || string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredRealm))
                 {
                     // Show error message in case of posting back and no relevant config values are specified
                     if (Page.IsPostBack)

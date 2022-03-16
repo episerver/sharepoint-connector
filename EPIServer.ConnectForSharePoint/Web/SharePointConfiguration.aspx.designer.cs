@@ -87,15 +87,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::System.Web.UI.WebControls.TextBox ClientSecret;
 
         /// <summary>
-        /// TargetHost control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TargetHost;
-
-        /// <summary>
         /// Realm control.
         /// </summary>
         /// <remarks>

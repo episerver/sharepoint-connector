@@ -89,10 +89,9 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
         private WebRequest CreateRequest(IRestRequest requestInfo, string requestBody, NameValueCollection headers)
         {
-            var url = _spSettings.IsModernAuth ? _spSettings.TargetHost : _spSettings.SiteUrl;
-            var requestUrl = WebHelper.CombineUrl(url, requestInfo.EncodedUrl);
+            var requestUrl = WebHelper.CombineUrl(_spSettings.SiteUrl, requestInfo.EncodedUrl);
             string acceptType = "application/json;odata=verbose";
-            if (requestInfo.EncodedUrl.StartsWith(url, StringComparison.OrdinalIgnoreCase))
+            if (requestInfo.EncodedUrl.StartsWith(_spSettings.SiteUrl, StringComparison.OrdinalIgnoreCase))
             {
                 acceptType = "application/atom+xml";
             }

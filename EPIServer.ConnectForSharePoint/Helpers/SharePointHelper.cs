@@ -190,7 +190,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 using (WebClient client = new WebClient())
                 {
-                    var domain = new Uri(spSettings.TargetHost).Host;
+                    var domain = new Uri(spSettings.SiteUrl).Host;
                     var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
                     var reqParams = new System.Collections.Specialized.NameValueCollection();
                     reqParams.Add("grant_type", "client_credentials");

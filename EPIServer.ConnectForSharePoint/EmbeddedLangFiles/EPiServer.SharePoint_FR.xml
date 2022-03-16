@@ -22,7 +22,6 @@
         <password>Mot de passe</password>
         <clientid>ClientId</clientid>
         <clientsecret>ClientSecret</clientsecret>
-        <targethost>TargetHost</targethost>
         <realm>Realm</realm>
         <connectiontype>Type de connexion</connectiontype>
         <online>En ligne</online>

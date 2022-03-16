@@ -87,11 +87,6 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string ClientSecret {  get; set; }
 
         /// <summary>
-        /// Gets or sets the SharePoint url.
-        /// </summary>
-        public string TargetHost {  get; set; }
-
-        /// <summary>
         /// Gets or sets the SharePoint Realm
         /// </summary>
         public string Realm {  get; set; }
