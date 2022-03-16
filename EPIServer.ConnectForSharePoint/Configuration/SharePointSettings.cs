@@ -65,7 +65,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public bool IsSharePointOnline { get; set; }
 
         /// <summary>
-        /// Indicates if we are using Basic or Modern Authentication
+        /// Indicates if we are using Modern Authentication
         /// </summary>
         public bool IsModernAuth { get; set; }
 

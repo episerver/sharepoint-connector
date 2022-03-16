@@ -36,6 +36,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
         private const int CookieContainerCacheOffsetSeconds = 5 * 60; // 5 minutes
+        private IObjectInstanceCache _cache;
 
         /// <summary>
         /// The cache key for form digest value
@@ -56,6 +57,16 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             get
             {
                 return string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "CookieContainer");
+            }
+        }
+
+        /// <summary>
+        /// The cache key for Access token response
+        /// </summary>
+        public static string AccessTokenCacheKey
+        {
+            get { 
+                return string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "AccessToken");
             }
         }
 
@@ -174,22 +185,31 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <returns></returns>
         public static SharePointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
         {
-            using (WebClient client = new WebClient())
+            var response = CacheManager.Get(AccessTokenCacheKey) as SharePointOAuthTokenResult;
+            if (response == null)
             {
-                var domain = new Uri(spSettings.TargetHost).Host;
-                var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
-                var reqParams = new System.Collections.Specialized.NameValueCollection();
-                reqParams.Add("grant_type", "client_credentials");
-                reqParams.Add("client_id", string.Format("{0}@{1}", spSettings.ClientId, spSettings.Realm));
-                reqParams.Add("client_secret", spSettings.ClientSecret);
-                reqParams.Add("resource", resource);
+                using (WebClient client = new WebClient())
+                {
+                    var domain = new Uri(spSettings.TargetHost).Host;
+                    var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
+                    var reqParams = new System.Collections.Specialized.NameValueCollection();
+                    reqParams.Add("grant_type", "client_credentials");
+                    reqParams.Add("client_id", string.Format("{0}@{1}", spSettings.ClientId, spSettings.Realm));
+                    reqParams.Add("client_secret", spSettings.ClientSecret);
+                    reqParams.Add("resource", resource);
 
-                var requestUrl = string.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
-                client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
-                string responsebody = Encoding.UTF8.GetString(responsebytes);
-                return JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
+                    var requestUrl = string.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
+                    client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
+                    string responsebody = Encoding.UTF8.GetString(responsebytes);
+                    response = JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
+
+                    var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
+                    CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
+                }
             }
+
+            return response;
         }
 
         /// <summary>
