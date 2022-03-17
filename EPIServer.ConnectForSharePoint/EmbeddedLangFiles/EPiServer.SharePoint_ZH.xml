@@ -16,7 +16,7 @@
         <selectviewdescription>选择一个或多个列表及相应的视图。</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>网站 URL</serverurl>
         <username>用户名</username>
         <password>密码</password>

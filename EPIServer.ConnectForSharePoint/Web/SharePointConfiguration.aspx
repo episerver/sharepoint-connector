@@ -19,7 +19,7 @@
         }
 
         .listViewSelector {
-        padding: 0 0 8px 2px;
+            padding: 0 0 8px 2px;
         }
     </style>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -117,6 +117,9 @@
             $('span.listCheckBox input[type="checkbox"]').change(function () {
                 setSaveButtonState();
             });
+
+            //Set authentication type based on selected connection type.
+            setAuthTypeByConnectionType();
 
             //Select authentication form to display based on authentication type selected.
             setAuthTypePanelVisibility();
@@ -239,7 +242,7 @@
 
             return false;
         }
-        
+
         function setAuthTypePanelVisibility() {
             var isModernAuthChecked = $('#FullRegion_RBModernAuth').is(':checked');
             if (isModernAuthChecked) {
@@ -248,14 +251,14 @@
                 displayBasicAuthSection();
             }
 
-            $('#FullRegion_RBBasicAuth').click(function() {
+            $('#FullRegion_RBBasicAuth').click(function () {
                 displayBasicAuthSection();
             });
 
-            $('#FullRegion_RBModernAuth').click(function() {
+            $('#FullRegion_RBModernAuth').click(function () {
                 displayModernAuthSection();
             });
-       }
+        }
 
         function displayModernAuthSection() {
             $('#ModernAuth').css('display', 'block');
@@ -266,6 +269,37 @@
             $('#ModernAuth').css('display', 'none');
             $('#BasicAuth').css('display', 'block');
         }
+
+        function setAuthTypeByConnectionType() {
+            var isOnPremisesChecked = $('#FullRegion_RBOnPremises').is(':checked');
+
+            if (isOnPremisesChecked) {
+                disableModernAuthRadio();
+                displayBasicAuthSection();
+            } else {
+                enableModernAuthRadio()
+            }
+
+            $('#FullRegion_RBOnPremises').click(function () {
+                disableModernAuthRadio();
+                displayBasicAuthSection();
+            });
+
+            $('#FullRegion_RBOnline').click(function () {
+                enableModernAuthRadio()
+            });
+        }
+
+        function disableModernAuthRadio() {
+            $("#FullRegion_RBBasicAuth").prop("checked", true);
+            $('#FullRegion_RBModernAuth').prop("disabled", true);
+        }
+
+        function enableModernAuthRadio() {
+            $('#FullRegion_RBModernAuth').prop("disabled", false);
+        }
+
+
     </script>
 
     <div class="epi-contentContainer epi-padding">
@@ -286,13 +320,19 @@
                     <asp:TextBox ID="ServerUrl" runat="server" MaxLength="255" Text="<%# CurrentSettings.SiteUrl %>" />
                 </div>
                 <div class="epi-size15">
-                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/authenticationtype")%></label>
+                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
+                    <label></label>
+                    <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
+                    <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>" />
+                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/online") %></label>
                     <br />
+                </div>
+                <div class="epi-size15">
+                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/authenticationtype")%></label>
                     <label></label>
                     <asp:RadioButton ID="RBBasicAuth" GroupName="AuthenticationType" runat="server" checked="<%# !CurrentSettings.IsModernAuth %>" />
                     <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/basicauth") %></label>
-                    <br />
-                    <label></label>
                     <asp:RadioButton ID="RBModernAuth" GroupName="AuthenticationType" runat="server" checked="<%# CurrentSettings.IsModernAuth %>" />
                     <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/modernauth") %></label>
                     <br />
@@ -322,18 +362,6 @@
                         <asp:TextBox ID="Realm" runat="server" MaxLength="255" Text="<%# CurrentSettings.Realm %>" />
                     </div>
                 </fieldset>
-                <div class="epi-size15">
-                    <label style="position: absolute; vertical-align: bottom;"><%#Translate("/sharepoint/admin/connectiontype")%></label>
-                    <br />
-                    <label></label>
-                    <asp:RadioButton ID="RBOnPremises" GroupName="ConnectionType" runat="server" checked="<%# !CurrentSettings.IsSharePointOnline %>" />
-                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/onpremises") %></label>
-                    <br />
-                    <label></label>
-                    <asp:RadioButton ID="RBOnline" GroupName="ConnectionType" runat="server" checked="<%# CurrentSettings.IsSharePointOnline %>" />
-                    <label style="position: relative; vertical-align: middle;"><%# Translate("/sharepoint/admin/online") %></label>
-                    <br />
-                </div>
 
                 <div class="epi-size15">
                     <br />

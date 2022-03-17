@@ -16,7 +16,7 @@
         <selectviewdescription>Välj en eller flera listor och motsvarande vyer.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Webbplats-URL</serverurl>
         <username>Användarnamn</username>
         <password>Lösenord</password>

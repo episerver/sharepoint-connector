@@ -16,7 +16,7 @@
         <selectviewdescription>1 つまたは複数のリスト、ならびに対応するビューを選択してください。</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>サイトURL</serverurl>
         <username>ユーザー名</username>
         <password>パスワード</password>

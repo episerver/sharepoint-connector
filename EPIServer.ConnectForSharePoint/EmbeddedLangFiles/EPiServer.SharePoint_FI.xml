@@ -16,7 +16,7 @@
         <selectviewdescription>Valitse luettelo tai useampi luettelo ja vastaavat näkymät.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Sivuston URL</serverurl>
         <username>Käyttäjänimi</username>
         <password>Salasana</password>

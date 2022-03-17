@@ -16,7 +16,7 @@
         <selectviewdescription>Wählen Sie eine oder mehrere Listen und entsprechenden Ansichten aus.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Site-URL</serverurl>
         <username>Benutzername</username>
         <password>Passwort</password>

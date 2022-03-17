@@ -16,7 +16,7 @@
         <selectviewdescription>Vælg en eller flere lister og tilhørende visninger.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
         <basicauth>Basic</basicauth>
-        <modernauth>Modern</modernauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Websteds-URL</serverurl>
         <username>Brugernavn</username>
         <password>Adgangskode</password>
