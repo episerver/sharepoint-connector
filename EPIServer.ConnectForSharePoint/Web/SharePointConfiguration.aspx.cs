@@ -676,6 +676,9 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// <returns></returns>
         private IEnumerable<SPList> TestConnection()
         {
+            CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
+            CacheManager.Remove(SharePointHelper.AccessTokenCacheKey);
+
             var newSettings = new SharePointSettings()
             {
                 SiteUrl = ConfiguredUrl,
