@@ -277,7 +277,7 @@
                 disableModernAuthRadio();
                 displayBasicAuthSection();
             } else {
-                enableModernAuthRadio()
+                enableModernAuthRadio();
             }
 
             $('#FullRegion_RBOnPremises').click(function () {
@@ -286,19 +286,18 @@
             });
 
             $('#FullRegion_RBOnline').click(function () {
-                enableModernAuthRadio()
+                enableModernAuthRadio();
             });
         }
 
         function disableModernAuthRadio() {
-            $("#FullRegion_RBBasicAuth").prop("checked", true);
             $('#FullRegion_RBModernAuth').prop("disabled", true);
+            $("#FullRegion_RBBasicAuth").prop("checked", true);
         }
 
         function enableModernAuthRadio() {
             $('#FullRegion_RBModernAuth').prop("disabled", false);
         }
-
 
     </script>
 
