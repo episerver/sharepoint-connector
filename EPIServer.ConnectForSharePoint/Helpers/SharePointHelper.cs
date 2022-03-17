@@ -35,8 +35,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
-        private const int CookieContainerCacheOffsetSeconds = 5 * 60; // 5 minutes
-        private IObjectInstanceCache _cache;
 
         /// <summary>
         /// The cache key for form digest value
