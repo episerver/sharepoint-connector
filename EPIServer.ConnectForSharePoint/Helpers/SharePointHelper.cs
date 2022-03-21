@@ -1,17 +1,17 @@
-﻿using EPiServer.ConnectForSharePoint.Authentication;
-using EPiServer.ConnectForSharePoint.Configuration;
+﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.SPServices;
-using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Framework.Cache;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
@@ -35,7 +35,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         private static readonly ILogger _logger = LogManager.GetLogger();
 
         private const int DefaultCookieContainerCacheSeconds = 1 * 60 * 60; // 1 hour
-        private const int CookieContainerCacheOffsetSeconds = 5 * 60; // 5 minutes
 
         /// <summary>
         /// The cache key for form digest value
@@ -56,6 +55,16 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             get
             {
                 return string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "CookieContainer");
+            }
+        }
+
+        /// <summary>
+        /// The cache key for Access token response
+        /// </summary>
+        public static string AccessTokenCacheKey
+        {
+            get { 
+                return string.Format(Consts.SHAREPOINT_CACHE_KEY_FORMAT, "AccessToken");
             }
         }
 
@@ -157,8 +166,6 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <param name="spSettings">The SharePoint settings.</param>
         public static CookieContainer GetLatestCookies(SharePointSettings spSettings)
         {
-            //var claimHelper = new MsOnlineClaimsHelper(spSettings.SiteUrl, spSettings.Username, spSettings.Password);
-            //return claimHelper.CookieContainer;
             var securePassword = new SecureString();
             var siteUri = new Uri(spSettings.SiteUrl);
             foreach (var c in spSettings.Password) { securePassword.AppendChar(c); }
@@ -167,6 +174,40 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var cookieContainer = new CookieContainer();
             cookieContainer.SetCookies(siteUri, authCookie);
             return cookieContainer;
+        }
+
+        /// <summary>
+        /// Get OAuth response from Sharepoint.
+        /// </summary>
+        /// <param name="spSettings">The SharePoint settings.</param>
+        /// <returns></returns>
+        public static SharePointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
+        {
+            var response = CacheManager.Get(AccessTokenCacheKey) as SharePointOAuthTokenResult;
+            if (response == null)
+            {
+                using (WebClient client = new WebClient())
+                {
+                    var domain = new Uri(spSettings.SiteUrl).Host;
+                    var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
+                    var reqParams = new System.Collections.Specialized.NameValueCollection();
+                    reqParams.Add("grant_type", "client_credentials");
+                    reqParams.Add("client_id", string.Format("{0}@{1}", spSettings.ClientId, spSettings.Realm));
+                    reqParams.Add("client_secret", spSettings.ClientSecret);
+                    reqParams.Add("resource", resource);
+
+                    var requestUrl = string.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
+                    client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
+                    string responsebody = Encoding.UTF8.GetString(responsebytes);
+                    response = JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
+
+                    var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
+                    CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
+                }
+            }
+
+            return response;
         }
 
         /// <summary>

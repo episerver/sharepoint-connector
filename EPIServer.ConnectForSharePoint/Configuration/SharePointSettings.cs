@@ -58,10 +58,16 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// 
         /// </summary>
         public bool UseSelectedFolder { get; set; }
+
         /// <summary>
         /// Indicates if we are connecting to a SharePoint Online instance
         /// </summary>
         public bool IsSharePointOnline { get; set; }
+
+        /// <summary>
+        /// Indicates if we are using Modern Authentication
+        /// </summary>
+        public bool IsModernAuth { get; set; }
 
         // Todo we should get rid of the thumbnail field but when we do it causes an issue loading the config in an existing environment
         /// <summary>
@@ -69,6 +75,21 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         /// </summary>
         /// <value>
         public ThumbnailOptions ThumbnailOption { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SharePoint Client Id
+        /// </summary>
+        public string ClientId {  get; set; }
+
+        /// <summary>
+        /// Gets or sets the SharePoint Client Secret
+        /// </summary>
+        public string ClientSecret {  get; set; }
+
+        /// <summary>
+        /// Gets or sets the SharePoint Realm
+        /// </summary>
+        public string Realm {  get; set; }
 
         /// <summary>
         /// Internal static instance of the connector settings. 
@@ -100,6 +121,9 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             SiteUrl = string.Empty;
             Username = string.Empty;
             Password = string.Empty;
+            ClientId = string.Empty;
+            ClientSecret = string.Empty;
+            Realm = string.Empty;
             ListIds = string.Empty;
             EntryPoint = ContentReference.EmptyReference;
             EntryPointFolderName = string.Empty;

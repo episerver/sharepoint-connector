@@ -1,62 +1,70 @@
-<?xml version="1.0" encoding="utf-8" ?> <languages>
-    <language name="deutsch" id="de">
-        <sharepoint>
-          <scheduledjob>
-            <description>Importiert neue oder aktualisierte Dokumente, Elemente und Ordner von SharePoint in Episerver.</description>
-            <displayname>SharePoint-Aktualisierung</displayname>
-          </scheduledjob>
-          <admin>
-                <ok>OK</ok>
-                <cancel>Abbrechen</cancel>
-                <displayname>Connect For SharePoint</displayname>
-                <description>Anmeldeinformationen für die SharePoint-Website</description>
-                <queuedescription>Warteschlangen-Informationen</queuedescription>
-                <remainingitems>Verbleibende Elemente</remainingitems>
-                <selectviewdescription>Wählen Sie eine oder mehrere Listen und entsprechenden Ansichten aus.</selectviewdescription>
-                <serverurl>Site-URL</serverurl>
-                <username>Benutzername</username>
-                <password>Passwort</password>
-                <connectiontype>Verbindungstyp</connectiontype>
-                <online>Online</online>
-                <onpremises>Lokal</onpremises>
-                <save>Speichern</save>
-                <connect>Verbindung testen</connect>
-                <selectedfolder>Ordner</selectedfolder>
-                <selectfolder>Ordner auswählen:</selectfolder>
-                <entrypoint>Einstieg für die Verbindung</entrypoint>
-                <entrypointinstructions>Einen Ordner als Ort für den Einstiegspunkt festlegen.  Wenn Sie darüber hinaus einen neuen Unterordner erstellen möchten, verwenden Sie das Textfeld unten:</entrypointinstructions>
-                <newsubfolder>Neuen Unterordner erstellen:</newsubfolder>  
-                <expirationtime>Ablaufdatum</expirationtime>
-                <refreshcache>Aktualisieren</refreshcache>
-                <entrypointrequired>Einstiegspunkt für die Verbindung erforderlich.</entrypointrequired>
-                <message>
-                    <savesuccess>Ihre Konfiguration wurde erfolgreich gespeichert.</savesuccess>
-                    <refreshsuccess>SharePoint-Daten werden aktualisiert.</refreshsuccess>
-                    <connectsuccess>Die Verbindung mit der entry point location wurde hergestellt. Wählen Sie SharePoint-Ansichten aus, um Medien abzurufen.</connectsuccess>
-                    <savesuccesswithnomedia>Ihre Konfiguration wurde gespeichert. Zu beachten: Da keine Ansicht ausgewählt wurde, wird kein SharePoint-Medium zugeordnet.</savesuccesswithnomedia>
-                    <saveerror>Fehler beim Speichern: {0}.</saveerror>
-                    <connecttosharepointerror>Fehler beim Aufbau der Verbindung mit einer SharePoint-Website: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>Es wurde keine SharePoint-URL, kein Benutzername oder Passwort angegeben.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Die Autorisierung mit dem angegebenen Benutzernamen und dem angegebenen Passwort ist fehlgeschlagen.</unauthorizederror>
-                    <notfounderror>Die SharePoint-URL ist nicht korrekt, oder Sie haben keinen Zugriff auf die in der URL angegebenen Website.</notfounderror>
-                    <listviewnotmatched>Die Liste der Ansichten ist nicht auf dem neuesten Stand. Erneuern Sie die Verbindung, um neue SharePoint-Ansichten zu erhalten.</listviewnotmatched>
-                    <invalidentrypoint>Ungültiger Einstiegspunkt für die Verbindung.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Der Einstiegspunkt für die Verbindung muss ein Inhaltsordner sein.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Der Einstiegspunkt für die Verbindung muss leer sein.  Bitte wählen Sie einen Ordner aus, der keine „Blöcke“ oder Medienelemente enthält.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Der ausgewählte Ordner kann kein Abkömmling des zuvor gewählten Ordners sein.  Bitte wählen Sie einen anderen Ordner.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Die Ablaufzeit muss in Minuten angegeben werden.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(größer oder gleich 3 Minuten)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Der Ordner „{0}“ wurde gelöscht, bitte wählen Sie einen neuen Zielordner.</folderdeleted>
-                </message>
-            </admin>
-            <plugin>
-                <spcontentindexjob>
-                    <displayname>Indizieren von ShairPoint-Inhalt</displayname>
-                    <description>Dieser Vorgang indiziert den Medieninhalt von SharePoint</description>
-                    <indexcompleted>Inhalt erfolgreich indiziert.</indexcompleted>
-                    <indexfailed>Inhaltsindizierung fehlgeschlagen.</indexfailed>
-                </spcontentindexjob>
-            </plugin>
-        </sharepoint>
-    </language>
+<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <language name="deutsch" id="de">
+    <sharepoint>
+      <scheduledjob>
+        <description>Importiert neue oder aktualisierte Dokumente, Elemente und Ordner von SharePoint in Episerver.</description>
+        <displayname>SharePoint-Aktualisierung</displayname>
+      </scheduledjob>
+      <admin>
+        <ok>OK</ok>
+        <cancel>Abbrechen</cancel>
+        <displayname>Connect For SharePoint</displayname>
+        <description>Anmeldeinformationen für die SharePoint-Website</description>
+        <queuedescription>Warteschlangen-Informationen</queuedescription>
+        <remainingitems>Verbleibende Elemente</remainingitems>
+        <selectviewdescription>Wählen Sie eine oder mehrere Listen und entsprechenden Ansichten aus.</selectviewdescription>
+        <authenticationtype>Authentication Type</authenticationtype>
+        <basicauth>Basic</basicauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
+        <serverurl>Site-URL</serverurl>
+        <username>Benutzername</username>
+        <password>Passwort</password>
+        <clientid>ClientId</clientid>
+        <clientsecret>ClientSecret</clientsecret>
+        <realm>Realm</realm>
+        <connectiontype>Verbindungstyp</connectiontype>
+        <online>Online</online>
+        <onpremises>Lokal</onpremises>
+        <save>Speichern</save>
+        <connect>Verbindung testen</connect>
+        <selectedfolder>Ordner</selectedfolder>
+        <selectfolder>Ordner auswählen:</selectfolder>
+        <entrypoint>Einstieg für die Verbindung</entrypoint>
+        <entrypointinstructions>Einen Ordner als Ort für den Einstiegspunkt festlegen.  Wenn Sie darüber hinaus einen neuen Unterordner erstellen möchten, verwenden Sie das Textfeld unten:</entrypointinstructions>
+        <newsubfolder>Neuen Unterordner erstellen:</newsubfolder>
+        <expirationtime>Ablaufdatum</expirationtime>
+        <refreshcache>Aktualisieren</refreshcache>
+        <entrypointrequired>Einstiegspunkt für die Verbindung erforderlich.</entrypointrequired>
+        <message>
+          <savesuccess>Ihre Konfiguration wurde erfolgreich gespeichert.</savesuccess>
+          <refreshsuccess>SharePoint-Daten werden aktualisiert.</refreshsuccess>
+          <connectsuccess>Die Verbindung mit der entry point location wurde hergestellt. Wählen Sie SharePoint-Ansichten aus, um Medien abzurufen.</connectsuccess>
+          <savesuccesswithnomedia>Ihre Konfiguration wurde gespeichert. Zu beachten: Da keine Ansicht ausgewählt wurde, wird kein SharePoint-Medium zugeordnet.</savesuccesswithnomedia>
+          <saveerror>Fehler beim Speichern: {0}.</saveerror>
+          <connecttosharepointerror>Fehler beim Aufbau der Verbindung mit einer SharePoint-Website: {0}</connecttosharepointerror>
+          <nourlusernamepasswordspecified>Es wurde keine SharePoint-URL, kein Benutzername oder Passwort angegeben.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <unauthorizederror>Die Autorisierung mit dem angegebenen Benutzernamen und dem angegebenen Passwort ist fehlgeschlagen.</unauthorizederror>
+          <notfounderror>Die SharePoint-URL ist nicht korrekt, oder Sie haben keinen Zugriff auf die in der URL angegebenen Website.</notfounderror>
+          <listviewnotmatched>Die Liste der Ansichten ist nicht auf dem neuesten Stand. Erneuern Sie die Verbindung, um neue SharePoint-Ansichten zu erhalten.</listviewnotmatched>
+          <invalidentrypoint>Ungültiger Einstiegspunkt für die Verbindung.</invalidentrypoint>
+          <entrypointmustbecontentfolder>Der Einstiegspunkt für die Verbindung muss ein Inhaltsordner sein.</entrypointmustbecontentfolder>
+          <entrypointmustnothavechildren>Der Einstiegspunkt für die Verbindung muss leer sein.  Bitte wählen Sie einen Ordner aus, der keine „Blöcke“ oder Medienelemente enthält.</entrypointmustnothavechildren>
+          <entrypointcannotbechildofprevious>Der ausgewählte Ordner kann kein Abkömmling des zuvor gewählten Ordners sein.  Bitte wählen Sie einen anderen Ordner.</entrypointcannotbechildofprevious>
+          <expirationtimemustbeminutes>Die Ablaufzeit muss in Minuten angegeben werden.</expirationtimemustbeminutes>
+          <expirationtimegreaterorequalthree>(größer oder gleich 3 Minuten)</expirationtimegreaterorequalthree>
+          <folderdeleted>Der Ordner „{0}“ wurde gelöscht, bitte wählen Sie einen neuen Zielordner.</folderdeleted>
+        </message>
+      </admin>
+      <plugin>
+        <spcontentindexjob>
+          <displayname>Indizieren von ShairPoint-Inhalt</displayname>
+          <description>Dieser Vorgang indiziert den Medieninhalt von SharePoint</description>
+          <indexcompleted>Inhalt erfolgreich indiziert.</indexcompleted>
+          <indexfailed>Inhaltsindizierung fehlgeschlagen.</indexfailed>
+        </spcontentindexjob>
+      </plugin>
+    </sharepoint>
+  </language>
 </languages>

@@ -1,62 +1,70 @@
-<?xml version="1.0" encoding="utf-8" ?> <languages>
-    <language name="Nederlands" id="nl">
-        <sharepoint>
-          <scheduledjob>
-            <description>Importeer nieuwe of bijwerkte documenten. items en mappen van SharePoint in Episerver</description>
-            <displayname>Update SharePoint</displayname>
-          </scheduledjob>
-          <admin>
-                <ok>Ok</ok>
-                <cancel>Annuleren</cancel>
-                <displayname>Verbinding voor SharePoint</displayname>
-                <description>Referenties SharePoint Site</description>
-                <queuedescription>Wachtrijgegevens</queuedescription>
-                <remainingitems>Resterende items</remainingitems>
-                <selectviewdescription>Selecteer een of meer lijsten en bijbehorende weergaven.</selectviewdescription>
-                <serverurl>Site-URL</serverurl>
-                <username>Gebruikersnaam</username>
-                <password>Wachtwoord</password>
-                <connectiontype>Verbindingstype</connectiontype>
-                <online>Online</online>
-                <onpremises>Op locatie</onpremises>
-                <save>Opslaan</save>
-                <connect>Verbinding testen</connect>
-                <selectedfolder>Map</selectedfolder>
-                <selectfolder>Selecteer map:</selectfolder>
-                <entrypoint>Verbinding toegangspunt</entrypoint>
-                <entrypointinstructions>Selecteer een map die de toegangspuntlocatie zal worden.  Als u daarnaast een nieuwe submap wilt creëren kunt u het tekstvak hieronder gebruiken:</entrypointinstructions>
-                <newsubfolder>Nieuwe submap creëren:</newsubfolder>  
-                <expirationtime>Vervaltijdstip</expirationtime>
-                <refreshcache>Vernieuwen</refreshcache>
-                <entrypointrequired>Verbinding toegangspunt is vereist.</entrypointrequired>
-                <message>
-                    <savesuccess>Uw configuratie is succesvol opgeslagen.</savesuccess>
-                    <refreshsuccess>SharePoint-gegevens wordt bijgewerkt.</refreshsuccess>
-                    <connectsuccess>Succesvol verbonden met de SharePoint-site. Selecteer SharePoint weergaven om media van te krijgen.</connectsuccess>
-                    <savesuccesswithnomedia>Uw configuratie is opgeslagen. Merk op dat aangezien er geen visie geselecteerd is, er geen SharePoint-media is toegewezen.</savesuccesswithnomedia>
-                    <saveerror>Fout tijdens het opslaan: {0}.</saveerror>
-                    <connecttosharepointerror>Fout tijdens verbinding maken met de SharePoint-site: {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>Geen SharePoint-URL, gebruikersnaam of wachtwoord opgegeven.</nourlusernamepasswordspecified>
-                    <unauthorizederror>Kon niet machtigen met de opgegeven gebruikersnaam en wachtwoord.</unauthorizederror>
-                    <notfounderror>De SharePoint-URL is onjuist of u hebt geen toegang tot de site die is opgegeven in de URL.</notfounderror>
-                    <listviewnotmatched>De lijst met weergaven is niet bijgewerkt. Opnieuw verbinden om de nieuwe SharePoint-weergaven te krijgen.</listviewnotmatched>
-                    <invalidentrypoint>Ongeldige verbinding toegangspunt.</invalidentrypoint>
-                    <entrypointmustbecontentfolder>Verbinding toegangspunt moet een inhoudsmap zijn.</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>Verbinding toegangspunt moet leeg zijn.  Selecteer een map die geen 'Blokken' of media-items bevat.</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>Geselecteerde map mag geen kind zijn van de eerder geselecteerde map.  Selecteer een andere map.</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>Vervaltijdstip moet in minuten zijn.</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>(groter dan of gelijk aan 3 minuten)</expirationtimegreaterorequalthree>
-                    <folderdeleted>Map '{0}' is verwijderd, selecteer een nieuwe bestemming.</folderdeleted>
-                </message>
-            </admin>
-            <plugin>
-                <spcontentindexjob>
-                    <displayname>SharePoint-inhoudsindex</displayname>
-                    <description>Deze taak indexeert media-inhoud van SharePoint.</description>
-                    <indexcompleted>Inhoud met succes geïndexeerd.</indexcompleted>
-                    <indexfailed>Inhoud indexeren mislukt.</indexfailed>
-                </spcontentindexjob>
-            </plugin>
-        </sharepoint>
-    </language>
+<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <language name="Nederlands" id="nl">
+    <sharepoint>
+      <scheduledjob>
+        <description>Importeer nieuwe of bijwerkte documenten. items en mappen van SharePoint in Episerver</description>
+        <displayname>Update SharePoint</displayname>
+      </scheduledjob>
+      <admin>
+        <ok>Ok</ok>
+        <cancel>Annuleren</cancel>
+        <displayname>Verbinding voor SharePoint</displayname>
+        <description>Referenties SharePoint Site</description>
+        <queuedescription>Wachtrijgegevens</queuedescription>
+        <remainingitems>Resterende items</remainingitems>
+        <selectviewdescription>Selecteer een of meer lijsten en bijbehorende weergaven.</selectviewdescription>
+        <authenticationtype>Authentication Type</authenticationtype>
+        <basicauth>Basic</basicauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
+        <serverurl>Site-URL</serverurl>
+        <username>Gebruikersnaam</username>
+        <password>Wachtwoord</password>
+        <clientid>ClientId</clientid>
+        <clientsecret>ClientSecret</clientsecret>
+        <realm>Realm</realm>
+        <connectiontype>Verbindingstype</connectiontype>
+        <online>Online</online>
+        <onpremises>Op locatie</onpremises>
+        <save>Opslaan</save>
+        <connect>Verbinding testen</connect>
+        <selectedfolder>Map</selectedfolder>
+        <selectfolder>Selecteer map:</selectfolder>
+        <entrypoint>Verbinding toegangspunt</entrypoint>
+        <entrypointinstructions>Selecteer een map die de toegangspuntlocatie zal worden.  Als u daarnaast een nieuwe submap wilt creëren kunt u het tekstvak hieronder gebruiken:</entrypointinstructions>
+        <newsubfolder>Nieuwe submap creëren:</newsubfolder>
+        <expirationtime>Vervaltijdstip</expirationtime>
+        <refreshcache>Vernieuwen</refreshcache>
+        <entrypointrequired>Verbinding toegangspunt is vereist.</entrypointrequired>
+        <message>
+          <savesuccess>Uw configuratie is succesvol opgeslagen.</savesuccess>
+          <refreshsuccess>SharePoint-gegevens wordt bijgewerkt.</refreshsuccess>
+          <connectsuccess>Succesvol verbonden met de SharePoint-site. Selecteer SharePoint weergaven om media van te krijgen.</connectsuccess>
+          <savesuccesswithnomedia>Uw configuratie is opgeslagen. Merk op dat aangezien er geen visie geselecteerd is, er geen SharePoint-media is toegewezen.</savesuccesswithnomedia>
+          <saveerror>Fout tijdens het opslaan: {0}.</saveerror>
+          <connecttosharepointerror>Fout tijdens verbinding maken met de SharePoint-site: {0}</connecttosharepointerror>
+          <nourlusernamepasswordspecified>Geen SharePoint-URL, gebruikersnaam of wachtwoord opgegeven.</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <unauthorizederror>Kon niet machtigen met de opgegeven gebruikersnaam en wachtwoord.</unauthorizederror>
+          <notfounderror>De SharePoint-URL is onjuist of u hebt geen toegang tot de site die is opgegeven in de URL.</notfounderror>
+          <listviewnotmatched>De lijst met weergaven is niet bijgewerkt. Opnieuw verbinden om de nieuwe SharePoint-weergaven te krijgen.</listviewnotmatched>
+          <invalidentrypoint>Ongeldige verbinding toegangspunt.</invalidentrypoint>
+          <entrypointmustbecontentfolder>Verbinding toegangspunt moet een inhoudsmap zijn.</entrypointmustbecontentfolder>
+          <entrypointmustnothavechildren>Verbinding toegangspunt moet leeg zijn.  Selecteer een map die geen 'Blokken' of media-items bevat.</entrypointmustnothavechildren>
+          <entrypointcannotbechildofprevious>Geselecteerde map mag geen kind zijn van de eerder geselecteerde map.  Selecteer een andere map.</entrypointcannotbechildofprevious>
+          <expirationtimemustbeminutes>Vervaltijdstip moet in minuten zijn.</expirationtimemustbeminutes>
+          <expirationtimegreaterorequalthree>(groter dan of gelijk aan 3 minuten)</expirationtimegreaterorequalthree>
+          <folderdeleted>Map '{0}' is verwijderd, selecteer een nieuwe bestemming.</folderdeleted>
+        </message>
+      </admin>
+      <plugin>
+        <spcontentindexjob>
+          <displayname>SharePoint-inhoudsindex</displayname>
+          <description>Deze taak indexeert media-inhoud van SharePoint.</description>
+          <indexcompleted>Inhoud met succes geïndexeerd.</indexcompleted>
+          <indexfailed>Inhoud indexeren mislukt.</indexfailed>
+        </spcontentindexjob>
+      </plugin>
+    </sharepoint>
+  </language>
 </languages>
