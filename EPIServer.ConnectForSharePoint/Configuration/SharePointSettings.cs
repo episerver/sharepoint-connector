@@ -121,6 +121,9 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             SiteUrl = string.Empty;
             Username = string.Empty;
             Password = string.Empty;
+            ClientId = string.Empty;
+            ClientSecret = string.Empty;
+            Realm = string.Empty;
             ListIds = string.Empty;
             EntryPoint = ContentReference.EmptyReference;
             EntryPointFolderName = string.Empty;
