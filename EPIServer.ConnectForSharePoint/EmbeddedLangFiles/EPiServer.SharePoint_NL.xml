@@ -20,9 +20,9 @@
         <serverurl>Site-URL</serverurl>
         <username>Gebruikersnaam</username>
         <password>Wachtwoord</password>
-        <clientid>ClientId</clientid>
-        <clientsecret>ClientSecret</clientsecret>
-        <realm>Realm</realm>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
         <connectiontype>Verbindingstype</connectiontype>
         <online>Online</online>
         <onpremises>Op locatie</onpremises>

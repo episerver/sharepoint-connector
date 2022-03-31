@@ -20,9 +20,9 @@
         <serverurl>URL-adresse for område</serverurl>
         <username>Brukernavn</username>
         <password>Passord</password>
-        <clientid>ClientId</clientid>
-        <clientsecret>ClientSecret</clientsecret>
-        <realm>Realm</realm>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
         <connectiontype>Tilkoblingstype</connectiontype>
         <online>Pålogget</online>
         <onpremises>Lokalt</onpremises>

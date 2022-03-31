@@ -20,9 +20,9 @@
         <serverurl>Webbplats-URL</serverurl>
         <username>Användarnamn</username>
         <password>Lösenord</password>
-        <clientid>ClientId</clientid>
-        <clientsecret>ClientSecret</clientsecret>
-        <realm>Realm</realm>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
         <connectiontype>Anslutningstyp</connectiontype>
         <online>Online lagringsplats</online>
         <onpremises>Lokal lagringsplats</onpremises>

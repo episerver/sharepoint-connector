@@ -20,9 +20,9 @@
         <serverurl>网站 URL</serverurl>
         <username>用户名</username>
         <password>密码</password>
-        <clientid>ClientId</clientid>
-        <clientsecret>ClientSecret</clientsecret>
-        <realm>Realm</realm>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
         <connectiontype>连接类型</connectiontype>
         <online>在线</online>
         <onpremises>本机端</onpremises>

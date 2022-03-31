@@ -20,9 +20,9 @@
         <serverurl>サイトURL</serverurl>
         <username>ユーザー名</username>
         <password>パスワード</password>
-        <clientid>ClientId</clientid>
-        <clientsecret>ClientSecret</clientsecret>
-        <realm>Realm</realm>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
         <connectiontype>接続タイプ</connectiontype>
         <online>オンライン</online>
         <onpremises>オンプレミス</onpremises>
