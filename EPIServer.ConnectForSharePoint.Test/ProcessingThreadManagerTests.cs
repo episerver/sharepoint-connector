@@ -88,7 +88,7 @@ namespace EPiServer.ConnectForSharePoint.Test
         [TestMethod]
         public void Uses_ThreadCount_Specified_InConfig()
         {
-            int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount - 1;
+            int expectedNumberOfThreads = ProcessingThreadManager.DefaultThreadCount - 2;
             int actualNumberOfThreads = 0;
             int testSleepTime = 5000;
 

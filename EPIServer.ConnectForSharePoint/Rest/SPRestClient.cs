@@ -19,16 +19,25 @@ namespace EPiServer.ConnectForSharePoint.Rest
         private IObjectSerializer _serializer = ServiceLocator.Current.GetInstance<IObjectSerializerFactory>().GetSerializer(KnownContentTypes.Json);
         private SharePointSettings _spSettings;
         private Func<SharePointSettings, CookieContainer> _getCookieContainer;
+        private SharePointOAuthTokenResult _oAuthTokenResult;
 
         public SPRestClient()
             : this(SharePointSettings.Current, (currentSettings) => { return SharePointHelper.GetCookies(currentSettings); })
-        { }
+        {
+            _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
+        }
 
         public SPRestClient(
             SharePointSettings settings, Func<SharePointSettings, CookieContainer> getCookieContainer)
         {
             _spSettings = settings;
             _getCookieContainer = getCookieContainer;
+        }
+
+        public SPRestClient(SharePointSettings settings)
+        {
+            _spSettings = settings;
+            _oAuthTokenResult = SharePointHelper.GetOAuthResponse(_spSettings);
         }
 
         /// <summary>
@@ -89,15 +98,22 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
             var webRequest = (HttpWebRequest)WebHelper.CreateRequest(requestUrl, requestInfo.RequestMethod, headers, acceptType);
 
-            // NOTE: the CookieContainer MUST be set before GetRequestStream() call
-            // so that any POST request can work successfully
-            if (_spSettings.IsSharePointOnline || SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
+            if (_spSettings.IsModernAuth)
             {
-                webRequest.CookieContainer = _getCookieContainer(_spSettings);
+                webRequest.Headers.Add("Authorization", "Bearer " + _oAuthTokenResult.AccessToken);
             }
             else
             {
-                webRequest.Credentials = SharePointHelper.GetCredentialCache(_spSettings);
+                // NOTE: the CookieContainer MUST be set before GetRequestStream() call
+                // so that any POST request can work successfully
+                if (_spSettings.IsSharePointOnline || SharePointHelper.IsConnectToSharePointOnline(_spSettings.Username))
+                {
+                    webRequest.CookieContainer = _getCookieContainer(_spSettings);
+                }
+                else
+                {
+                    webRequest.Credentials = SharePointHelper.GetCredentialCache(_spSettings);
+                }
             }
 
             AddRequestBody(webRequest, requestBody);

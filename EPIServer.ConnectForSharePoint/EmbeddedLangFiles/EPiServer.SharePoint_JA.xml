@@ -1,62 +1,70 @@
-<?xml version="1.0" encoding="utf-8" ?> <languages>
-    <language name="日本語 (Japanese)" id="ja">
-        <sharepoint>
-          <scheduledjob>
-            <description>新規または更新されたドキュメント、アイテム、およびフォルダをSharePointからEpiserverへインポートします。</description>
-            <displayname>SharePoint 更新</displayname>
-          </scheduledjob>
-          <admin>
-                <ok>OK</ok>
-                <cancel>キャンセル</cancel>
-                <displayname>SharePoint用接続</displayname>
-                <description>SharePoint サイトの認証情報</description>
-                <queuedescription>キュー情報</queuedescription>
-                <remainingitems>残りのアイテム</remainingitems>
-                <selectviewdescription>1 つまたは複数のリスト、ならびに対応するビューを選択してください。</selectviewdescription>
-                <serverurl>サイトURL</serverurl>
-                <username>ユーザー名</username>
-                <password>パスワード</password>
-                <connectiontype>接続タイプ</connectiontype>
-                <online>オンライン</online>
-                <onpremises>オンプレミス</onpremises>
-                <save>保存</save>
-                <connect>テスト接続</connect>
-                <selectedfolder>フォルダ</selectedfolder>
-                <selectfolder>フォルダの選択：</selectfolder>
-                <entrypoint>接続エントリ ポイント</entrypoint>
-                <entrypointinstructions>エントリ ポイントの場所となるフォルダを選択してください。  また、新規サブ フォルダを作成したい場合は、下のテキスト ボックスを使用してください：</entrypointinstructions>
-                <newsubfolder>新規サブ フォルダの作成：</newsubfolder>  
-                <expirationtime>有効期限</expirationtime>
-                <refreshcache>リフレッシュ</refreshcache>
-                <entrypointrequired>接続エントリ ポイントが必要です。</entrypointrequired>
-                <message>
-                    <savesuccess>構成が正常に保存されました。</savesuccess>
-                    <refreshsuccess>SharePointデータを更新しています。</refreshsuccess>
-                    <connectsuccess>SharePointサイトに正常に接続しました。 メディアの取得元となるSharePointビューを選択してください。</connectsuccess>
-                    <savesuccesswithnomedia>構成が保存されました。 選択されているビューがないため、Sharepointメディアはマッピングされません。</savesuccesswithnomedia>
-                    <saveerror>保存時のエラー： {0}。</saveerror>
-                    <connecttosharepointerror>SharePointサイトへ接続時のエラー： {0}</connecttosharepointerror>
-                    <nourlusernamepasswordspecified>SharePoint URL、ユーザー名、パスワードが何も指定されていません。</nourlusernamepasswordspecified>
-                    <unauthorizederror>指定のユーザー名およびパスワードによる認証に失敗しました。</unauthorizederror>
-                    <notfounderror>SharePoint URLが正しくありません。またはURLで指定されているサイトへのアクセス権がありません。</notfounderror>
-                    <listviewnotmatched>ビューのリストが最新ではありません。 再接続して、新しいSharePointビューを取得してください。</listviewnotmatched>
-                    <invalidentrypoint>無効な接続エントリ ポイント。</invalidentrypoint>
-                    <entrypointmustbecontentfolder>接続エントリ ポイントは、コンテンツ フォルダでなければなりません。</entrypointmustbecontentfolder>
-                    <entrypointmustnothavechildren>接続エントリ ポイントは空でなければなりません。  「ブロック」またはメディア アイテムが含まれていないフォルダを選択してください。</entrypointmustnothavechildren>
-                    <entrypointcannotbechildofprevious>選択したフォルダは、以前に選択したフォルダの子にできません。  別のフォルダを選択してください。</entrypointcannotbechildofprevious>
-                  <expirationtimemustbeminutes>有効期限は、分単位でなければなりません。</expirationtimemustbeminutes>                   
-                    <expirationtimegreaterorequalthree>（3分以上）</expirationtimegreaterorequalthree>
-                    <folderdeleted>フォルダ '{0}' は削除されています。新しい移行先を選択してください。</folderdeleted>
-                </message>
-            </admin>
-            <plugin>
-                <spcontentindexjob>
-                    <displayname>SharePoint コンテンツ インデックス</displayname>
-                    <description>このジョブは、SharePointのメディア コンテンツをインデックス化します。</description>
-                    <indexcompleted>コンテンツが正常にインデックス化されました。</indexcompleted>
-                    <indexfailed>コンテンツのインデックス化に失敗しました。</indexfailed>
-                </spcontentindexjob>
-            </plugin>
-        </sharepoint>
-    </language>
+<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <language name="日本語 (Japanese)" id="ja">
+    <sharepoint>
+      <scheduledjob>
+        <description>新規または更新されたドキュメント、アイテム、およびフォルダをSharePointからEpiserverへインポートします。</description>
+        <displayname>SharePoint 更新</displayname>
+      </scheduledjob>
+      <admin>
+        <ok>OK</ok>
+        <cancel>キャンセル</cancel>
+        <displayname>SharePoint用接続</displayname>
+        <description>SharePoint サイトの認証情報</description>
+        <queuedescription>キュー情報</queuedescription>
+        <remainingitems>残りのアイテム</remainingitems>
+        <selectviewdescription>1 つまたは複数のリスト、ならびに対応するビューを選択してください。</selectviewdescription>
+        <authenticationtype>Authentication Type</authenticationtype>
+        <basicauth>Basic</basicauth>
+        <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
+        <serverurl>サイトURL</serverurl>
+        <username>ユーザー名</username>
+        <password>パスワード</password>
+        <clientid>Client Id (Application Id)</clientid>
+        <clientsecret>Client Secret</clientsecret>
+        <realm>Realm (Directory/Tenant Id)</realm>
+        <connectiontype>接続タイプ</connectiontype>
+        <online>オンライン</online>
+        <onpremises>オンプレミス</onpremises>
+        <save>保存</save>
+        <connect>テスト接続</connect>
+        <selectedfolder>フォルダ</selectedfolder>
+        <selectfolder>フォルダの選択：</selectfolder>
+        <entrypoint>接続エントリ ポイント</entrypoint>
+        <entrypointinstructions>エントリ ポイントの場所となるフォルダを選択してください。  また、新規サブ フォルダを作成したい場合は、下のテキスト ボックスを使用してください：</entrypointinstructions>
+        <newsubfolder>新規サブ フォルダの作成：</newsubfolder>
+        <expirationtime>有効期限</expirationtime>
+        <refreshcache>リフレッシュ</refreshcache>
+        <entrypointrequired>接続エントリ ポイントが必要です。</entrypointrequired>
+        <message>
+          <savesuccess>構成が正常に保存されました。</savesuccess>
+          <refreshsuccess>SharePointデータを更新しています。</refreshsuccess>
+          <connectsuccess>SharePointサイトに正常に接続しました。 メディアの取得元となるSharePointビューを選択してください。</connectsuccess>
+          <savesuccesswithnomedia>構成が保存されました。 選択されているビューがないため、Sharepointメディアはマッピングされません。</savesuccesswithnomedia>
+          <saveerror>保存時のエラー： {0}。</saveerror>
+          <connecttosharepointerror>SharePointサイトへ接続時のエラー： {0}</connecttosharepointerror>
+          <nourlusernamepasswordspecified>SharePoint URL、ユーザー名、パスワードが何も指定されていません。</nourlusernamepasswordspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <unauthorizederror>指定のユーザー名およびパスワードによる認証に失敗しました。</unauthorizederror>
+          <notfounderror>SharePoint URLが正しくありません。またはURLで指定されているサイトへのアクセス権がありません。</notfounderror>
+          <listviewnotmatched>ビューのリストが最新ではありません。 再接続して、新しいSharePointビューを取得してください。</listviewnotmatched>
+          <invalidentrypoint>無効な接続エントリ ポイント。</invalidentrypoint>
+          <entrypointmustbecontentfolder>接続エントリ ポイントは、コンテンツ フォルダでなければなりません。</entrypointmustbecontentfolder>
+          <entrypointmustnothavechildren>接続エントリ ポイントは空でなければなりません。  「ブロック」またはメディア アイテムが含まれていないフォルダを選択してください。</entrypointmustnothavechildren>
+          <entrypointcannotbechildofprevious>選択したフォルダは、以前に選択したフォルダの子にできません。  別のフォルダを選択してください。</entrypointcannotbechildofprevious>
+          <expirationtimemustbeminutes>有効期限は、分単位でなければなりません。</expirationtimemustbeminutes>
+          <expirationtimegreaterorequalthree>（3分以上）</expirationtimegreaterorequalthree>
+          <folderdeleted>フォルダ '{0}' は削除されています。新しい移行先を選択してください。</folderdeleted>
+        </message>
+      </admin>
+      <plugin>
+        <spcontentindexjob>
+          <displayname>SharePoint コンテンツ インデックス</displayname>
+          <description>このジョブは、SharePointのメディア コンテンツをインデックス化します。</description>
+          <indexcompleted>コンテンツが正常にインデックス化されました。</indexcompleted>
+          <indexfailed>コンテンツのインデックス化に失敗しました。</indexfailed>
+        </spcontentindexjob>
+      </plugin>
+    </sharepoint>
+  </language>
 </languages>
