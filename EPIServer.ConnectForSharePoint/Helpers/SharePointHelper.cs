@@ -1,6 +1,7 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
 using EPiServer.ConnectForSharePoint.Models;
-using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Rest;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Framework.Cache;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
@@ -237,12 +238,32 @@ namespace EPiServer.ConnectForSharePoint.Helpers
 
         public IEnumerable<SPListItem> GetPagedItems(SPList list, SPListView view, SPFolder folder, out string nextUri)
         {
-            var service = _serviceLocator.GetInstance<IListsViewsService>();
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, GetLatestCookies)
+            };
+
+            var service = new ListsViewsService { EndpointContextService = contextService };
             return service.GetPagedItems(list, view, folder, out nextUri);
         }
         public IEnumerable<SPListItem> GetNextPagedItems(SPList list, string Uri, out string nextUri)
         {
-            var service = _serviceLocator.GetInstance<IListsViewsService>();
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, GetLatestCookies)
+            };
+
+            var service = new ListsViewsService { EndpointContextService = contextService };
             return service.GetNextPagedItems(list, Uri, out nextUri);
         }
     }

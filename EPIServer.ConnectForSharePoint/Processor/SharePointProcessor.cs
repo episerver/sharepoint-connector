@@ -13,6 +13,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
+using EPiServer.ConnectForSharePoint.Rest;
 
 namespace EPiServer.ConnectForSharePoint.Messaging
 {
@@ -31,8 +34,20 @@ namespace EPiServer.ConnectForSharePoint.Messaging
         {
             _serviceLocator = ServiceLocator.Current;
             _contentProviderHelper = new ContentProviderHelper();
-            _fileStreamService = _serviceLocator.GetInstance<IFileStreamService>();
-            _listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
+            
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            _fileStreamService = new FileStreamService { EndpointContextService = contextService };
+            _listViewsService = new ListsViewsService { EndpointContextService = contextService };
+
             _helper = new SharePointProcessorHelper();
             _logger = LogManager.GetLogger();
         }

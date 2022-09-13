@@ -9,6 +9,9 @@ using EPiServer.ConnectForSharePoint.Models.ViewModels;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
+using EPiServer.ConnectForSharePoint.Rest;
 
 namespace EPiServer.ConnectForSharePoint.Helpers
 {
@@ -26,8 +29,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         public SharePointProcessorHelper()
         {
             _serviceLocator = ServiceLocator.Current;
-            _fileStreamService = _serviceLocator.GetInstance<IFileStreamService>();
-            _listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
+            
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            _fileStreamService = new FileStreamService { EndpointContextService = contextService };
+            _listViewsService = new ListsViewsService { EndpointContextService = contextService };
         }
 
         internal SharePointProcessorHelper(IServiceLocator serviceLocator)
@@ -38,7 +52,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
-        /// Gets the stream data assocatied with a specific SPListItem, 
+        /// Gets the stream data associated with a specific SPListItem, 
         /// useful when adding or updating a document in cms
         /// </summary>
         /// <param name="item"></param>

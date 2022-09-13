@@ -1,5 +1,7 @@
-﻿using EPiServer.ConnectForSharePoint.Helpers;
+﻿using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Models;
+using EPiServer.ConnectForSharePoint.Rest;
 using EPiServer.ConnectForSharePoint.Rest.Requests;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
@@ -22,8 +24,18 @@ namespace EPiServer.ConnectForSharePoint.SPServices.REST
 
         public FileStreamService()
         {
-            _spListsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
-            _spFilesFoldersService = ServiceLocator.Current.GetInstance<IFilesFoldersService>();
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            _spListsService = new ListsViewsService { EndpointContextService = contextService };
+            _spFilesFoldersService = new FilesFoldersService { EndpointContextService = contextService };
         }
 
         public Stream GetFileSteam(string relativeUrl)

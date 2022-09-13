@@ -1,7 +1,9 @@
 ﻿using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.Helpers;
 using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Processor;
-using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Rest;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
 using EPiServer.Framework.Localization;
 using EPiServer.PlugIn;
@@ -76,8 +78,18 @@ namespace EPiServer.ConnectForSharePoint
             destfolderRef = SharePointSettings.Current.EntryPoint;
             foldername = SharePointSettings.Current.EntryPointFolderName;
 
-            // Concatinate the document and custom lists.
-            var listViewsService = _serviceLocator.GetInstance<IListsViewsService>();
+            // Concatenate the document and custom lists.
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            var listViewsService = new ListsViewsService { EndpointContextService = contextService };
             var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
             var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
             var supportedLists = documentLists.Concat(customLists);

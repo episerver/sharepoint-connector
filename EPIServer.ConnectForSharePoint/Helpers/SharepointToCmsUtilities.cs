@@ -6,7 +6,8 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Models.FileTypes;
-using EPiServer.ConnectForSharePoint.SPServices;
+using EPiServer.ConnectForSharePoint.Rest;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
@@ -44,7 +45,17 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <inheritdoc/>
         public IEnumerable<SPList> FindSupportedLists()
         {
-            var listViewService = _serviceLocator.GetInstance<IListsViewsService>();
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            var listViewService = new ListsViewsService { EndpointContextService = contextService };
 
             // Get all of the lists we support in sharepoint.
             var documentLists = listViewService.GetLists((int)ListBaseType.DocumentLibrary);

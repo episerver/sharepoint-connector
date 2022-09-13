@@ -7,9 +7,11 @@ using EPiServer.ConnectForSharePoint.Messaging;
 using EPiServer.Core;
 using EPiServer.ServiceLocation;
 using System.Diagnostics.CodeAnalysis;
-using EPiServer.ConnectForSharePoint.SPServices;
 using System.Threading;
 using EPiServer.ConnectForSharePoint.Helpers;
+using EPiServer.ConnectForSharePoint.Configuration;
+using EPiServer.ConnectForSharePoint.SPServices.REST;
+using EPiServer.ConnectForSharePoint.Rest;
 
 namespace EPiServer.ConnectForSharePoint.Processor
 {
@@ -212,7 +214,18 @@ namespace EPiServer.ConnectForSharePoint.Processor
         internal void ProcessItemList(SPList list, SPListView view, SPListItem rootFolder, IEnumerable<SPListItem> items, int scope)
         {
             _logger.Debug("Sharepoint: Processing batch: " + items.Count());
-            var fileFolderService = _serviceLocator.GetInstance<IFilesFoldersService>();
+
+            var contextService = SharePointSettings.Current.IsModernAuth ?
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current)
+            } :
+            new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(SharePointSettings.Current, SharePointHelper.GetLatestCookies)
+            };
+
+            var fileFolderService = new FilesFoldersService { EndpointContextService = contextService };
 
             // iterate over all the items
             foreach (var item in items)

@@ -5,7 +5,6 @@ using EPiServer.ConnectForSharePoint.Messaging.Messages;
 using EPiServer.ConnectForSharePoint.Models;
 using EPiServer.ConnectForSharePoint.Processor;
 using EPiServer.ConnectForSharePoint.Rest;
-using EPiServer.ConnectForSharePoint.SPServices;
 using EPiServer.ConnectForSharePoint.SPServices.REST;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
@@ -634,7 +633,17 @@ namespace EPiServer.ConnectForSharePoint.Web
                 else
                 {
                     // Concatenate the document and custom lists.
-                    var listViewsService = ServiceLocator.Current.GetInstance<IListsViewsService>();
+                    var contextService = CurrentSettings.IsModernAuth ?
+                    new EndpointContextService
+                    {
+                        EndpointContext = new SPRestClient(CurrentSettings)
+                    } :
+                    new EndpointContextService
+                    {
+                        EndpointContext = new SPRestClient(CurrentSettings, SharePointHelper.GetLatestCookies)
+                    };
+
+                    var listViewsService = new ListsViewsService { EndpointContextService = contextService };
                     var documentLists = listViewsService.GetLists((int)ListBaseType.DocumentLibrary);
                     var customLists = listViewsService.GetLists((int)ListBaseType.GenericList);
                     var supportedLists = documentLists.Concat(customLists);
