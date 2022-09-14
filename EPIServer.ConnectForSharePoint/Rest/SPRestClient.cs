@@ -22,25 +22,41 @@ namespace EPiServer.ConnectForSharePoint.Rest
         private SharePointOAuthTokenResult _oAuthTokenResult;
 
         public SPRestClient()
-            : this(SharePointSettings.Current, (currentSettings) => { return SharePointHelper.GetCookies(currentSettings); })
         {
+            _spSettings = SharePointSettings.Current;
+
             if (SharePointSettings.Current.IsModernAuth)
             {
                 _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
             }
+            else
+            {
+                _getCookieContainer = (currentSettings) =>
+                {
+                    return SharePointHelper.GetCookies(currentSettings);
+                };
+            }
         }
 
-        public SPRestClient(
-            SharePointSettings settings, Func<SharePointSettings, CookieContainer> getCookieContainer)
-        {
-            _spSettings = settings;
-            _getCookieContainer = getCookieContainer;
-        }
-
+        /// <summary>
+        /// For testing from the UI.
+        /// </summary>
+        /// <param name="settings"></param>
         public SPRestClient(SharePointSettings settings)
         {
             _spSettings = settings;
-            _oAuthTokenResult = SharePointHelper.GetOAuthResponse(_spSettings);
+
+            if (_spSettings.IsModernAuth)
+            {
+                _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
+            }
+            else
+            {
+                _getCookieContainer = (_spSettings) =>
+                {
+                    return SharePointHelper.GetCookies(_spSettings);
+                };
+            }
         }
 
         /// <summary>

@@ -691,15 +691,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 IsModernAuth = RBModernAuth.Checked
             };
 
-            var contextService = newSettings.IsModernAuth ?
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings)
-                } :
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
-                };
+            var contextService = new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(newSettings)
+            };
 
             var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
