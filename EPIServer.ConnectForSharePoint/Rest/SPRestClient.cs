@@ -48,13 +48,13 @@ namespace EPiServer.ConnectForSharePoint.Rest
 
             if (_spSettings.IsModernAuth)
             {
-                _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
+                _oAuthTokenResult = SharePointHelper.GetOAuthResponse(_spSettings);
             }
             else
             {
-                _getCookieContainer = (_spSettings) =>
+                _getCookieContainer = (Settings) =>
                 {
-                    return SharePointHelper.GetCookies(_spSettings);
+                    return SharePointHelper.GetCookies(Settings);
                 };
             }
         }
