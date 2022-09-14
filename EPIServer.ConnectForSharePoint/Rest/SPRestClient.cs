@@ -25,15 +25,15 @@ namespace EPiServer.ConnectForSharePoint.Rest
         {
             _spSettings = SharePointSettings.Current;
 
-            if (SharePointSettings.Current.IsModernAuth)
+            if (_spSettings.IsModernAuth)
             {
-                _oAuthTokenResult = SharePointHelper.GetOAuthResponse(SharePointSettings.Current);
+                _oAuthTokenResult = SharePointHelper.GetOAuthResponse(_spSettings);
             }
             else
             {
-                _getCookieContainer = (currentSettings) =>
+                _getCookieContainer = (Settings) =>
                 {
-                    return SharePointHelper.GetCookies(currentSettings);
+                    return SharePointHelper.GetCookies(Settings);
                 };
             }
         }

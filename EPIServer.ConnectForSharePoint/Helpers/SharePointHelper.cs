@@ -183,7 +183,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <returns></returns>
         public static SharePointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
         {
-            if (!SharePointSettings.Current.IsModernAuth)
+            if (!spSettings.IsModernAuth)
             {
                 return null;
             }
