@@ -18,7 +18,6 @@ namespace EPiServer.ConnectForSharePoint.Processor
     {
         private ILogger _logger;
         private ISharePointHelper _helper;
-        private ISharePointProcessorHelper _processorHelper;
         private IMessageEmitterFactory _emitterFactory;
         private IServiceLocator _serviceLocator;
 
@@ -40,6 +39,8 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
         internal bool _stopSignaled;
 
+        private bool _isTest;
+
         [ExcludeFromCodeCoverageAttribute]
         public MetaDataProcessor()
         {
@@ -47,7 +48,6 @@ namespace EPiServer.ConnectForSharePoint.Processor
             _helper = new SharePointHelper();
             _emitterFactory = new SharePointMessageEmitterFactory();
             _serviceLocator = ServiceLocator.Current;
-            _processorHelper = new SharePointProcessorHelper();
 
             SharepointToCmsUtils = new SharepointToCmsUtilities(ServiceLocator.Current);
         }
@@ -59,7 +59,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
             _emitterFactory = emitter;
 
             _serviceLocator = serviceLocator;
-            _processorHelper = _serviceLocator.GetInstance<ISharePointProcessorHelper>();
+            _isTest = true;
 
             SharepointToCmsUtils = new SharepointToCmsUtilities(_serviceLocator);
         }
@@ -142,7 +142,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
                     // Invalidate the metadata cache for this list, this ensures that if the metadata changes
                     // we can fix it when the user hits save, refresh, or the scheduled task runs.
-                    _processorHelper.GetMetaData(selectedList, true);
+                    var _processorHelper = _isTest ? _serviceLocator.GetInstance<ISharePointProcessorHelper>() : new SharePointProcessorHelper();
 
                     var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
