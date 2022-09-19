@@ -142,7 +142,7 @@ namespace EPiServer.ConnectForSharePoint.Processor
 
                     // Invalidate the metadata cache for this list, this ensures that if the metadata changes
                     // we can fix it when the user hits save, refresh, or the scheduled task runs.
-                    var _processorHelper = _isTest ? _serviceLocator.GetInstance<ISharePointProcessorHelper>() : new SharePointProcessorHelper();
+                    var processorHelper = _isTest ? _serviceLocator.GetInstance<ISharePointProcessorHelper>() : new SharePointProcessorHelper();
 
                     var selectedView = selectedList.Views.FirstOrDefault(f => f.Id.Equals(new Guid(idListAndView[1])));
 
