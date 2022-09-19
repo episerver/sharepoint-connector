@@ -183,6 +183,11 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         /// <returns></returns>
         public static SharePointOAuthTokenResult GetOAuthResponse(SharePointSettings spSettings)
         {
+            if (!spSettings.IsModernAuth)
+            {
+                return null;
+            }
+
             var response = CacheManager.Get(AccessTokenCacheKey) as SharePointOAuthTokenResult;
             if (response == null)
             {

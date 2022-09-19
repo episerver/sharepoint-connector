@@ -503,11 +503,11 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
-                SharePointSettings.Current.Username = ConfiguredUsername;
-                SharePointSettings.Current.Password = ConfiguredPassword;
-                SharePointSettings.Current.ClientId = ConfiguredClientId;
-                SharePointSettings.Current.ClientSecret = ConfiguredClientSecret;
-                SharePointSettings.Current.Realm = ConfiguredRealm;
+                SharePointSettings.Current.Username = !RBModernAuth.Checked ? ConfiguredUsername : "";
+                SharePointSettings.Current.Password = !RBModernAuth.Checked ? ConfiguredPassword : "";
+                SharePointSettings.Current.ClientId = RBModernAuth.Checked ? ConfiguredClientId : "";
+                SharePointSettings.Current.ClientSecret = RBModernAuth.Checked ? ConfiguredClientSecret : "";
+                SharePointSettings.Current.Realm = RBModernAuth.Checked ? ConfiguredRealm : "";
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
                 SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
@@ -691,15 +691,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 IsModernAuth = RBModernAuth.Checked
             };
 
-            var contextService = newSettings.IsModernAuth ?
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings)
-                } :
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
-                };
+            var contextService = new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(newSettings)
+            };
 
             var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
