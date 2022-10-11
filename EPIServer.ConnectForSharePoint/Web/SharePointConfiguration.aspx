@@ -42,14 +42,15 @@
                 $('.listViewSelector select').removeAttr('disabled'); // List of all the dropdownlists which contain the views of each list.
 
                 var fldrName = $('#FullRegion_EntryPointFolderName').val();
-                var listIds = $('#hdnListIds').val();
-
-                if (fldrName != undefined && fldrName != "") {
+                var listIds = "<%=CurrentSettings.ListIds%>";
+                var credChanged = $('#hdnCredentialsChanged').val();
+                
+                if (fldrName != undefined && fldrName != "" && credChanged != "changed") {
                     $('#FullRegion_Save').parent().attr('class', 'epi-cmsButton');
                     $('#FullRegion_Save').removeAttr('disabled');
 
                     // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
-                    if (listIds != undefined && listIds != "") {
+                    if (listIds != undefined && listIds != "" && credChanged != "changed") {
                         $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
                         $('#FullRegion_Refresh').removeAttr('disabled');
                     }
@@ -98,6 +99,31 @@
                 document.getElementById('<%# FolderOk.ClientID %>').disabled = disabled;
             });
 
+            $('#FullRegion_Username').keyup(function () {
+                $('#hdnCredentialsChanged').val("changed");
+                setSaveButtonState();
+            });
+
+            $('#FullRegion_Password').keyup(function () {
+                $('#hdnCredentialsChanged').val("changed");
+                setSaveButtonState();
+            });
+
+            $('#FullRegion_ClientId').keyup(function () {
+                $('#hdnCredentialsChanged').val("changed");
+                setSaveButtonState();
+            });
+
+            $('#FullRegion_ClientSecret').keyup(function () {
+                $('#hdnCredentialsChanged').val("changed");
+                setSaveButtonState();
+            });
+
+            $('#FullRegion_Realm').keyup(function () {
+                $('#hdnCredentialsChanged').val("changed");
+                setSaveButtonState();
+            });
+
             $('#FullRegion_Save').click(function () {
                 processSelectedViews();
             });
@@ -127,13 +153,14 @@
 
         function setSaveButtonState() {
             var fldrName = $('#FullRegion_EntryPointFolderName').val();
-            var listIds = $('#hdnListIds').val();
+            var listIds = "<%=CurrentSettings.ListIds%>";
             var $saveBtn = $('#FullRegion_Save');
             var $refreshBtn = $('#FullRegion_Refresh');
+            var credChanged = $('#hdnCredentialsChanged').val();
 
             // Enable Save and Refresh buttons only if one or more list/view combinations are selected
             // and a folder in the cms is also chosen to import the Sharepoint data into.
-            if (fldrName != undefined && fldrName != "") {
+            if (fldrName != undefined && fldrName != "" && credChanged != "changed") {
                 if ($('span.listCheckBox input[type="checkbox"]:checked').length === 0) {
                     $saveBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
                     $refreshBtn.attr("disabled", "disabled").parent().attr('class', 'epi-cmsButtondisabled');
@@ -142,7 +169,7 @@
                     $saveBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
 
                     // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
-                    if (listIds != undefined && listIds != "") {
+                    if (listIds != undefined && listIds != "" && credChanged != "changed") {
                         $refreshBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
                     }
                 }
@@ -372,6 +399,7 @@
                
                     <%= Translate("/sharepoint/admin/selectviewdescription")%>
             </asp:Label>
+                <asp:HiddenField ID="hdnCredentialsChanged" ClientIDMode="Static" Value="" runat="server"></asp:HiddenField>
                 <asp:HiddenField ID="hdnListIds" ClientIDMode="Static" Value="<%# CurrentSettings.ListIds %>" runat="server"></asp:HiddenField>
                 <asp:Panel ID="ListSelector" runat="server" CssClass="epi-size15" Visible="False" Height="300px" ScrollBars="Auto">
                     <asp:ListView ID="lvLists" runat="server" EnableViewState="True" ItemPlaceholderID="phLists" OnItemDataBound="lvLists_ItemDataBound">
@@ -398,7 +426,7 @@
                 <input type="button" id="btnShow" value="..." />
                 <div id="treedialog" class="ui-helper-hidden">
                     <asp:Label runat="server"><%# Translate("/sharepoint/admin/entrypointinstructions") %></asp:Label>
-                    <episerveruisharepoint:sharepointcontentdatasource id="contentDataSource"
+                    <episerveruisharepoint:SharepointContentDataSource id="contentDataSource"
                         accesslevel="NoAccess"
                         runat="server"
                         includerootitem="true"
