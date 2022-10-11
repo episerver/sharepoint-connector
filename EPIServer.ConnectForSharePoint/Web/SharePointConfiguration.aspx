@@ -50,7 +50,7 @@
                     $('#FullRegion_Save').removeAttr('disabled');
 
                     // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
-                    if (listIds != undefined && listIds != "" && credChanged != "changed") {
+                    if (listIds != undefined && listIds != "") {
                         $('#FullRegion_Refresh').parent().attr('class', 'epi-cmsButton');
                         $('#FullRegion_Refresh').removeAttr('disabled');
                     }
@@ -169,7 +169,7 @@
                     $saveBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
 
                     // Enable Refresh button only if any listIds are currently saved in Sharepoint Settings.
-                    if (listIds != undefined && listIds != "" && credChanged != "changed") {
+                    if (listIds != undefined && listIds != "") {
                         $refreshBtn.removeAttr("disabled").parent().attr('class', 'epi-cmsButton');
                     }
                 }
