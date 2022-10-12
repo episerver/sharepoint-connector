@@ -664,7 +664,15 @@ namespace EPiServer.ConnectForSharePoint.Web
                             break;
                     }
                 }
-                errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"), e.Message);
+                if (e.HResult == -2147186539)
+                {
+                    errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
+                                                        Translate("/sharepoint/admin/message/unauthorizederror"));
+                }
+                else
+                {
+                    errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"), e.Message);
+                }
                 return null;
             }
         }
@@ -678,6 +686,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
             CacheManager.Remove(SharePointHelper.AccessTokenCacheKey);
+            CacheManager.Remove(SharePointHelper.CookieContainerCacheKey);
 
             var newSettings = new SharePointSettings()
             {
@@ -803,6 +812,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             if (active)
             {
                 Connect.Enabled = true;
+                hdnCredentialsChanged.Value = "";
             }
         }
 
