@@ -51,6 +51,42 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::System.Web.UI.WebControls.TextBox ServerUrl;
 
         /// <summary>
+        /// RBOnPremises control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBOnPremises;
+
+        /// <summary>
+        /// RBOnline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBOnline;
+
+        /// <summary>
+        /// RBBasicAuth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBBasicAuth;
+
+        /// <summary>
+        /// RBModernAuth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButton RBModernAuth;
+
+        /// <summary>
         /// Username control.
         /// </summary>
         /// <remarks>
@@ -96,42 +132,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::System.Web.UI.WebControls.TextBox Realm;
 
         /// <summary>
-        /// RBOnPremises control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RBOnPremises;
-
-        /// <summary>
-        /// RBOnline control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RBOnline;
-
-        /// <summary>
-        /// RBBasicAuth control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RBBasicAuth;
-
-        /// <summary>
-        /// RBModernAuth control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RBModernAuth;
-
-        /// <summary>
         /// Connect control.
         /// </summary>
         /// <remarks>
@@ -141,13 +141,31 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::EPiServer.UI.WebControls.ToolButton Connect;
 
         /// <summary>
-        /// ListSelector control.
+        /// ListSelectorLabel control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label ListSelectorLabel;
+
+        /// <summary>
+        /// hdnCredentialsChanged control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnCredentialsChanged;
+
+        /// <summary>
+        /// hdnListIds control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnListIds;
 
         /// <summary>
         /// ListSelector control.
@@ -213,6 +231,33 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::System.Web.UI.WebControls.TextBox SelectedFolderName;
 
         /// <summary>
+        /// CBCreateNewFolder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox CBCreateNewFolder;
+
+        /// <summary>
+        /// TBNewFolderName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TBNewFolderName;
+
+        /// <summary>
+        /// FolderOk control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::EPiServer.UI.WebControls.ToolButton FolderOk;
+
+        /// <summary>
         /// EntryPoint control.
         /// </summary>
         /// <remarks>
@@ -238,16 +283,6 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox EntryPointCache;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected global::System.Web.UI.WebControls.TextBox TBNewFolderName;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected global::System.Web.UI.WebControls.CheckBox CBCreateNewFolder;
 
         /// <summary>
         /// Save control.
