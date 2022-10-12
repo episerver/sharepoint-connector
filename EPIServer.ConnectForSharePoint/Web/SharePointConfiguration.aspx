@@ -100,28 +100,23 @@
             });
 
             $('#FullRegion_Username').keyup(function () {
-                $('#hdnCredentialsChanged').val("changed");
-                setSaveButtonState();
+                disableSaveWhenAuthDisplayChanges();
             });
 
             $('#FullRegion_Password').keyup(function () {
-                $('#hdnCredentialsChanged').val("changed");
-                setSaveButtonState();
+                disableSaveWhenAuthDisplayChanges();
             });
 
             $('#FullRegion_ClientId').keyup(function () {
-                $('#hdnCredentialsChanged').val("changed");
-                setSaveButtonState();
+                disableSaveWhenAuthDisplayChanges();
             });
 
             $('#FullRegion_ClientSecret').keyup(function () {
-                $('#hdnCredentialsChanged').val("changed");
-                setSaveButtonState();
+                disableSaveWhenAuthDisplayChanges();
             });
 
             $('#FullRegion_Realm').keyup(function () {
-                $('#hdnCredentialsChanged').val("changed");
-                setSaveButtonState();
+                disableSaveWhenAuthDisplayChanges();
             });
 
             $('#FullRegion_Save').click(function () {
@@ -279,10 +274,16 @@
             }
 
             $('#FullRegion_RBBasicAuth').click(function () {
+                if (isModernAuthChecked) {
+                    disableSaveWhenAuthDisplayChanges();
+                }
                 displayBasicAuthSection();
             });
 
             $('#FullRegion_RBModernAuth').click(function () {
+                if (!isModernAuthChecked) {
+                    disableSaveWhenAuthDisplayChanges();
+                }
                 displayModernAuthSection();
             });
         }
@@ -299,6 +300,7 @@
 
         function setAuthTypeByConnectionType() {
             var isOnPremisesChecked = $('#FullRegion_RBOnPremises').is(':checked');
+            var isModernAuthChecked = $('#FullRegion_RBModernAuth').is(':checked');
 
             if (isOnPremisesChecked) {
                 disableModernAuthRadio();
@@ -308,6 +310,9 @@
             }
 
             $('#FullRegion_RBOnPremises').click(function () {
+                if (isModernAuthChecked) {
+                    disableSaveWhenAuthDisplayChanges();
+                }
                 disableModernAuthRadio();
                 displayBasicAuthSection();
             });
@@ -324,6 +329,11 @@
 
         function enableModernAuthRadio() {
             $('#FullRegion_RBModernAuth').prop("disabled", false);
+        }
+
+        function disableSaveWhenAuthDisplayChanges() {
+            $('#hdnCredentialsChanged').val("changed");
+            setSaveButtonState();
         }
 
     </script>
