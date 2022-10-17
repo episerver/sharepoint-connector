@@ -503,11 +503,11 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
-                SharePointSettings.Current.Username = ConfiguredUsername;
-                SharePointSettings.Current.Password = ConfiguredPassword;
-                SharePointSettings.Current.ClientId = ConfiguredClientId;
-                SharePointSettings.Current.ClientSecret = ConfiguredClientSecret;
-                SharePointSettings.Current.Realm = ConfiguredRealm;
+                SharePointSettings.Current.Username = !RBModernAuth.Checked ? ConfiguredUsername : "";
+                SharePointSettings.Current.Password = !RBModernAuth.Checked ? ConfiguredPassword : "";
+                SharePointSettings.Current.ClientId = RBModernAuth.Checked ? ConfiguredClientId : "";
+                SharePointSettings.Current.ClientSecret = RBModernAuth.Checked ? ConfiguredClientSecret : "";
+                SharePointSettings.Current.Realm = RBModernAuth.Checked ? ConfiguredRealm : "";
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
                 SharePointSettings.Current.EntryPointFolderName = EntryPointFolderName.Text;
@@ -664,7 +664,15 @@ namespace EPiServer.ConnectForSharePoint.Web
                             break;
                     }
                 }
-                errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"), e.Message);
+                if (e.HResult == -2147186539)
+                {
+                    errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
+                                                        Translate("/sharepoint/admin/message/unauthorizederror"));
+                }
+                else
+                {
+                    errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"), e.Message);
+                }
                 return null;
             }
         }
@@ -678,6 +686,7 @@ namespace EPiServer.ConnectForSharePoint.Web
         {
             CacheManager.Remove(SharePointHelper.FormDigestValueCacheKey);
             CacheManager.Remove(SharePointHelper.AccessTokenCacheKey);
+            CacheManager.Remove(SharePointHelper.CookieContainerCacheKey);
 
             var newSettings = new SharePointSettings()
             {
@@ -691,15 +700,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 IsModernAuth = RBModernAuth.Checked
             };
 
-            var contextService = newSettings.IsModernAuth ?
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings)
-                } :
-                new EndpointContextService
-                {
-                    EndpointContext = new SPRestClient(newSettings, SharePointHelper.GetLatestCookies)
-                };
+            var contextService = new EndpointContextService
+            {
+                EndpointContext = new SPRestClient(newSettings)
+            };
 
             var svcLists = new ListsViewsService { EndpointContextService = contextService };
 
@@ -808,6 +812,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             if (active)
             {
                 Connect.Enabled = true;
+                hdnCredentialsChanged.Value = "";
             }
         }
 
