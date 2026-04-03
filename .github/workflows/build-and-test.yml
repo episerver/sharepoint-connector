@@ -31,6 +31,9 @@ jobs:
       - name: Setup VSTest
         uses: darenm/Setup-VSTest@v1.3
 
+      - name: Configure GitHub Packages NuGet source
+        run: nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/episerver/index.json" -Username episerver -Password ${{ secrets.GITHUB_TOKEN }} -StorePasswordInClearText
+
       - name: Restore NuGet packages
         run: nuget restore EPiServer.ConnectForSharePoint.sln
 
@@ -54,7 +57,7 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: pwsh
         run: |
-          $prerelease = "${{ steps.version.outputs.VERSION }}-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}"
+          $prerelease = "${{ steps.version.outputs.VERSION }}-pre-release.${{ github.run_number }}"
           echo "PRERELEASE_VERSION=$prerelease" >> $env:GITHUB_OUTPUT
           echo "Pre-release version: $prerelease"
           nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version $prerelease -OutputDirectory Deployment
@@ -62,7 +65,7 @@ jobs:
 
       - name: Publish pre-release to GitHub Packages
         if: github.event_name == 'pull_request'
-        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.prerelease.outputs.PRERELEASE_VERSION }}.nupkg -Source https://nuget.pkg.github.com/episerver/index.json -ApiKey ${{ secrets.GITHUB_TOKEN }}
+        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.prerelease.outputs.PRERELEASE_VERSION }}.nupkg -Source "github" -ApiKey ${{ secrets.GITHUB_TOKEN }}
 
       # --- Master builds: release package ---
       - name: Create NuGet package
@@ -83,4 +86,4 @@ jobs:
 
       - name: Publish to GitHub Packages
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.version.outputs.VERSION }}.nupkg -Source https://nuget.pkg.github.com/episerver/index.json -ApiKey ${{ secrets.GITHUB_TOKEN }}
+        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.version.outputs.VERSION }}.nupkg -Source "github" -ApiKey ${{ secrets.GITHUB_TOKEN }}
