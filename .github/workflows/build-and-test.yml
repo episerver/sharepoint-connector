@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install .NET Framework 4.6.1 targeting pack
+        shell: pwsh
+        run: |
+          choco install netfx-4.6.1-devpack -y --no-progress
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
