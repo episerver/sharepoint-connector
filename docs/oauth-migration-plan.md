@@ -43,11 +43,15 @@ Replace the Azure ACS OAuth flow with the modern Microsoft Identity Platform (En
 
 ### Files Modified
 
-1. **`Helpers/SharePointHelper.cs`** - Update `GetOAuthResponse()` to call Entra ID token endpoint.
-2. **`Configuration/SharePointSettings.cs`** - Add `TenantId` property as alias/replacement for `Realm`.
-3. **`EmbeddedLangFiles/EPiServer.SharePoint_*.xml`** (all 10 language files) - Update "Realm" label to "Tenant ID".
-4. **`Web/SharePointConfiguration.aspx`** - No structural changes needed; the field is bound to `Realm` property which stores the tenant ID.
-5. **`Web/SharePointConfiguration.aspx.cs`** - No changes needed; `ConfiguredRealm` getter still works.
+1. **`Helpers/SharePointHelper.cs`** - Updated `GetOAuthResponse()` to call Entra ID token endpoint with `scope` instead of `resource`, plain `client_id` instead of `{clientId}@{realm}`.
+2. **`Web/SharePointConfiguration.aspx.cs`** - Fixed Modern Auth validation to use the correct error message key (`nourlmodernauthvaluesspecified` instead of `nourlusernamepasswordspecified`).
+3. **`EmbeddedLangFiles/EPiServer.SharePoint_*.xml`** (all 12 language files: DA, DE, EN, ES, FI, FR, IT, JA, NL, NO, SV, ZH) - Updated "Realm" label to "Tenant ID", "Basic" to "Basic (On-Premises Only)", and modernized the validation error message.
+4. **`.gitignore`** - Updated with standard .NET glob patterns.
+5. **`README.md`** - Added step-by-step authentication setup guide for customers.
+
+**Not modified** (by design):
+- **`Configuration/SharePointSettings.cs`** - The existing `Realm` property is reused to store the tenant ID. This preserves backward compatibility with existing DDS data so customers who already have a value stored do not need to reconfigure.
+- **`Web/SharePointConfiguration.aspx`** - No structural changes needed; the field is bound to the `Realm` property via language file labels which now display "Tenant ID".
 
 ### Customer Migration Steps
 

@@ -648,13 +648,17 @@ namespace EPiServer.ConnectForSharePoint.Web
 
                 var webException = e as WebException;
                 var webResponse = webException != null ? (HttpWebResponse)webException.Response : null;
+                var unauthorizedMessageKey = RBModernAuth.Checked
+                    ? "/sharepoint/admin/message/unauthorizedmodernautherror"
+                    : "/sharepoint/admin/message/unauthorizederror";
+
                 if (webResponse != null)
                 {
                     switch (webResponse.StatusCode)
                     {
                         case HttpStatusCode.Unauthorized:
                             errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
-                                                                Translate("/sharepoint/admin/message/unauthorizederror"));
+                                                                Translate(unauthorizedMessageKey));
                             return null;
                         case HttpStatusCode.NotFound:
                             errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
@@ -667,7 +671,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                 if (e.HResult == -2147186539)
                 {
                     errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
-                                                        Translate("/sharepoint/admin/message/unauthorizederror"));
+                                                        Translate(unauthorizedMessageKey));
                 }
                 else
                 {

@@ -191,30 +191,33 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var response = CacheManager.Get(AccessTokenCacheKey) as SharePointOAuthTokenResult;
             if (response == null)
             {
-                using (WebClient client = new WebClient())
-                {
-                    var siteUri = new Uri(spSettings.SiteUrl);
-                    var sharePointHost = string.Format("{0}://{1}", siteUri.Scheme, siteUri.Host);
-                    var scope = string.Format("{0}/.default", sharePointHost);
+                response = RequestOAuthToken(spSettings, new WebClientOAuthTokenClient());
 
-                    var reqParams = new System.Collections.Specialized.NameValueCollection();
-                    reqParams.Add("grant_type", "client_credentials");
-                    reqParams.Add("client_id", spSettings.ClientId);
-                    reqParams.Add("client_secret", spSettings.ClientSecret);
-                    reqParams.Add("scope", scope);
-
-                    var requestUrl = string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", spSettings.Realm);
-                    client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                    byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
-                    string responsebody = Encoding.UTF8.GetString(responsebytes);
-                    response = JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
-
-                    var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
-                    CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
-                }
+                var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
+                CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Builds the Entra ID token request and executes it via the supplied <see cref="IOAuthTokenClient"/>.
+        /// Separated from caching so the request construction logic can be unit-tested.
+        /// </summary>
+        internal static SharePointOAuthTokenResult RequestOAuthToken(SharePointSettings spSettings, IOAuthTokenClient tokenClient)
+        {
+            var siteUri = new Uri(spSettings.SiteUrl);
+            var scope = string.Format("https://{0}/.default", siteUri.Host);
+
+            var reqParams = new System.Collections.Specialized.NameValueCollection();
+            reqParams.Add("grant_type", "client_credentials");
+            reqParams.Add("client_id", spSettings.ClientId);
+            reqParams.Add("client_secret", spSettings.ClientSecret);
+            reqParams.Add("scope", scope);
+
+            var requestUrl = string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", spSettings.Realm);
+            string responsebody = tokenClient.RequestToken(requestUrl, reqParams);
+            return JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
         }
 
         /// <summary>

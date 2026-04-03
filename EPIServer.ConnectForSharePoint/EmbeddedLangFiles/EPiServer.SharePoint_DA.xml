@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>Der er ikke angivet SharePoint-URL, brugernavn eller adgangskode.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Der kunne ikke godkendes med angivne brugernavn og adgangskode.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint-URL'en er forkert, eller du har ikke adgang til webstedet, der er angivet af URL'en.</notfounderror>
           <listviewnotmatched>Listen over visninger er ikke opdateret. Opret forbindelse igen for at få nye SharePoint-visninger.</listviewnotmatched>
           <invalidentrypoint>Ugyldigt indgangspunkt for forbindelse.</invalidentrypoint>

@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>
           <listviewnotmatched>The list of views is not up to date. Reconnect to get new SharePoint views.</listviewnotmatched>
           <invalidentrypoint>Invalid Connection Entry Point.</invalidentrypoint>

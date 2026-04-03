@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>Geen SharePoint-URL, gebruikersnaam of wachtwoord opgegeven.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Kon niet machtigen met de opgegeven gebruikersnaam en wachtwoord.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>De SharePoint-URL is onjuist of u hebt geen toegang tot de site die is opgegeven in de URL.</notfounderror>
           <listviewnotmatched>De lijst met weergaven is niet bijgewerkt. Opnieuw verbinden om de nieuwe SharePoint-weergaven te krijgen.</listviewnotmatched>
           <invalidentrypoint>Ongeldige verbinding toegangspunt.</invalidentrypoint>

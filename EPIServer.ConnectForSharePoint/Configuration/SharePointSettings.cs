@@ -87,7 +87,8 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string ClientSecret {  get; set; }
 
         /// <summary>
-        /// Gets or sets the SharePoint Realm
+        /// Gets or sets the SharePoint Realm.
+        /// For Modern Authentication (Entra ID / Azure AD), this stores the Tenant ID (Directory ID).
         /// </summary>
         public string Realm {  get; set; }
 

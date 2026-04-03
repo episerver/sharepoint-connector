@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>SharePointin URL-osoitetta, käyttäjänimeä tai salasanaa ei määritetty.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Ei onnistunut valtuuttamaan määritettyä käyttäjänimeä ja salasanaa.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePointin URL-osoite on virheellinen tai sinulla ei ole pääsyä URL-osoitteen mukaiselle sivustolle.</notfounderror>
           <listviewnotmatched>Näkymien luettelo ei ole ajan tasalla. Yhdistä uudelleen, jos haluat uusia SharePoint-näkymiä.</listviewnotmatched>
           <invalidentrypoint>Virheellinen yhteyden aloituskohta.</invalidentrypoint>

@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>SharePoint URL、ユーザー名、パスワードが何も指定されていません。</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>指定のユーザー名およびパスワードによる認証に失敗しました。</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint URLが正しくありません。またはURLで指定されているサイトへのアクセス権がありません。</notfounderror>
           <listviewnotmatched>ビューのリストが最新ではありません。 再接続して、新しいSharePointビューを取得してください。</listviewnotmatched>
           <invalidentrypoint>無効な接続エントリ ポイント。</invalidentrypoint>

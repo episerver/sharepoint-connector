@@ -46,6 +46,7 @@
           <nourlusernamepasswordspecified>未指定 SharePoint URL、用户名或密码。</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>通过指定用户名和密码授权失败。</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint URL 错误或您没有访问 URL 中指定站点的权限。</notfounderror>
           <listviewnotmatched>视图列表未更新。 重新连接以获取新的 SharePoint 视图。</listviewnotmatched>
           <invalidentrypoint>无效连接条目点。</invalidentrypoint>
