@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   build:
@@ -31,9 +30,6 @@ jobs:
       - name: Setup VSTest
         uses: darenm/Setup-VSTest@v1.3
 
-      - name: Configure GitHub Packages NuGet source
-        run: nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/episerver/index.json" -Username episerver -Password ${{ secrets.GITHUB_TOKEN }} -StorePasswordInClearText
-
       - name: Restore NuGet packages
         run: nuget restore EPiServer.ConnectForSharePoint.sln
 
@@ -50,40 +46,17 @@ jobs:
           $match = (Select-String -Path AssemblyVersionAuto.cs -Pattern 'AssemblyInformationalVersion\("(.+)"\)').Matches[0]
           $version = $match.Groups[1].Value
           echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-          echo "Base version: $version"
 
-      # --- PR builds: pre-release package ---
       - name: Create pre-release NuGet package
         if: github.event_name == 'pull_request'
-        shell: pwsh
-        run: |
-          $prerelease = "${{ steps.version.outputs.VERSION }}-pre-release.${{ github.run_number }}"
-          echo "PRERELEASE_VERSION=$prerelease" >> $env:GITHUB_OUTPUT
-          echo "Pre-release version: $prerelease"
-          nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version $prerelease -OutputDirectory Deployment
-        id: prerelease
+        run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }}-pre-release.${{ github.run_number }} -OutputDirectory Deployment
 
-      - name: Publish pre-release to GitHub Packages
-        if: github.event_name == 'pull_request'
-        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.prerelease.outputs.PRERELEASE_VERSION }}.nupkg -Source "github" -ApiKey ${{ secrets.GITHUB_TOKEN }}
-
-      # --- Master builds: release package ---
-      - name: Create NuGet package
+      - name: Create release NuGet package
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }} -OutputDirectory Deployment
 
-      - name: Check if version already exists on GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        shell: pwsh
-        run: |
-          $source = "https://nuget.pkg.github.com/episerver/index.json"
-          $result = nuget list EPiServer.ConnectForSharePoint -Source $source -AllVersions 2>&1
-          if ($result -match "${{ steps.version.outputs.VERSION }}") {
-            Write-Error "Version ${{ steps.version.outputs.VERSION }} already exists on GitHub Packages. Bump the version in AssemblyVersionAuto.cs before merging."
-            exit 1
-          }
-          echo "Version ${{ steps.version.outputs.VERSION }} is available."
-
-      - name: Publish to GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.version.outputs.VERSION }}.nupkg -Source "github" -ApiKey ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload NuGet package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: Deployment/*.nupkg
