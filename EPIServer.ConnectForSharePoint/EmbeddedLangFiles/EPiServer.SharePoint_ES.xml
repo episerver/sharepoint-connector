@@ -15,14 +15,14 @@
         <remainingitems>Elementos restantes</remainingitems>
         <selectviewdescription>Seleccione una o varias listas y las vistas correspondientes.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>URL del sitio</serverurl>
         <username>Nombre de usuario</username>
         <password>Contraseña</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Tipo de conexión</connectiontype>
         <online>En línea</online>
         <onpremises>En las instalaciones</onpremises>
@@ -44,7 +44,7 @@
           <saveerror>Error al guardar: {0}.</saveerror>
           <connecttosharepointerror>Error al conectar al sitio de SharePoint: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>No se ha especificado ninguna dirección URL, nombre de usuario o contraseña de SharePoint.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Fallo de autorización con el nombre de usuario y la contraseña especificados.</unauthorizederror>
           <notfounderror>La dirección URL de SharePoint es incorrecta o no tiene acceso al sitio especificado en la URL.</notfounderror>
           <listviewnotmatched>La lista de vistas no está actualizada. Vuelva a conectar para obtener nuevas vistas de SharePoint.</listviewnotmatched>

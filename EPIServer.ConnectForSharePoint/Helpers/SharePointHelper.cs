@@ -177,7 +177,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
-        /// Get OAuth response from Sharepoint.
+        /// Get OAuth response from Microsoft Entra ID (Azure AD) using the client credentials grant.
         /// </summary>
         /// <param name="spSettings">The SharePoint settings.</param>
         /// <returns></returns>
@@ -193,15 +193,17 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             {
                 using (WebClient client = new WebClient())
                 {
-                    var domain = new Uri(spSettings.SiteUrl).Host;
-                    var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
+                    var siteUri = new Uri(spSettings.SiteUrl);
+                    var sharePointHost = string.Format("{0}://{1}", siteUri.Scheme, siteUri.Host);
+                    var scope = string.Format("{0}/.default", sharePointHost);
+
                     var reqParams = new System.Collections.Specialized.NameValueCollection();
                     reqParams.Add("grant_type", "client_credentials");
-                    reqParams.Add("client_id", string.Format("{0}@{1}", spSettings.ClientId, spSettings.Realm));
+                    reqParams.Add("client_id", spSettings.ClientId);
                     reqParams.Add("client_secret", spSettings.ClientSecret);
-                    reqParams.Add("resource", resource);
+                    reqParams.Add("scope", scope);
 
-                    var requestUrl = string.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
+                    var requestUrl = string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", spSettings.Realm);
                     client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
                     byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
                     string responsebody = Encoding.UTF8.GetString(responsebytes);

@@ -737,7 +737,7 @@ namespace EPiServer.ConnectForSharePoint.Web
                     // Show error message in case of posting back and no relevant config values are specified
                     if (Page.IsPostBack)
                     {
-                        ShowMessage(Translate("/sharepoint/admin/message/nourlusernamepasswordspecified"), true);
+                        ShowMessage(Translate("/sharepoint/admin/message/nourlmodernauthvaluesspecified"), true);
                     }
 
                     return false;

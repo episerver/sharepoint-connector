@@ -15,14 +15,14 @@
         <remainingitems>残りのアイテム</remainingitems>
         <selectviewdescription>1 つまたは複数のリスト、ならびに対応するビューを選択してください。</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>サイトURL</serverurl>
         <username>ユーザー名</username>
         <password>パスワード</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>接続タイプ</connectiontype>
         <online>オンライン</online>
         <onpremises>オンプレミス</onpremises>
@@ -44,7 +44,7 @@
           <saveerror>保存時のエラー： {0}。</saveerror>
           <connecttosharepointerror>SharePointサイトへ接続時のエラー： {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>SharePoint URL、ユーザー名、パスワードが何も指定されていません。</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>指定のユーザー名およびパスワードによる認証に失敗しました。</unauthorizederror>
           <notfounderror>SharePoint URLが正しくありません。またはURLで指定されているサイトへのアクセス権がありません。</notfounderror>
           <listviewnotmatched>ビューのリストが最新ではありません。 再接続して、新しいSharePointビューを取得してください。</listviewnotmatched>

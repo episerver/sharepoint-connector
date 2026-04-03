@@ -15,14 +15,14 @@
         <remainingitems>Verbleibende Elemente</remainingitems>
         <selectviewdescription>Wählen Sie eine oder mehrere Listen und entsprechenden Ansichten aus.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Site-URL</serverurl>
         <username>Benutzername</username>
         <password>Passwort</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Verbindungstyp</connectiontype>
         <online>Online</online>
         <onpremises>Lokal</onpremises>
@@ -44,7 +44,7 @@
           <saveerror>Fehler beim Speichern: {0}.</saveerror>
           <connecttosharepointerror>Fehler beim Aufbau der Verbindung mit einer SharePoint-Website: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Es wurde keine SharePoint-URL, kein Benutzername oder Passwort angegeben.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Die Autorisierung mit dem angegebenen Benutzernamen und dem angegebenen Passwort ist fehlgeschlagen.</unauthorizederror>
           <notfounderror>Die SharePoint-URL ist nicht korrekt, oder Sie haben keinen Zugriff auf die in der URL angegebenen Website.</notfounderror>
           <listviewnotmatched>Die Liste der Ansichten ist nicht auf dem neuesten Stand. Erneuern Sie die Verbindung, um neue SharePoint-Ansichten zu erhalten.</listviewnotmatched>

@@ -15,14 +15,14 @@
         <remainingitems>Éléments restants</remainingitems>
         <selectviewdescription>Choisissez une ou plusieurs listes et les affichages correspondants.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>URL du site</serverurl>
         <username>Nom d'utilisateur</username>
         <password>Mot de passe</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Type de connexion</connectiontype>
         <online>En ligne</online>
         <onpremises>Local</onpremises>
@@ -44,7 +44,7 @@
           <saveerror>Erreur lors de l’enregistrement : {0}.</saveerror>
           <connecttosharepointerror>Erreur lors de la connexion au site SharePoint : {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Aucun URL SharePoint, nom d’utilisateur ou mot de passe n’est spécifié.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
           <unauthorizederror>Autorisation impossible avec le mot de passe et le nom d’utilisateur spécifiés.</unauthorizederror>
           <notfounderror>L’URL SharePoint est incorrect ou vous n’avez pas accès au site spécifié dans l’URL.</notfounderror>
           <listviewnotmatched>La liste des affichages n’est pas à jour. Reconnectez-vous pour obtenir les nouveaux affichages SharePoint.</listviewnotmatched>
