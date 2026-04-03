@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  packages: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -39,15 +42,30 @@ jobs:
         run: vstest.console.exe "EPIServer.ConnectForSharePoint.Test\bin\Debug\EPiServer.ConnectForSharePoint.Test.dll"
 
       - name: Read version from AssemblyVersionAuto.cs
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         id: version
         shell: pwsh
         run: |
           $match = (Select-String -Path AssemblyVersionAuto.cs -Pattern 'AssemblyInformationalVersion\("(.+)"\)').Matches[0]
           $version = $match.Groups[1].Value
           echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-          echo "Package version: $version"
+          echo "Base version: $version"
 
+      # --- PR builds: pre-release package ---
+      - name: Create pre-release NuGet package
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          $prerelease = "${{ steps.version.outputs.VERSION }}-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}"
+          echo "PRERELEASE_VERSION=$prerelease" >> $env:GITHUB_OUTPUT
+          echo "Pre-release version: $prerelease"
+          nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version $prerelease -OutputDirectory Deployment
+        id: prerelease
+
+      - name: Publish pre-release to GitHub Packages
+        if: github.event_name == 'pull_request'
+        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.prerelease.outputs.PRERELEASE_VERSION }}.nupkg -Source https://nuget.pkg.github.com/episerver/index.json -ApiKey ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Master builds: release package ---
       - name: Create NuGet package
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }} -OutputDirectory Deployment
