@@ -37,3 +37,33 @@ jobs:
 
       - name: Run tests
         run: vstest.console.exe "EPIServer.ConnectForSharePoint.Test\bin\Debug\EPiServer.ConnectForSharePoint.Test.dll"
+
+      - name: Read version from AssemblyVersionAuto.cs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        id: version
+        shell: pwsh
+        run: |
+          $match = (Select-String -Path AssemblyVersionAuto.cs -Pattern 'AssemblyInformationalVersion\("(.+)"\)').Matches[0]
+          $version = $match.Groups[1].Value
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Package version: $version"
+
+      - name: Create NuGet package
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }} -OutputDirectory Deployment
+
+      - name: Check if version already exists on GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        shell: pwsh
+        run: |
+          $source = "https://nuget.pkg.github.com/episerver/index.json"
+          $result = nuget list EPiServer.ConnectForSharePoint -Source $source -AllVersions 2>&1
+          if ($result -match "${{ steps.version.outputs.VERSION }}") {
+            Write-Error "Version ${{ steps.version.outputs.VERSION }} already exists on GitHub Packages. Bump the version in AssemblyVersionAuto.cs before merging."
+            exit 1
+          }
+          echo "Version ${{ steps.version.outputs.VERSION }} is available."
+
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.version.outputs.VERSION }}.nupkg -Source https://nuget.pkg.github.com/episerver/index.json -ApiKey ${{ secrets.GITHUB_TOKEN }}
