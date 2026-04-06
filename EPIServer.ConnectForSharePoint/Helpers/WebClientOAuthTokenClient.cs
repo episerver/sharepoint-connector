@@ -22,8 +22,13 @@ namespace EPiServer.ConnectForSharePoint.Helpers
                     return Encoding.UTF8.GetString(responseBytes);
                 }
             }
-            catch (WebException ex) when (ex.Response != null)
+            catch (WebException ex)
             {
+                if (ex.Response == null)
+                {
+                    throw;
+                }
+
                 string responseBody;
                 using (var reader = new StreamReader(ex.Response.GetResponseStream()))
                 {
