@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Text;
 
@@ -11,11 +13,28 @@ namespace EPiServer.ConnectForSharePoint.Helpers
     {
         public string RequestToken(string requestUrl, NameValueCollection parameters)
         {
-            using (var client = new WebClient())
+            try
             {
-                client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                byte[] responseBytes = client.UploadValues(requestUrl, "POST", parameters);
-                return Encoding.UTF8.GetString(responseBytes);
+                using (var client = new WebClient())
+                {
+                    client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    byte[] responseBytes = client.UploadValues(requestUrl, "POST", parameters);
+                    return Encoding.UTF8.GetString(responseBytes);
+                }
+            }
+            catch (WebException ex) when (ex.Response != null)
+            {
+                string responseBody;
+                using (var reader = new StreamReader(ex.Response.GetResponseStream()))
+                {
+                    responseBody = reader.ReadToEnd();
+                }
+
+                throw new WebException(
+                    string.Format("Token request failed: {0}", responseBody),
+                    ex,
+                    ex.Status,
+                    ex.Response);
             }
         }
     }

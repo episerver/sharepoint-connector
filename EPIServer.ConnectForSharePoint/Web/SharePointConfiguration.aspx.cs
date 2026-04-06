@@ -656,6 +656,10 @@ namespace EPiServer.ConnectForSharePoint.Web
                 {
                     switch (webResponse.StatusCode)
                     {
+                        case HttpStatusCode.BadRequest:
+                            errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
+                                                                Translate(unauthorizedMessageKey));
+                            return null;
                         case HttpStatusCode.Unauthorized:
                             errorMessage = string.Format(Translate("/sharepoint/admin/message/connecttosharepointerror"),
                                                                 Translate(unauthorizedMessageKey));
