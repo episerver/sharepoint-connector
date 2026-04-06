@@ -49,7 +49,7 @@ jobs:
 
       - name: Create pre-release NuGet package
         if: github.event_name == 'pull_request'
-        run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }}-prerelease.${{ github.run_number }} -BasePath Deployment -OutputDirectory Deployment
+        run: nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version ${{ steps.version.outputs.VERSION }}.${{ github.run_number }}-pre -BasePath Deployment -OutputDirectory Deployment
 
       - name: Create release NuGet package
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
