@@ -1,0 +1,55 @@
+name: Publish NuGet Package
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Read version from AssemblyVersionAuto.cs
+        id: version
+        shell: pwsh
+        run: |
+          $match = (Select-String -Path AssemblyVersionAuto.cs -Pattern 'AssemblyInformationalVersion\("(.+)"\)').Matches[0]
+          $version = $match.Groups[1].Value
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Version: $version"
+
+      - name: Configure GitHub Packages NuGet source
+        run: nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/episerver/index.json" -Username episerver -Password ${{ secrets.GITHUB_TOKEN }} -StorePasswordInClearText
+
+      - name: Check if version already exists
+        shell: pwsh
+        run: |
+          $result = nuget list EPiServer.ConnectForSharePoint -Source "github" -AllVersions 2>&1
+          if ($result -match "${{ steps.version.outputs.VERSION }}") {
+            Write-Error "Version ${{ steps.version.outputs.VERSION }} already exists on GitHub Packages. Bump the version in AssemblyVersionAuto.cs before merging."
+            exit 1
+          }
+          echo "Version ${{ steps.version.outputs.VERSION }} is available."
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: Deployment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to GitHub Packages
+        run: nuget push Deployment\EPiServer.ConnectForSharePoint.${{ steps.version.outputs.VERSION }}.nupkg -Source "github" -ApiKey ${{ secrets.GITHUB_TOKEN }}
