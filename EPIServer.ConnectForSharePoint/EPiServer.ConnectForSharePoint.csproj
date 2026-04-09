@@ -284,6 +284,7 @@
     <Compile Include="Helpers\IContentProviderHelper.cs" />
     <Compile Include="Helpers\ISharePointHelper.cs" />
     <Compile Include="Helpers\IOAuthTokenClient.cs" />
+    <Compile Include="Helpers\CertificateAssertionHelper.cs" />
     <Compile Include="Helpers\WebClientOAuthTokenClient.cs" />
     <Compile Include="Helpers\SharepointOAuthTokenResult.cs" />
     <Compile Include="Messaging\Messages\ISharePointMessage.cs" />

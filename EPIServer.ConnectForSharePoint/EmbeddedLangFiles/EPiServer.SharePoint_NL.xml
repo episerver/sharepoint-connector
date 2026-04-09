@@ -22,6 +22,10 @@
         <password>Wachtwoord</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
         <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Verbindingstype</connectiontype>
         <online>Online</online>
@@ -45,6 +49,7 @@
           <connecttosharepointerror>Fout tijdens verbinding maken met de SharePoint-site: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Geen SharePoint-URL, gebruikersnaam of wachtwoord opgegeven.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Kon niet machtigen met de opgegeven gebruikersnaam en wachtwoord.</unauthorizederror>
           <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>De SharePoint-URL is onjuist of u hebt geen toegang tot de site die is opgegeven in de URL.</notfounderror>

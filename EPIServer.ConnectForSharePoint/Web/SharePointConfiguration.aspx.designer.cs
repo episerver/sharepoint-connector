@@ -114,6 +114,15 @@ namespace EPiServer.ConnectForSharePoint.Web
         protected global::System.Web.UI.WebControls.TextBox ClientId;
 
         /// <summary>
+        /// CredentialType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList CredentialType;
+
+        /// <summary>
         /// ClientSecret control.
         /// </summary>
         /// <remarks>
@@ -121,6 +130,15 @@ namespace EPiServer.ConnectForSharePoint.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox ClientSecret;
+
+        /// <summary>
+        /// CertificateThumbprint control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox CertificateThumbprint;
 
         /// <summary>
         /// Realm control.

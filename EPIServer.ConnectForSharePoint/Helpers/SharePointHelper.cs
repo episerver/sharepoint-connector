@@ -212,8 +212,19 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var reqParams = new System.Collections.Specialized.NameValueCollection();
             reqParams.Add("grant_type", "client_credentials");
             reqParams.Add("client_id", spSettings.ClientId);
-            reqParams.Add("client_secret", spSettings.ClientSecret);
             reqParams.Add("scope", scope);
+
+            if (spSettings.UseCertificateAuth)
+            {
+                var cert = CertificateAssertionHelper.LoadCertificate(spSettings.CertificateThumbprint);
+                var assertion = CertificateAssertionHelper.CreateClientAssertion(spSettings.ClientId, spSettings.Realm, cert);
+                reqParams.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+                reqParams.Add("client_assertion", assertion);
+            }
+            else
+            {
+                reqParams.Add("client_secret", spSettings.ClientSecret);
+            }
 
             var requestUrl = string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", spSettings.Realm);
             string responsebody = tokenClient.RequestToken(requestUrl, reqParams);

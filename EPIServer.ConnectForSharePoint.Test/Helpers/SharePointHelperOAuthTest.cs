@@ -157,5 +157,32 @@ namespace EPiServer.ConnectForSharePoint.Test.Helpers
             // Entra ID v2.0 uses "scope", not "resource"
             Assert.IsNull(fake.CapturedParams["resource"]);
         }
+
+        [TestMethod]
+        public void RequestOAuthToken_WhenNotCertificateAuth_SendsClientSecret()
+        {
+            var fake = new FakeTokenClient();
+            var settings = CreateModernAuthSettings(clientSecret: "my-secret");
+            settings.UseCertificateAuth = false;
+
+            SharePointHelper.RequestOAuthToken(settings, fake);
+
+            Assert.AreEqual("my-secret", fake.CapturedParams["client_secret"]);
+            Assert.IsNull(fake.CapturedParams["client_assertion"]);
+            Assert.IsNull(fake.CapturedParams["client_assertion_type"]);
+        }
+
+        [TestMethod]
+        public void RequestOAuthToken_WhenNotCertificateAuth_DoesNotSendAssertion()
+        {
+            var fake = new FakeTokenClient();
+            var settings = CreateModernAuthSettings();
+            settings.UseCertificateAuth = false;
+
+            SharePointHelper.RequestOAuthToken(settings, fake);
+
+            Assert.IsNull(fake.CapturedParams["client_assertion"]);
+            Assert.IsNull(fake.CapturedParams["client_assertion_type"]);
+        }
     }
 }

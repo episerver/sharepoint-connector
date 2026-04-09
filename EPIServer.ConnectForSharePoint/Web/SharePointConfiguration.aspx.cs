@@ -75,6 +75,11 @@ namespace EPiServer.ConnectForSharePoint.Web
             get { return ClientSecret.Text.Trim(); }
         }
 
+        private string ConfiguredCertificateThumbprint
+        {
+            get { return CertificateThumbprint.Text.Trim(); }
+        }
+
         private string ConfiguredRealm
         {
             get { return Realm.Text.Trim(); }
@@ -179,6 +184,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             if (!Page.IsPostBack)
             {
                 Session[SharePointUserPassword] = SharePointSettings.Current.Password;
+                CredentialType.SelectedValue = SharePointSettings.Current.UseCertificateAuth ? "certificate" : "secret";
             }
 
             DataBind();
@@ -502,11 +508,14 @@ namespace EPiServer.ConnectForSharePoint.Web
                 }
 
                 // Assign new setting values to SharePointSettings.Current and save it to cms
+                var useCertSave = RBModernAuth.Checked && CredentialType.SelectedValue == "certificate";
                 SharePointSettings.Current.SiteUrl = ConfiguredUrl.EndsWith("/") ? ConfiguredUrl : ConfiguredUrl + "/";
                 SharePointSettings.Current.Username = !RBModernAuth.Checked ? ConfiguredUsername : "";
                 SharePointSettings.Current.Password = !RBModernAuth.Checked ? ConfiguredPassword : "";
                 SharePointSettings.Current.ClientId = RBModernAuth.Checked ? ConfiguredClientId : "";
-                SharePointSettings.Current.ClientSecret = RBModernAuth.Checked ? ConfiguredClientSecret : "";
+                SharePointSettings.Current.ClientSecret = (RBModernAuth.Checked && !useCertSave) ? ConfiguredClientSecret : "";
+                SharePointSettings.Current.UseCertificateAuth = useCertSave;
+                SharePointSettings.Current.CertificateThumbprint = useCertSave ? ConfiguredCertificateThumbprint : "";
                 SharePointSettings.Current.Realm = RBModernAuth.Checked ? ConfiguredRealm : "";
                 SharePointSettings.Current.ListIds = String.Join(";", selectedListViewIds);
                 SharePointSettings.Current.EntryPoint = new ContentReference(entryPointId);
@@ -696,6 +705,7 @@ namespace EPiServer.ConnectForSharePoint.Web
             CacheManager.Remove(SharePointHelper.AccessTokenCacheKey);
             CacheManager.Remove(SharePointHelper.CookieContainerCacheKey);
 
+            var useCert = RBModernAuth.Checked && CredentialType.SelectedValue == "certificate";
             var newSettings = new SharePointSettings()
             {
                 SiteUrl = ConfiguredUrl,
@@ -703,9 +713,11 @@ namespace EPiServer.ConnectForSharePoint.Web
                 Password = ConfiguredPassword,
                 ClientId = ConfiguredClientId,
                 ClientSecret = ConfiguredClientSecret,
+                CertificateThumbprint = ConfiguredCertificateThumbprint,
                 Realm = ConfiguredRealm,
                 IsSharePointOnline = RBOnline.Checked,
-                IsModernAuth = RBModernAuth.Checked
+                IsModernAuth = RBModernAuth.Checked,
+                UseCertificateAuth = useCert
             };
 
             var contextService = new EndpointContextService
@@ -740,12 +752,26 @@ namespace EPiServer.ConnectForSharePoint.Web
             }
             else
             {
-                if (string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) || string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredRealm))
+                bool useCert = CredentialType.SelectedValue == "certificate";
+                bool missingValues;
+                string messageKey;
+
+                if (useCert)
                 {
-                    // Show error message in case of posting back and no relevant config values are specified
+                    missingValues = string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredCertificateThumbprint) || string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredRealm);
+                    messageKey = "/sharepoint/admin/message/nourlcertificatevaluesspecified";
+                }
+                else
+                {
+                    missingValues = string.IsNullOrEmpty(ConfiguredClientId) || string.IsNullOrEmpty(ConfiguredClientSecret) || string.IsNullOrEmpty(ConfiguredUrl) || string.IsNullOrEmpty(ConfiguredRealm);
+                    messageKey = "/sharepoint/admin/message/nourlmodernauthvaluesspecified";
+                }
+
+                if (missingValues)
+                {
                     if (Page.IsPostBack)
                     {
-                        ShowMessage(Translate("/sharepoint/admin/message/nourlmodernauthvaluesspecified"), true);
+                        ShowMessage(Translate(messageKey), true);
                     }
 
                     return false;

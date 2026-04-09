@@ -22,6 +22,10 @@
         <password>Password</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
         <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Connection type</connectiontype>
         <online>Online</online>
@@ -45,6 +49,7 @@
           <connecttosharepointerror>Error when connecting to SharePoint site: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>No SharePoint URL, username or password specified.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Failed to authorize with specified username and password.</unauthorizederror>
           <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>The SharePoint URL is incorrect or you do not have access to the site specified in the URL.</notfounderror>

@@ -22,6 +22,10 @@
         <password>Adgangskode</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
         <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Forbindelsestype</connectiontype>
         <online>Online</online>
@@ -45,6 +49,7 @@
           <connecttosharepointerror>Fejl ved oprettelse af forbindelse til SharePoint-websted: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Der er ikke angivet SharePoint-URL, brugernavn eller adgangskode.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Der kunne ikke godkendes med angivne brugernavn og adgangskode.</unauthorizederror>
           <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint-URL'en er forkert, eller du har ikke adgang til webstedet, der er angivet af URL'en.</notfounderror>

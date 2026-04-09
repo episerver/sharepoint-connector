@@ -22,6 +22,10 @@
         <password>Salasana</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
         <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Yhteyden tyyppi</connectiontype>
         <online>Online</online>
@@ -45,6 +49,7 @@
           <connecttosharepointerror>Virhe muodostettaessa yhteyttä SharePoint-sivustoon: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>SharePointin URL-osoitetta, käyttäjänimeä tai salasanaa ei määritetty.</nourlusernamepasswordspecified>
           <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Ei onnistunut valtuuttamaan määritettyä käyttäjänimeä ja salasanaa.</unauthorizederror>
           <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePointin URL-osoite on virheellinen tai sinulla ei ole pääsyä URL-osoitteen mukaiselle sivustolle.</notfounderror>

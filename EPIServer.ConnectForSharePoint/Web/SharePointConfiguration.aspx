@@ -115,6 +115,15 @@
                 disableSaveWhenAuthDisplayChanges();
             });
 
+            $('#FullRegion_CertificateThumbprint').keyup(function () {
+                disableSaveWhenAuthDisplayChanges();
+            });
+
+            $('#FullRegion_CredentialType').change(function () {
+                setCredentialTypeVisibility();
+                disableSaveWhenAuthDisplayChanges();
+            });
+
             $('#FullRegion_Realm').keyup(function () {
                 disableSaveWhenAuthDisplayChanges();
             });
@@ -291,11 +300,23 @@
         function displayModernAuthSection() {
             $('#ModernAuth').css('display', 'block');
             $('#BasicAuth').css('display', 'none');
+            setCredentialTypeVisibility();
         }
 
         function displayBasicAuthSection() {
             $('#ModernAuth').css('display', 'none');
             $('#BasicAuth').css('display', 'block');
+        }
+
+        function setCredentialTypeVisibility() {
+            var credType = $('#FullRegion_CredentialType').val();
+            if (credType === 'certificate') {
+                $('#ClientSecretSection').css('display', 'none');
+                $('#CertificateThumbprintSection').css('display', 'block');
+            } else {
+                $('#ClientSecretSection').css('display', 'block');
+                $('#CertificateThumbprintSection').css('display', 'none');
+            }
         }
 
         function setAuthTypeByConnectionType() {
@@ -390,8 +411,19 @@
                         <asp:TextBox ID="ClientId" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientId %>" />
                     </div>
                     <div class="epi-size15">
+                        <asp:Label AssociatedControlID="CredentialType" runat="server"><%# Translate("/sharepoint/admin/credentialtype") %></asp:Label>
+                        <asp:DropDownList ID="CredentialType" runat="server">
+                            <asp:ListItem Value="secret" Text="<%$ Resources: EPiServer, sharepoint.admin.credentialtypesecret %>" />
+                            <asp:ListItem Value="certificate" Text="<%$ Resources: EPiServer, sharepoint.admin.credentialtypecertificate %>" />
+                        </asp:DropDownList>
+                    </div>
+                    <div id="ClientSecretSection" class="epi-size15">
                         <asp:Label AssociatedControlID="ClientSecret" runat="server"><%# Translate("/sharepoint/admin/clientsecret") %></asp:Label>
                         <asp:TextBox ID="ClientSecret" runat="server" MaxLength="255" Text="<%# CurrentSettings.ClientSecret %>" />
+                    </div>
+                    <div id="CertificateThumbprintSection" class="epi-size15">
+                        <asp:Label AssociatedControlID="CertificateThumbprint" runat="server"><%# Translate("/sharepoint/admin/certificatethumbprint") %></asp:Label>
+                        <asp:TextBox ID="CertificateThumbprint" runat="server" MaxLength="255" Text="<%# CurrentSettings.CertificateThumbprint %>" />
                     </div>
                     <div class="epi-size15">
                         <asp:Label AssociatedControlID="Realm" runat="server"><%# Translate("/sharepoint/admin/realm") %></asp:Label>
