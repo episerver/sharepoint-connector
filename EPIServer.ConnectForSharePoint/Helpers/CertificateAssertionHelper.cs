@@ -86,9 +86,9 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             string dataToSign = string.Format("{0}.{1}", headerB64, payloadB64);
 
             byte[] signature;
-            using (var rsa = (RSACryptoServiceProvider)certificate.PrivateKey)
+            using (var rsa = certificate.GetRSAPrivateKey())
             {
-                signature = rsa.SignData(Encoding.UTF8.GetBytes(dataToSign), CryptoConfig.MapNameToOID("SHA256"));
+                signature = rsa.SignData(Encoding.UTF8.GetBytes(dataToSign), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             }
 
             return string.Format("{0}.{1}.{2}", headerB64, payloadB64, Base64UrlEncode(signature));
