@@ -15,14 +15,18 @@
         <remainingitems>Kvarvarande objekt</remainingitems>
         <selectviewdescription>Välj en eller flera listor och motsvarande vyer.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>Webbplats-URL</serverurl>
         <username>Användarnamn</username>
         <password>Lösenord</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Anslutningstyp</connectiontype>
         <online>Online lagringsplats</online>
         <onpremises>Lokal lagringsplats</onpremises>
@@ -44,8 +48,10 @@
           <saveerror>Fel vid sparande: {0}.</saveerror>
           <connecttosharepointerror>Fel vid anslutning till SharePoint-webbplats: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Ingen SharePoint-URL, användarnamn eller lösenord har angetts.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Det gick inte att auktorisera med det angivna användarnamnet och lösenordet.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint-URL:en är felaktig eller också har du inte rättigheter till webbplatsen som angetts i URL:en.</notfounderror>
           <listviewnotmatched>Listan med vyer är inte uppdaterad. Anslut igen för att se nya SharePoint-vyer.</listviewnotmatched>
           <invalidentrypoint>Ogiltig startpunkt för anslutningen.</invalidentrypoint>

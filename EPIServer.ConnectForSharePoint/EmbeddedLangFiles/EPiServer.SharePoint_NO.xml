@@ -15,14 +15,18 @@
         <remainingitems>Gjenstående elementer</remainingitems>
         <selectviewdescription>Velg en eller flere lister og tilhørende visninger</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>URL-adresse for område</serverurl>
         <username>Brukernavn</username>
         <password>Passord</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Tilkoblingstype</connectiontype>
         <online>Pålogget</online>
         <onpremises>Lokalt</onpremises>
@@ -44,8 +48,10 @@
           <saveerror>Feil under lagring: {0}.</saveerror>
           <connecttosharepointerror>Feil ved tilkobling til SharePoint-område: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>SharePoint-URL, brukernavn eller passord er ikke oppgitt.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Kunne ikke godkjenne med oppgitt brukernavn og passord.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>SharePoint-URL er feil, eller du har ikke tilgang til området som er angitt i URL-en.</notfounderror>
           <listviewnotmatched>Visningslisten er ikke oppdatert. Koble til på nytt for å få nye SharePoint-visninger.</listviewnotmatched>
           <invalidentrypoint>Ugyldig inngangspunkt for tilkobling.</invalidentrypoint>

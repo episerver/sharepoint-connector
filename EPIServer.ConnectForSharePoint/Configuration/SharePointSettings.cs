@@ -87,7 +87,19 @@ namespace EPiServer.ConnectForSharePoint.Configuration
         public string ClientSecret {  get; set; }
 
         /// <summary>
-        /// Gets or sets the SharePoint Realm
+        /// When true, Modern Authentication uses a certificate instead of a client secret.
+        /// </summary>
+        public bool UseCertificateAuth { get; set; }
+
+        /// <summary>
+        /// The thumbprint of the X.509 certificate in the Windows Certificate Store
+        /// used for certificate-based authentication.
+        /// </summary>
+        public string CertificateThumbprint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SharePoint Realm.
+        /// For Modern Authentication (Entra ID / Azure AD), this stores the Tenant ID (Directory ID).
         /// </summary>
         public string Realm {  get; set; }
 
@@ -123,6 +135,7 @@ namespace EPiServer.ConnectForSharePoint.Configuration
             Password = string.Empty;
             ClientId = string.Empty;
             ClientSecret = string.Empty;
+            CertificateThumbprint = string.Empty;
             Realm = string.Empty;
             ListIds = string.Empty;
             EntryPoint = ContentReference.EmptyReference;

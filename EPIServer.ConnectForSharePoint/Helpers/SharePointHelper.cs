@@ -177,7 +177,7 @@ namespace EPiServer.ConnectForSharePoint.Helpers
         }
 
         /// <summary>
-        /// Get OAuth response from Sharepoint.
+        /// Get OAuth response from Microsoft Entra ID (Azure AD) using the client credentials grant.
         /// </summary>
         /// <param name="spSettings">The SharePoint settings.</param>
         /// <returns></returns>
@@ -191,28 +191,44 @@ namespace EPiServer.ConnectForSharePoint.Helpers
             var response = CacheManager.Get(AccessTokenCacheKey) as SharePointOAuthTokenResult;
             if (response == null)
             {
-                using (WebClient client = new WebClient())
-                {
-                    var domain = new Uri(spSettings.SiteUrl).Host;
-                    var resource = string.Format("00000003-0000-0ff1-ce00-000000000000/{0}@{1}", domain, spSettings.Realm);
-                    var reqParams = new System.Collections.Specialized.NameValueCollection();
-                    reqParams.Add("grant_type", "client_credentials");
-                    reqParams.Add("client_id", string.Format("{0}@{1}", spSettings.ClientId, spSettings.Realm));
-                    reqParams.Add("client_secret", spSettings.ClientSecret);
-                    reqParams.Add("resource", resource);
+                response = RequestOAuthToken(spSettings, new WebClientOAuthTokenClient());
 
-                    var requestUrl = string.Format("https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2", spSettings.Realm);
-                    client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                    byte[] responsebytes = client.UploadValues(requestUrl, "POST", reqParams);
-                    string responsebody = Encoding.UTF8.GetString(responsebytes);
-                    response = JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
-
-                    var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
-                    CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
-                }
+                var expiresIn = Convert.ToInt32(response.ExpiresIn) - 5;
+                CacheManager.Insert(AccessTokenCacheKey, response, new CacheEvictionPolicy(TimeSpan.FromSeconds(expiresIn), CacheTimeoutType.Absolute));
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Builds the Entra ID token request and executes it via the supplied <see cref="IOAuthTokenClient"/>.
+        /// Separated from caching so the request construction logic can be unit-tested.
+        /// </summary>
+        internal static SharePointOAuthTokenResult RequestOAuthToken(SharePointSettings spSettings, IOAuthTokenClient tokenClient)
+        {
+            var siteUri = new Uri(spSettings.SiteUrl);
+            var scope = string.Format("https://{0}/.default", siteUri.Host);
+
+            var reqParams = new System.Collections.Specialized.NameValueCollection();
+            reqParams.Add("grant_type", "client_credentials");
+            reqParams.Add("client_id", spSettings.ClientId);
+            reqParams.Add("scope", scope);
+
+            if (spSettings.UseCertificateAuth)
+            {
+                var cert = CertificateAssertionHelper.LoadCertificate(spSettings.CertificateThumbprint);
+                var assertion = CertificateAssertionHelper.CreateClientAssertion(spSettings.ClientId, spSettings.Realm, cert);
+                reqParams.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+                reqParams.Add("client_assertion", assertion);
+            }
+            else
+            {
+                reqParams.Add("client_secret", spSettings.ClientSecret);
+            }
+
+            var requestUrl = string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", spSettings.Realm);
+            string responsebody = tokenClient.RequestToken(requestUrl, reqParams);
+            return JsonConvert.DeserializeObject<SharePointOAuthTokenResult>(responsebody);
         }
 
         /// <summary>

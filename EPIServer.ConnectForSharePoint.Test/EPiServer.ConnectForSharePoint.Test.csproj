@@ -253,6 +253,7 @@
     <Compile Include="Helpers\SharepointToCmsUtilitiesTests.cs" />
     <Compile Include="Helpers\WebHelperTest.cs" />
     <Compile Include="Helpers\SharePointHelperTest.cs" />
+    <Compile Include="Helpers\SharePointHelperOAuthTest.cs" />
     <Compile Include="Messaging\FanOutMessageDispatcherTests.cs" />
     <Compile Include="Messaging\InMemoryMessageReceiverTests.cs" />
     <Compile Include="Messaging\InMemory\InMemoryMessageEmitterTests.cs" />

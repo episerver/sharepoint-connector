@@ -15,14 +15,18 @@
         <remainingitems>Elementi rimanenti</remainingitems>
         <selectviewdescription>Seleziona uno o più elenchi e visualizzazioni corrispondenti.</selectviewdescription>
         <authenticationtype>Authentication Type</authenticationtype>
-        <basicauth>Basic</basicauth>
+        <basicauth>Basic (On-Premises Only)</basicauth>
         <modernauth>Modern (Applicable to Online Connections Only)</modernauth>
         <serverurl>URL del sito</serverurl>
         <username>Nome utente</username>
         <password>Password</password>
         <clientid>Client Id (Application Id)</clientid>
         <clientsecret>Client Secret</clientsecret>
-        <realm>Realm (Directory/Tenant Id)</realm>
+        <credentialtype>Credential Type</credentialtype>
+        <credentialtypesecret>Client Secret</credentialtypesecret>
+        <credentialtypecertificate>Certificate</credentialtypecertificate>
+        <certificatethumbprint>Certificate Thumbprint</certificatethumbprint>
+        <realm>Tenant ID (Directory ID)</realm>
         <connectiontype>Tipo di collegamento</connectiontype>
         <online>Online</online>
         <onpremises>On-premise</onpremises>
@@ -44,8 +48,10 @@
           <saveerror>Errore durante il salvataggio: {0}.</saveerror>
           <connecttosharepointerror>Errore durante la connessione al sito di SharePoint: {0}</connecttosharepointerror>
           <nourlusernamepasswordspecified>Nessun URL, nome utente o password specificati per SharePoint.</nourlusernamepasswordspecified>
-          <nourlmodernauthvaluesspecified>No SharePoint URL, clientId, clientSecret or realm specified.</nourlmodernauthvaluesspecified>
+          <nourlmodernauthvaluesspecified>No SharePoint URL, Client ID, Client Secret or Tenant ID specified.</nourlmodernauthvaluesspecified>
+          <nourlcertificatevaluesspecified>No SharePoint URL, Client ID, Certificate Thumbprint, or Tenant ID specified.</nourlcertificatevaluesspecified>
           <unauthorizederror>Autorizzazione fallita con password e nome utente specificati.</unauthorizederror>
+          <unauthorizedmodernautherror>Failed to authorize with the specified Client ID, Client Secret, or Tenant ID. Verify the credentials and that admin consent has been granted.</unauthorizedmodernautherror>
           <notfounderror>URL di SharePoint errato o non hai accesso al sito specificato nel URL.</notfounderror>
           <listviewnotmatched>L'elenco delle visualizzazioni non è aggiornato. Ricollegati per ottenere nuove visualizzazioni di SharePoint.</listviewnotmatched>
           <invalidentrypoint>Punto di ingresso connessione errato.</invalidentrypoint>
