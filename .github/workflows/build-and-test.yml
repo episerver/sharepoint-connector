@@ -39,6 +39,41 @@ jobs:
       - name: Run tests
         run: vstest.console.exe "EPIServer.ConnectForSharePoint.Test\bin\Debug\EPiServer.ConnectForSharePoint.Test.dll"
 
+      - name: Stage deployment directory
+        shell: pwsh
+        run: |
+          # Copy DLLs to Deployment/lib
+          New-Item -ItemType Directory -Path Deployment\lib -Force | Out-Null
+          Copy-Item "EPIServer.ConnectForSharePoint\bin\Debug\EPiServer.ConnectForSharePoint.dll" -Destination "Deployment\lib\"
+          Copy-Item "EPIServer.ConnectForSharePoint.Messaging\bin\Debug\EPiServer.ConnectForSharePoint.Messaging.dll" -Destination "Deployment\lib\"
+
+          # Copy module.config to Deployment/content/modules/_protected/EPiServer.ConnectForSharePoint
+          $modulePath = "Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint"
+          New-Item -ItemType Directory -Path $modulePath -Force | Out-Null
+          Copy-Item "EPIServer.ConnectForSharePoint\module.config" -Destination "$modulePath\"
+
+          # Create EPiServer.ConnectForSharePoint.zip containing module client resources
+          $zipStagingDir = "Deployment\_zipstaging"
+          New-Item -ItemType Directory -Path "$zipStagingDir\ClientResources\Images" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$zipStagingDir\EmbeddedLangFiles" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$zipStagingDir\Web" -Force | Out-Null
+
+          Copy-Item "EPIServer.ConnectForSharePoint\ClientResources\Images\DefaultThumbnail.png" -Destination "$zipStagingDir\ClientResources\Images\"
+          Copy-Item "EPIServer.ConnectForSharePoint\EmbeddedLangFiles\EPiServer.SharePoint_EN.xml" -Destination "$zipStagingDir\EmbeddedLangFiles\"
+          Copy-Item "EPIServer.ConnectForSharePoint\Web\SharePointConfiguration.aspx" -Destination "$zipStagingDir\Web\"
+
+          $zipPath = "$modulePath\EPiServer.ConnectForSharePoint.zip"
+          Compress-Archive -Path "$zipStagingDir\*" -DestinationPath $zipPath -Force
+
+          # Clean up staging directory
+          Remove-Item -Path $zipStagingDir -Recurse -Force
+
+          # Verify layout
+          Write-Host "=== Deployment directory layout ==="
+          Get-ChildItem -Path Deployment -Recurse -File | ForEach-Object {
+            Write-Host "  $($_.FullName.Substring((Get-Location).Path.Length + 1))  ($($_.Length) bytes)"
+          }
+
       - name: Read version from AssemblyVersionAuto.cs
         id: version
         shell: pwsh
