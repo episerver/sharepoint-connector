@@ -43,16 +43,16 @@ jobs:
         shell: pwsh
         run: |
           # Copy DLLs to Deployment/lib
+          # Main project is a web application - OutputPath is bin\ (no Debug subfolder)
+          # Messaging DLL is also copied there via ProjectReference
           New-Item -ItemType Directory -Path Deployment\lib -Force | Out-Null
-          Copy-Item "EPIServer.ConnectForSharePoint\bin\Debug\EPiServer.ConnectForSharePoint.dll" -Destination "Deployment\lib\"
-          Copy-Item "EPIServer.ConnectForSharePoint.Messaging\bin\Debug\EPiServer.ConnectForSharePoint.Messaging.dll" -Destination "Deployment\lib\"
+          Copy-Item "EPIServer.ConnectForSharePoint\bin\EPiServer.ConnectForSharePoint.dll" -Destination "Deployment\lib\"
+          Copy-Item "EPIServer.ConnectForSharePoint\bin\EPiServer.ConnectForSharePoint.Messaging.dll" -Destination "Deployment\lib\"
 
-          # Copy module.config to Deployment/content/modules/_protected/EPiServer.ConnectForSharePoint
+          # Stage module content for zipping
           $modulePath = "Deployment\content\modules\_protected\EPiServer.ConnectForSharePoint"
           New-Item -ItemType Directory -Path $modulePath -Force | Out-Null
-          Copy-Item "EPIServer.ConnectForSharePoint\module.config" -Destination "$modulePath\"
 
-          # Create EPiServer.ConnectForSharePoint.zip containing module client resources
           $zipStagingDir = "Deployment\_zipstaging"
           New-Item -ItemType Directory -Path "$zipStagingDir\ClientResources\Images" -Force | Out-Null
           New-Item -ItemType Directory -Path "$zipStagingDir\EmbeddedLangFiles" -Force | Out-Null
@@ -62,11 +62,12 @@ jobs:
           Copy-Item "EPIServer.ConnectForSharePoint\EmbeddedLangFiles\EPiServer.SharePoint_EN.xml" -Destination "$zipStagingDir\EmbeddedLangFiles\"
           Copy-Item "EPIServer.ConnectForSharePoint\Web\SharePointConfiguration.aspx" -Destination "$zipStagingDir\Web\"
 
-          $zipPath = "$modulePath\EPiServer.ConnectForSharePoint.zip"
-          Compress-Archive -Path "$zipStagingDir\*" -DestinationPath $zipPath -Force
-
-          # Clean up staging directory
+          # Create the module zip and place it in the modules directory
+          Compress-Archive -Path "$zipStagingDir\*" -DestinationPath "$modulePath\EPiServer.ConnectForSharePoint.zip" -Force
           Remove-Item -Path $zipStagingDir -Recurse -Force
+
+          # Copy module.config alongside the zip
+          Copy-Item "EPIServer.ConnectForSharePoint\module.config" -Destination "$modulePath\"
 
           # Verify layout
           Write-Host "=== Deployment directory layout ==="
