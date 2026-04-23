@@ -172,3 +172,64 @@ New-MgSiteSPermission -SiteId $site.Id -BodyParameter @{
 
 ---
 
+## Development
+
+### Prerequisites
+
+* Visual Studio 2017 or higher with the **.NET desktop development** workload
+* .NET Framework 4.8 Developer Pack -- [Download](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
+* NuGet CLI (included in the repo under `.nuget/`, or install via `winget install Microsoft.NuGet`)
+
+### Building
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/episerver/sharepoint-connector.git
+   cd sharepoint-connector
+   ```
+2. Restore NuGet packages:
+   ```
+   nuget restore EPiServer.ConnectForSharePoint.sln
+   ```
+3. Build the solution:
+   ```
+   msbuild EPiServer.ConnectForSharePoint.sln /p:Configuration=Debug /p:Platform="Any CPU"
+   ```
+   Or open `EPiServer.ConnectForSharePoint.sln` in Visual Studio and build from there.
+
+### Running tests
+
+The test project uses MSTest and Moq. Run tests with the Visual Studio Test Explorer, or from the command line:
+
+```
+vstest.console.exe EPIServer.ConnectForSharePoint.Test\bin\Debug\EPiServer.ConnectForSharePoint.Test.dll
+```
+
+### Project structure
+
+| Project | Description |
+|---------|-------------|
+| `EPiServer.ConnectForSharePoint` | Main connector library -- controllers, SharePoint REST client, authentication, content processing, and admin UI |
+| `EPiServer.ConnectForSharePoint.Messaging` | Message-driven processing framework for async content sync operations |
+| `EPiServer.ConnectForSharePoint.Test` | Unit tests (MSTest + Moq) |
+
+### Creating a NuGet package locally
+
+```
+nuget pack MSBuild\EPiServer.ConnectForSharePoint.nuspec -Version <version> -BasePath Deployment -OutputDirectory Deployment
+```
+
+---
+
+## Contributing
+
+Contributions are welcome. Please open an issue to discuss proposed changes before submitting a pull request.
+
+1. Fork the repository.
+2. Create a feature branch from `master`.
+3. Make your changes and add tests where appropriate.
+4. Ensure the solution builds and all tests pass.
+5. Submit a pull request.
+
+---
+
