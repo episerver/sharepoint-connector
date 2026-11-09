@@ -3,6 +3,8 @@
 ## Sharepoint Connector
 Optimizely Connect for SharePoint makes it easy to transfer documents from your SharePoint instance to Optimizely assets.
 
+> **Community-maintained.** This addon is open source and maintained by the community. It is **not** covered by Optimizely Support. It targets **Optimizely CMS 11 (.NET Framework 4.8)** — there is no CMS 12/13 or SaaS CMS build. Use [GitHub issues](https://github.com/episerver/sharepoint-connector/issues) for bugs and requests, and see [SECURITY.md](SECURITY.md) for reporting vulnerabilities privately.
+
 ## Table of Contents
 
 - [System requirements](#system-requirements)
@@ -230,6 +232,10 @@ Contributions are welcome. Please open an issue to discuss proposed changes befo
 3. Make your changes and add tests where appropriate.
 4. Ensure the solution builds and all tests pass.
 5. Submit a pull request.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide (branching, commit messages, and PR
+expectations), the [Code of Conduct](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md) for
+reporting vulnerabilities privately.
 
 ---
 
